@@ -1,0 +1,13 @@
+Output: NC Drill Files
+Type  : NC Drill
+From  : Project [CartePuissance.PrjPcb]
+   Generated File[CartePuissance.TXT]
+   Generated File[CartePuissance.DRL]
+   Generated File[CartePuissance.LDP]
+   Generated File[CartePuissance.DRR]
+
+
+Files Generated   : 4
+Documents Printed : 0
+
+Finished Output Generation At 21:01:08 On 12/02/2014

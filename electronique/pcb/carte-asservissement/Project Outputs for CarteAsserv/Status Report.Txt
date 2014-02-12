@@ -1,0 +1,13 @@
+Output: NC Drill Files
+Type  : NC Drill
+From  : Project [CarteAsserv.PrjPCB]
+   Generated File[carteAsserv.TXT]
+   Generated File[carteAsserv.DRL]
+   Generated File[carteAsserv.LDP]
+   Generated File[carteAsserv.DRR]
+
+
+Files Generated   : 4
+Documents Printed : 0
+
+Finished Output Generation At 20:54:42 On 12/02/2014
