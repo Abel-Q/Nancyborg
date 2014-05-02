@@ -1,4 +1,5 @@
 #include "Main.h"
+#include <iostream>
 
 extern serial_t stdio_uart;
 
@@ -49,6 +50,8 @@ void ecouteSerie()
     double consigneValue1 = 0;
     double consigneValue2 = 0;
     char c = getchar();
+    std::string name, value;
+    const Parameter *param = Config::getParam(name);
 
     switch (c) {
         //Test de débug
@@ -150,6 +153,31 @@ void ecouteSerie()
             resetAsserv();
             break;
 
+        case 'D': // dump la config du robot
+            std::cout << Config::dumpConfig() << std::endl;
+            break;
+
+        case 'G': // lire la valeur d'un paramètre
+            std::getline(std::cin, name, '\r');
+            param = Config::getParam(name);
+
+            if (param == NULL)
+                std::cout << "error" << endl;
+            else
+                std::cout << param->toString() << std::endl;
+            break;
+
+        case 'S': // modifie la valeur d'un paramètre
+            std::getline(std::cin, name, '\r');
+            std::getline(std::cin, value, '\r');
+            param = Config::getParam(name);
+
+            if (param == NULL) {
+                std::cout << "error" << endl;
+            } else {
+                param->setFromString(value);
+                std::cout << "ok" << std::endl;
+            }
         default:
             //putchar(c);
             break;

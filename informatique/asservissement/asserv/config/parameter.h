@@ -2,6 +2,7 @@
 #define PARAMETER_H
 
 #include <string>
+#include <sstream>
 
 struct Parameter {
     enum Type {
@@ -31,6 +32,28 @@ struct Parameter {
                 *double_ptr = atof(value.c_str());
                 break;
         }
+    }
+
+    std::string toString() const {
+        std::stringstream out;
+        switch (type) {
+            case INT64:
+                out << get<int64_t>();
+                break;
+
+            case BOOL:
+                out << std::boolalpha << get<bool>();
+                break;
+
+            case DOUBLE:
+                out << get<double>();
+                break;
+        }
+        return out.str();
+    }
+
+    const std::string& getName() const {
+        return name;
     }
 
     template <typename T>

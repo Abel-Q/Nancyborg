@@ -19,6 +19,7 @@ public:
     static const Parameter *getParam(std::string name);
     static void parseConfigLine(std::string line);
     static void loadFile(const char *filename);
+    static std::string dumpConfig();
 
 private:
     static const Parameter params[];
