@@ -18,11 +18,16 @@ disableAsserv = 0
 reglageCodeurs = 0
 
 // Désactiver la QuadRampDérivée en distance
-disableDistanceQuad = 0
+disableDistanceQuad = false
 
 // Désactiver la QuadRampDérivée en angle
-disableAngleQuad = 0
+disableAngleQuad = false
 
+// Désactiver le régu de distance
+disableDistanceRegu = false
+
+// Désactiver le régu d'angle
+disableAngleRegu = false
 
 //--------------------------//
 //       CommandManager     //

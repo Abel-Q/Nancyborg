@@ -70,6 +70,11 @@ PARAM(bool, disableDistanceQuad)
 // Désactiver la QuadRampDérivée en angle
 PARAM(bool, disableAngleQuad)
 
+// Désactiver le régulateur de distance
+PARAM(bool, disableDistanceRegu)
+
+// Désactiver le régulateur d'angle
+PARAM(bool, disableAngleRegu)
 
 //--------------------------//
 //       CommandManager     //

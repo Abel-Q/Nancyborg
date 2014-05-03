@@ -19,8 +19,8 @@ ConsignController::ConsignController(Odometrie *odo, MotorsController *mot)
     motors = mot;
 
     // Les 2 regus sont actifs par défaut
-    angle_regu_on = true;
-    dist_regu_on = true;
+    angle_regu_on = !Config::disableDistanceRegu;
+    dist_regu_on = !Config::disableAngleRegu;
 
 }
 
