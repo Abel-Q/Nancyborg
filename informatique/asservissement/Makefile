@@ -25,6 +25,9 @@ config.%.txt: asserv/config/params.h
 	@echo Regénération $@
 	$(Q) $(PYTHON) gen_config.py $< $@
 
+deploy-default:
+	$(Q) $(subst PROJECT.bin,config.default.txt,$(LPC_DEPLOY))
+
 deploy-%:
 	$(Q) $(eval DIR=$(shell mktemp -d))
 	$(Q) cp config.$(subst deploy-,,$@).txt $(DIR)/config.txt

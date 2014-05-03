@@ -8,6 +8,11 @@ extern "C" void HardFault_Handler()
     error("Planté !!\n");
 }
 
+void loadConfig() {
+    Config::loadFile("/local/config.txt");
+    printf("Version configuration : %lld\n", Config::configVersion);
+}
+
 int main()
 {
     // Initialisation du port série par défaut (utilisé par printf & co)
@@ -18,10 +23,8 @@ int main()
     printf("Version " GIT_VERSION " - Compilée le " DATE_COMPIL " par " AUTEUR_COMPIL "\n\n");
 
     LocalFileSystem local("local");
-    Config::loadFile("/local/config.txt");
 
-    printf("Version configuration : %lld\n", Config::configVersion);
-
+    loadConfig();
     initAsserv();
 
     refLed = 1;
@@ -51,7 +54,7 @@ void ecouteSerie()
     double consigneValue2 = 0;
     char c = getchar();
     std::string name, value;
-    const Parameter *param = Config::getParam(name);
+    const Parameter *param;
 
     switch (c) {
         //Test de débug
@@ -178,6 +181,16 @@ void ecouteSerie()
                 param->setFromString(value);
                 std::cout << "ok" << std::endl;
             }
+            break;
+        case 'L': // recharge la config
+            loadConfig();
+            std::cout << "ok" << endl;
+            break;
+        case 'W': // sauvegarde la config courante
+            // config~1.txt = config.default.txt
+            Config::saveToFile("/local/config~1.txt", "/local/config.txt");
+            std::cout << "ok" << endl;
+            break;
         default:
             //putchar(c);
             break;
@@ -189,17 +202,11 @@ void initAsserv() {
     fflush(stdout);
 
     odometrie = new Odometrie();
-    if (Config::reglageCodeurs) {
-        motorController = new DummyMotorsController();
-    } else {
-        motorController = new Md22(p9, p10);
-        //motorController = new Qik(p9, p10);
-        //motorController = new PololuSMCs(p13, p14, p28, p27);
-    }
-    consignController = new ConsignController(odometrie, motorController);
-    consignController->setQuadRamp_Dist(!Config::disableDistanceQuad);
-    consignController->setQuadRamp_Angle(!Config::disableAngleQuad);
+    motorController = new Md22(p9, p10);
+    //motorController = new Qik(p9, p10);
+    //motorController = new PololuSMCs(p13, p14, p28, p27);
 
+    consignController = new ConsignController(odometrie, motorController);
     commandManager = new CommandManager(50, consignController, odometrie);
 
     printf("ok\n");

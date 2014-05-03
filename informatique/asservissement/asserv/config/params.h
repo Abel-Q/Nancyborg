@@ -94,15 +94,19 @@ PARAM(int64_t, enchainThreshold)
 //--------------------------//
 
 // Nombre de tics codeurs en 1m pour codeur gauche
+// !!! ATTENTION : redémarrer l'asserv pour prendre en compte les changements !!
 PARAM(double, frontParMetreCodeurG)
 
 // Nombre de tics codeurs en 1m pour codeur droite
+// !!! ATTENTION : redémarrer l'asserv pour prendre en compte les changements !!
 PARAM(double, frontParMetreCodeurD)
 
 // Distance entre les roues codeuses en mm
+// !!! ATTENTION : redémarrer l'asserv pour prendre en compte les changements !!
 PARAM(int64_t, distRoues)
 
 // Nombre d'UO pour un tic de codeur
+// !!! ATTENTION : redémarrer l'asserv pour prendre en compte les changements !!
 PARAM(int64_t, uOParFront)
 
 // Inversion du sens du codeur gauche

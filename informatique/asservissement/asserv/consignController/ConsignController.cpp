@@ -19,9 +19,8 @@ ConsignController::ConsignController(Odometrie *odo, MotorsController *mot)
     motors = mot;
 
     // Les 2 regus sont actifs par défaut
-    angle_regu_on = !Config::disableDistanceRegu;
-    dist_regu_on = !Config::disableAngleRegu;
-
+    angle_regu_on = true;
+    dist_regu_on = true;
 }
 
 // Destructeur
@@ -60,12 +59,12 @@ void ConsignController::perform()
     int64_t angle_output = 0; // Calcul de la sortie moteur en angle
 
     // Si le régulateur d'angle est actif, il doit calculer la consigne angulaire en fonction de la différence des tics codeurs (variation d'angle en UO)
-    if (angle_regu_on) {
+    if (angle_regu_on && !Config::disableAngleRegu) {
         angle_output = angle_regu.manage(angle_consigne, odometrie->getDeltaThetaBrut());
     }
 
     // Si le régu de distance est actif, il doit calculer la consigne de distance en fonction de la moyenne des tics codeurs (variation de distance en UO)
-    if (dist_regu_on) {
+    if (dist_regu_on && !Config::disableDistanceRegu) {
         dist_output = dist_regu.manage(dist_consigne, odometrie->getDeltaDist());
     }
 
@@ -79,7 +78,6 @@ void ConsignController::perform()
 
     //printf("VG=%d  ", VmoteurG);
     //printf("VD=%d\n", VmoteurD);
-
 }
 
 

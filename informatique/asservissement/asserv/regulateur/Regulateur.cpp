@@ -10,9 +10,7 @@ Regulateur::Regulateur(bool isDistance) : filtreQuadRampDerivee(isDistance), fil
 {
     filtreQuadRampDeriveeON = true;
     accumulateur = 0;
-#ifdef DEBUG
     this->isDistance = isDistance;
-#endif
 }
 
 // Destructeur
@@ -34,8 +32,14 @@ int64_t Regulateur::manage(int64_t consigne, int64_t feedback_odometrie)
 
     // On calcul l'erreur, c'est à dire la différence entre la consigne à suivre et la position réelle stockée dans l'accumulateur
     int64_t erreur;
+    bool enabled = filtreQuadRampDeriveeON;
 
-    if (filtreQuadRampDeriveeON) {
+    if (isDistance)
+        enabled &= !Config::disableDistanceQuad;
+    else
+        enabled &= !Config::disableAngleQuad;
+
+    if (enabled) {
         erreur = consigneFiltree - accumulateur;
     } else {
         erreur = consigne - accumulateur;

@@ -22,11 +22,9 @@ const Parameter *Config::getParam(std::string name)
     return NULL;
 }
 
-void Config::parseConfigLine(std::string line)
+const Parameter* Config::parseConfigLine(std::string line, std::string& name, std::string &val)
 {
     bool isName = true;
-    std::string name;
-    std::string val;
 
     for (std::string::const_iterator it = line.begin(); it != line.end(); ++it) {
         if (*it == ' ' || *it == '\n' || *it == '\r')
@@ -44,24 +42,22 @@ void Config::parseConfigLine(std::string line)
     }
 
     if (name.empty()) {
-        return;
+        return NULL;
     }
 
     const Parameter *p = Config::getParam(name);
 
     if (p == NULL) {
         printf("Attention : Le paramètre '%s' n'existe pas !\n", name.c_str());
-        return;
+        return NULL;
     }
-
-    p->setFromString(val);
+    return p;
 }
 
 void Config::loadFile(const char *filename)
 {
     printf("Chargement de '%s'...\n", filename);
 
-    std::string line;
     std::ifstream file(filename);
 
     if (!file) {
@@ -70,12 +66,56 @@ void Config::loadFile(const char *filename)
     }
 
     while (!file.eof()) {
+        std::string line, name, val;
         getline(file, line);
 
-        if (!line.empty() && line[0] != '#' && line[0] != '/')
-            parseConfigLine(line);
+        if (!line.empty() && line[0] != '#' && line[0] != '/') {
+            const Parameter *p = parseConfigLine(line, name, val);
+            if (p != NULL) {
+                p->setFromString(val);
+            }
+        }
     }
 
+    file.close();
+}
+
+void Config::saveToFile(const char *template_filename, const char *filename) {
+    printf("Chargement de '%s'...\n", template_filename);
+    std::ifstream tmpl(template_filename);
+
+    if (!tmpl) {
+        printf("Erreur : Impossible de charger le fichier modèle '%s'\n", template_filename);
+        return;
+    }
+
+    printf("Sauvegarde dans '%s'...\n", filename);
+    std::ofstream file(filename);
+
+    if (!file) {
+        printf("Erreur : Impossible d'ouvrir le fichier de sortie '%s'\n", filename);
+        tmpl.close();
+        return;
+    }
+
+    while (!tmpl.eof()) {
+        std::string line, name, val;
+        getline(tmpl, line);
+
+        if (line.empty() || line[0] == '#' || line[0] == '/') {
+            file << line << endl;
+        } else {
+            const Parameter *p = parseConfigLine(line, name, val);
+
+            if (p != NULL) {
+                file << name << " = " << p->toString() << std::endl;
+            } else {
+                file << line << endl;
+            }
+        }
+    }
+
+    tmpl.close();
     file.close();
 }
 

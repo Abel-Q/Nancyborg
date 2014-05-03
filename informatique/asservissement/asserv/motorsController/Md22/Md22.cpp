@@ -53,6 +53,9 @@ Md22::~Md22()
 
 void Md22::vitesseG(int vitMoteurG)
 {
+    if (Config::reglageCodeurs)
+        return;
+
     if (Config::inverseMoteurG) {
         vitMoteurG = -vitMoteurG;
     }
@@ -86,6 +89,9 @@ void Md22::vitesseG(int vitMoteurG)
 
 void Md22::vitesseD(int vitMoteurD)
 {
+    if (Config::reglageCodeurs)
+        return;
+
     if (Config::inverseMoteurD) {
         vitMoteurD = -vitMoteurD;
     }

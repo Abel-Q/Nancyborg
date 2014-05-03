@@ -17,12 +17,13 @@ public:
 #   include "params.h"
 
     static const Parameter *getParam(std::string name);
-    static void parseConfigLine(std::string line);
     static void loadFile(const char *filename);
+    static void saveToFile(const char *template_filename, const char *filename);
     static std::string dumpConfig();
 
 private:
     static const Parameter params[];
+    static const Parameter *parseConfigLine(std::string line, std::string &name, std::string &val);
 };
 
 #endif
