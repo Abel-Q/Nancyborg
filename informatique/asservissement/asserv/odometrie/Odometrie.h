@@ -18,10 +18,10 @@ public:
 
     // Reset de la position du robot
     void resetX() {
-        x = Config::placementOrigine;
+        x = Utils::mmToUO(this, Config::placementOrigine);
     }
     void resetY() {
-        y = Config::placementOrigine;
+        y = Utils::mmToUO(this, Config::placementOrigine);
     }
     void resetTheta() {
         theta = 0;
