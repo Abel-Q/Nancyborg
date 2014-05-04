@@ -46,6 +46,9 @@ enchainThreshold = 2000000
 //        Odométrie         //
 //--------------------------//
 
+// Distance entre le point asservit (centre des deux roues) et l'arrière du robot pour mettre le (0,0) au coin de la table
+placementOrigine = 70
+
 // Nombre de tics codeurs en 1m pour codeur gauche
 // !!! ATTENTION : redémarrer l'asserv pour prendre en compte les changements !!
 frontParMetreCodeurG = 25650.333
