@@ -62,6 +62,18 @@ Odometrie::~Odometrie()
     delete codeurs;
 }
 
+void resetX() {
+    x = Utils::mmToUO(this, Config::placementOrigine);
+}
+
+void resetY() {
+    y = Utils::mmToUO(this, Config::placementOrigine);
+}
+
+void resetTheta() {
+    theta = 0;
+}       
+
 // Mise à jour de la position du robot
 void Odometrie::refresh()
 {

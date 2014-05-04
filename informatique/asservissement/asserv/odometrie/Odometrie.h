@@ -5,8 +5,6 @@
 #include "../Utils/Utils.h"
 #include "../codeurs/CodeursInterface.h"
 
-class Utils;
-
 class Odometrie
 {
 
@@ -20,15 +18,9 @@ public:
     ~Odometrie();
 
     // Reset de la position du robot
-    void resetX() {
-        x = Utils::mmToUO(this, Config::placementOrigine);
-    }
-    void resetY() {
-        y = Utils::mmToUO(this, Config::placementOrigine);
-    }
-    void resetTheta() {
-        theta = 0;
-    }
+    void resetX();
+    void resetY();
+    void resetTheta();
 
     // Mise à jour de la position du robot
     void refresh();

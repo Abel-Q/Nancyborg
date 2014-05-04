@@ -4,8 +4,6 @@
 #include "mbed.h"
 #include "../odometrie/Odometrie.h"
 
-class Odometrie;
-
 class Utils
 {
 public :
