@@ -5,6 +5,8 @@
 #include "../Utils/Utils.h"
 #include "../codeurs/CodeursInterface.h"
 
+class Utils;
+
 class Odometrie
 {
 
