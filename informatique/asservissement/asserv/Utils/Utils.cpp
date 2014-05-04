@@ -1,4 +1,5 @@
 #include "Utils.h"
+#include "../odometrie/Odometrie.h"
 
 //Limitation d'une valeur à un intervalle [valeurMin , valeurMax]
 int64_t Utils::constrain(int64_t value , int64_t valeurMin , int64_t valeurMax)

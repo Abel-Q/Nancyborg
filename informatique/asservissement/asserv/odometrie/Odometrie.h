@@ -2,7 +2,6 @@
 #define ODOMETRIE
 
 #include "../config/config.h"
-#include "../Utils/Utils.h"
 #include "../codeurs/CodeursInterface.h"
 
 class Odometrie
