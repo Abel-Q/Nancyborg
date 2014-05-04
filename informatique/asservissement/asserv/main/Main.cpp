@@ -135,8 +135,8 @@ void ecouteSerie()
             break;
 
         case 'c': {//calage bordure
-                char sens = getchar();
-                char gros = getchar();
+                char sens = getchar(); // si 0, y vers l'intérieur de la table, si 1, y vers l'extérieur de la table
+                char gros = getchar(); // g pour le Gros, p pour le petit
 
                 if (sens != '1' && sens != '0') {
                     return;
