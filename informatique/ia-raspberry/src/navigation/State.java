@@ -19,74 +19,66 @@ package navigation;
  *
  */
 
-public class State implements Comparable, java.io.Serializable
-{
+@SuppressWarnings("rawtypes")
+public class State implements Comparable, java.io.Serializable {
+	private static final long serialVersionUID = 4708066414355847510L;
 	public int x=0;
 	public int y=0;
-	public Pair<Double, Double> k = new Pair(0.0,0.0);
+	public Pair<Double, Double> k = new Pair<Double, Double>(0.0,0.0);
 
 
 	//Default constructor
-	public State()
-	{
+	public State() {
 
 	}
 
 	//Overloaded constructor
-	public State(int x, int y, Pair<Double,Double> k)
-	{
+	public State(int x, int y, Pair<Double,Double> k) {
 		this.x = x;
 		this.y = y;
 		this.k = k;
 	}
 
 	//Overloaded constructor
-	public State(State other)
-	{
+	public State(State other) {
 		this.x = other.x;
 		this.y = other.y;
 		this.k = other.k;
 	}
 
 	//Equals
-	public boolean eq(final State s2)
-	{
+	public boolean eq(final State s2) {
 		return ((this.x == s2.x) && (this.y == s2.y));
 	}
 
 	//Not Equals
-	public boolean neq(final State s2)
-	{
+	public boolean neq(final State s2) {
 		return ((this.x != s2.x) || (this.y != s2.y));
 	}
 
 	//Greater than
-	public boolean gt(final State s2)
-	{
+	public boolean gt(final State s2) {
 		if (k.first()-0.00001 > s2.k.first()) return true;
 		else if (k.first() < s2.k.first()-0.00001) return false;
 		return k.second() > s2.k.second();
 	}
 
 	//Less than or equal to
-	public boolean lte(final State s2)
-	{
+	public boolean lte(final State s2) {
 		if (k.first() < s2.k.first()) return true;
 		else if (k.first() > s2.k.first()) return false;
 		return k.second() < s2.k.second() + 0.00001;
 	}
 
 	//Less than
-	public boolean lt(final State s2)
-	{
+	public boolean lt(final State s2) {
 		if (k.first() + 0.000001 < s2.k.first()) return true;
 		else if (k.first() - 0.000001 > s2.k.first()) return false;
 		return k.second() < s2.k.second();
 	}
 
 	//CompareTo Method. This is necessary when this class is used in a priority queue
-	public int compareTo(Object that)
-	{
+	public int compareTo(Object that) {
 		//This is a modified version of the gt method
 		State other = (State)that;
 		if (k.first()-0.00001 > other.k.first()) return 1;
@@ -98,8 +90,7 @@ public class State implements Comparable, java.io.Serializable
 
 	//Override the CompareTo function for the HashMap usage
 	@Override
-	public int hashCode()
-	{
+	public int hashCode() {
 		return this.x + 34245*this.y;
 	}
 

@@ -35,6 +35,10 @@ package navigation;
 public class Pair<T, U> implements Cloneable, java.io.Serializable {
 
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = 61103407775500327L;
+	/**
      * One of the two values, for the declared type T.
      */
     private T object1;
