@@ -33,7 +33,7 @@ public class Navigation2014 extends Navigation {
 		// On bloque les dépôts de fruits
 		for (int i = 0; i <= 104; i++) {
 			this.zonesInterdites.add(new Point(23+i, 153));
-			this.zonesInterdites.add(new Point(167+i, 153));
+			this.zonesInterdites.add(new Point(173+i, 153));
 		}
 		for (int i = 0; i <= 47; i++) {
 			this.zonesInterdites.add(new Point(23, 200-i));
@@ -45,6 +45,16 @@ public class Navigation2014 extends Navigation {
 		// On remplit DStar
 		for (Point p : this.zonesInterdites) {
 			this.dStar.updateCell(p.x, p.y, -1);
+		}
+	}
+
+	@Override
+	protected void setZonesInterditesMobiles(int x, int y) {
+		for (int i = 0; i <= 72; i++) {
+			this.zonesInterditesMobiles.add(new Point(x-36, y-36+i));
+			this.zonesInterditesMobiles.add(new Point(x-36+i, y-36));
+			this.zonesInterditesMobiles.add(new Point(x+36, y-36+i));
+			this.zonesInterditesMobiles.add(new Point(x-36+i, y+36));
 		}
 	}
 
