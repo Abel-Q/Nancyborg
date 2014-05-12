@@ -1,6 +1,7 @@
 package navigation;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Classe abstraite gérant la navigation du robot, il suffit de l'étendre chaque année en remplissant les méthodes qui vont bien
@@ -69,6 +70,17 @@ public abstract class Navigation {
 		this.dStar.updateStart(startX, startY);
 		this.dStar.updateGoal(this.goal.x, this.goal.y);
 		return this.dStar.replan();
+	}
+	
+	public ArrayList<String> getCommandeAsserv() {
+		ArrayList<String> commandes = new ArrayList<String>();
+		List<State> path = this.dStar.getPathReduced();
+		
+		for (State i : path) {
+			commandes.add(i.x+";"+i.y);
+		}
+		
+		return commandes;
 	}
 	
 	public void debugZoneInterdites() {
