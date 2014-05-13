@@ -582,7 +582,7 @@ public class DStarLite implements java.io.Serializable {
 					todel.remove(path.get(i-1));
 				}
 			}
-			if (todel.get(todel.size()-1).equals(path.get(path.size()-1))) {
+			if (todel.size() >= 2 && todel.get(todel.size()-1).equals(path.get(path.size()-1))) {
 				todel.remove(todel.get(todel.size()-1));
 			}
 			path.removeAll(todel);
