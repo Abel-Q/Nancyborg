@@ -17,7 +17,9 @@ public class Ia {
 			System.out.println(str);
 		}
 		System.out.println("================= Fin Commandes asserv ===================");
+		
 		nav.obstacleMobile(80, 150, 25, 152);
+		
 		nav.calculItineraire(20, 160);
 		commandes = nav.getCommandeAsserv();
 		System.out.println("================= Commandes asserv ===================");

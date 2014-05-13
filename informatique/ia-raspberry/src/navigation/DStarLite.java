@@ -552,6 +552,7 @@ public class DStarLite implements java.io.Serializable {
 	public List<State> getPathReduced() {
 		List<State> path = this.getPath();
 		
+		// Premier filtrage, on cherche les points alignés et on nettoie
 		if (path.size() > 3) {
 			double colineaireAB, colineaireAC;
 			int a = 0;
@@ -568,6 +569,23 @@ public class DStarLite implements java.io.Serializable {
 					c++;
 				}
 			}
+		}
+		
+		// Deuxième filtrage ??
+		if (path.size() > 3) {
+			List<State> todel = new ArrayList<State>();
+			for (int i = 1; i < path.size(); i++) {
+				if ((path.get(i-1).x - path.get(i).x <= 5) && (path.get(i-1).x - path.get(i).x >= -5) &&
+						(path.get(i-1).y - path.get(i).y <= 5) && (path.get(i-1).y - path.get(i).y >= -5)) {
+					todel.add(path.get(i));
+				} else {
+					todel.remove(path.get(i-1));
+				}
+			}
+			if (todel.get(todel.size()-1).equals(path.get(path.size()-1))) {
+				todel.remove(todel.get(todel.size()-1));
+			}
+			path.removeAll(todel);
 		}
 		
 		return path;
