@@ -3,6 +3,7 @@ package ia.nancyborg2014;
 import java.util.ArrayList;
 
 import navigation.Navigation2014;
+import navigation.Point;
 
 public class Ia {
 
@@ -12,10 +13,10 @@ public class Ia {
 		nav.setGoal(250, 100);
 		long begin = System.currentTimeMillis();
 		nav.calculItineraire(20, 160);
-		ArrayList<String> commandes = nav.getCommandeAsserv();
+		ArrayList<Point> commandes = nav.getCommandeAsserv();
 		long end = System.currentTimeMillis();
 		System.out.println("================= Commandes asserv ===================");
-		for (String str : commandes) {
+		for (Point str : commandes) {
 			System.out.println(str);
 		}
 		System.out.println("Time: " + (end-begin) + "ms");
@@ -28,7 +29,7 @@ public class Ia {
 		commandes = nav.getCommandeAsserv();
 		end = System.currentTimeMillis();
 		System.out.println("================= Commandes asserv ===================");
-		for (String str : commandes) {
+		for (Point str : commandes) {
 			System.out.println(str);
 		}
 		System.out.println("Time: " + (end-begin) + "ms");

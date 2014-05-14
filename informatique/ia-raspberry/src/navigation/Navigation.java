@@ -46,12 +46,12 @@ public abstract class Navigation {
 	 * @param obstacleY Position en Y de l'obstacle (prendre en cm l'entier le plus proche)
 	 * @param robotX Position en X du robot (prendre en cm l'entier le plus proche)
 	 * @param robotY Position en Y du robot (prendre en cm l'entier le plus proche)
-	 * @return
+	 * @return true si l'objectif est encore atteignable, false sinon
 	 */
 	public boolean obstacleMobile(int obstacleX, int obstacleY, int robotX, int robotY) {
 		// On nettoie les anciennes zones interdites
 		for (Point p : this.zonesInterditesMobiles) {
-			this.dStar.updateCell(p.x, p.y, 1);
+			this.dStar.updateCell(p.getX(), p.getY(), 1);
 		}
 		this.zonesInterditesMobiles.clear();
 		
@@ -60,33 +60,46 @@ public abstract class Navigation {
 		
 		// On place la nouvelle zone interdite
 		for (Point p : this.zonesInterditesMobiles) {
-			this.dStar.updateCell(p.x, p.y, -1);
+			this.dStar.updateCell(p.getX(), p.getY(), -1);
 		}
 		
 		return calculItineraire(robotX, robotY);
 	}
 	
+	/**
+	 * On déclenche un calcul de l'itinaire à suivre
+	 * @param startX Position en X du robot (prendre en cm l'entier le plus proche)
+	 * @param startY Position en Y du robot (prendre en cm l'entier le plus proche)
+	 * @return true si l'objectif est atteignable, false sinon
+	 */
 	public boolean calculItineraire(int startX, int startY) {
 		this.dStar.updateStart(startX, startY);
-		this.dStar.updateGoal(this.goal.x, this.goal.y);
+		this.dStar.updateGoal(this.goal.getX(), this.goal.getY());
 		return this.dStar.replan();
 	}
 	
-	public ArrayList<String> getCommandeAsserv() {
-		ArrayList<String> commandes = new ArrayList<String>();
+	/**
+	 * Permet de récupérer la liste des positions à transmettre à l'asservissement
+	 * @return ArrayList<Point> des positions du parcours
+	 */
+	public ArrayList<Point> getCommandeAsserv() {
+		ArrayList<Point> commandes = new ArrayList<Point>();
 		List<State> path = this.dStar.getPathReduced();
 		
 		for (State i : path) {
-			commandes.add(i.x+";"+i.y);
+			commandes.add(new Point(i.x,i.y));
 		}
 		
 		return commandes;
+		
+		// Méthode JBG, semble moins legèrement moins bonne mais plus propre
+		//return this.dStar.getRoute();
 	}
 	
 	public void debugZoneInterdites() {
 		System.out.println("================= Debug zones interdites ===================");
 		for (Point state : this.zonesInterdites) {
-			System.out.println(state.x+";"+state.y);
+			System.out.println(state.getX()+";"+state.getY());
 		}
 		System.out.println("================= Fin debug zones interdites ===================");
 	}
@@ -94,20 +107,9 @@ public abstract class Navigation {
 	public void debugZoneInterditesMobiles() {
 		System.out.println("================= Debug zones interdites mobiles ===================");
 		for (Point state : this.zonesInterditesMobiles) {
-			System.out.println(state.x+";"+state.y);
+			System.out.println(state.getX()+";"+state.getY());
 		}
 		System.out.println("================= Fin debug zones interdites mobiles ===================");
-	}
-	
-	
-	
-	public class Point {
-		public int x, y;
-		
-		public Point(int x, int y) {
-			this.x = x;
-			this.y = y;
-		}
 	}
 
 }

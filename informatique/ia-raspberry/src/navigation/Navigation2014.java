@@ -44,7 +44,7 @@ public class Navigation2014 extends Navigation {
 		
 		// On remplit DStar
 		for (Point p : this.zonesInterdites) {
-			this.dStar.updateCell(p.x, p.y, -1);
+			this.dStar.updateCell(p.getX(), p.getY(), -1);
 		}
 	}
 

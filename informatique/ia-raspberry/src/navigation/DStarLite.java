@@ -7,6 +7,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
+
+import navigation.Point.DIRECTION;
 /**
  *
  * @author daniel beard
@@ -589,6 +591,37 @@ public class DStarLite implements java.io.Serializable {
 		}
 		
 		return path;
+	}
+	
+	public ArrayList<Point> getRoute() {
+		// On transforme les State en Point
+		ArrayList<Point> path = new ArrayList<Point>();
+		for (State i : this.getPath()) {
+			path.add(new Point(i.x,i.y));
+		}
+		
+		// La liste des points épurés
+		ArrayList<Point> liste = new ArrayList<Point>();
+		// On ajoute le premier élément (forcément)
+		liste.add(path.get(0));
+		
+		// On initialise notre détecteur de diagonales
+		CycleDetector cd = new CycleDetector(); 
+		cd.add(path.get(0).getDirectionToGoTo(path.get(1)));
+		for(int i=1 ; i < path.size()-1 ; i++){
+			DIRECTION dir = path.get(i).getDirectionToGoTo(path.get(i+1));
+			// Si le point ne fait plus partie de la dagonale elle s'arrêtait au point d'avant 
+			if(!cd.add(dir)){
+				liste.add(path.get(i-1));
+			//	System.out.println("direction : "+dir+"\ndump : "+cd.dump()+"\n p["+i+"]="+p[i]+" ; p["+(i+1)+"]="+p[i+1]);
+				cd.reset();
+				cd.add(dir);
+			}
+		}
+		// On ajoute le dernier élément
+		liste.add(path.get(path.size()-1));
+		
+		return liste;
 	}
 
 
