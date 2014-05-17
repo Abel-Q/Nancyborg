@@ -21,14 +21,16 @@ import com.pi4j.io.gpio.trigger.GpioCallbackTrigger;
 
 public class DetectionIR extends Thread {
 	private float[] anglesCapteurs;
+	private float angle0;
 	private AX12Linux ax12;
 	private Ia ia; // Histoire de signaler à l'IA qu'il y a un adversaire
 	public double distanceDetection;
 
-	public DetectionIR(float[] anglesCapteurs, double distanceDetection, AX12Linux ax12, Pin pinCapteur1, Pin pinCapteur2, Pin pinCapteur3, Ia ia){
+	public DetectionIR(float[] anglesCapteurs, float angle0, double distanceDetection, AX12Linux ax12, Pin pinCapteur1, Pin pinCapteur2, Pin pinCapteur3, Ia ia){
 		this.anglesCapteurs = anglesCapteurs;
 		this.ax12 = ax12;
 		this.distanceDetection = distanceDetection;
+		this.angle0 = angle0;
 
 		// create gpio controller
         final GpioController gpio = GpioFactory.getInstance();
@@ -66,14 +68,14 @@ public class DetectionIR extends Thread {
 	public void run(){
 		while(true){
 			// TODO timer pour la rotation
-			this.ax12.setGoalPosition(0.0f, true);
-			this.ax12.setGoalPosition(45.0f, true);
+			this.ax12.setGoalPosition(this.angle0-45.0f, true);
+			this.ax12.setGoalPosition(this.angle0+45.0f, true);
 		}
 	}
 
 	public void detected(int capteur) {
 		Point nous = ia.getPosition();
-		float angle = this.ax12.getPresentPosition() + this.anglesCapteurs[capteur] - nous.getCap();
+		float angle = this.ax12.getPresentPosition() - angle0 + this.anglesCapteurs[capteur] - nous.getCap();
 		int x = (nous.getX() + (int) (Math.cos(Math.PI * angle) * this.distanceDetection));
 		int y = (nous.getY() + (int) (Math.sin(Math.PI * angle) * this.distanceDetection));
 		ia.detectionAdversaire(new Point(x, y));
