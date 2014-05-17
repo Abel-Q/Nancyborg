@@ -7,5 +7,6 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/raspberry/libs/pi4j-core-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="libs/ax12.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
