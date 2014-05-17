@@ -1,17 +1,23 @@
 package api.sensors;
 
-import fr.nancyborg.ax12.AX12Base;
-import navigation.Point;
+import java.util.concurrent.Callable;
 
-import com.pi4j.io.gpio.*;
-import com.pi4j.io.gpio.trigger.*;
+import navigation.Point;
+import api.ax12.AX12Base;
+
+import com.pi4j.io.gpio.GpioController;
+import com.pi4j.io.gpio.GpioFactory;
+import com.pi4j.io.gpio.GpioPinDigitalInput;
+import com.pi4j.io.gpio.PinPullResistance;
+import com.pi4j.io.gpio.RaspiPin;
+import com.pi4j.io.gpio.trigger.GpioCallbackTrigger;
 
 //TODO: - mettre a jour l'angle de notre robot
 // - mettre a jour les GPIO
 // - metre a jour les angles des capteurs et de la rotation
 
-public class DetectionIR extends thread {
-	private final floatt[] angles = {-15.0f, 0.0f, 15.0f};
+public class DetectionIR extends Thread {
+	private final float[] angles = {-15.0f, 0.0f, 15.0f};
 	private Point nous, adversaire;
 	private float angle;
 	private AX12Base ax12;
