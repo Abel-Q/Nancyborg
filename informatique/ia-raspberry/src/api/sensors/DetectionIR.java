@@ -9,6 +9,7 @@ import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.gpio.GpioPinDigitalInput;
 import com.pi4j.io.gpio.PinPullResistance;
+import com.pi4j.io.gpio.PinState;
 import com.pi4j.io.gpio.RaspiPin;
 import com.pi4j.io.gpio.trigger.GpioCallbackTrigger;
 
@@ -24,7 +25,7 @@ public class DetectionIR extends Thread {
 
 	public static double DISTANCE = 30.0;
 
-	public DetectionIR(Point nous, double angle, Point adversaire, AX12Base ax12){
+	public DetectionIR(Point nous, float angle, Point adversaire, AX12Base ax12){
 		this.nous = nous;
 		this.angle = angle;
 		this.adversaire = adversaire;
@@ -40,21 +41,25 @@ public class DetectionIR extends Thread {
         
 
         //add trigger event
-        capteur0.addTrigger(new GpioCallbackTrigger(new Callable<Void>() {
-            public void call() throws Exception {
-                DetectionIR.this.detected(0);
-            }
-        }));
-
-        capteur1.addTrigger(new GpioCallbackTrigger(new Callable<Void>() {
-            public void call() throws Exception {
+        capteur0.addTrigger(new GpioCallbackTrigger(PinState.LOW, new Callable<Void>() {
+			@Override
+			public Void call() throws Exception {
+				DetectionIR.this.detected(0);
+				return null;
+			}
+		}));
+        
+        capteur1.addTrigger(new GpioCallbackTrigger(PinState.LOW, new Callable<Void>() {
+            public Void call() throws Exception {
                 DetectionIR.this.detected(1);
+                return null;
             }
         }));
 
-        capteur2.addTrigger(new GpioCallbackTrigger(new Callable<Void>() {
-            public void call() throws Exception {
+        capteur2.addTrigger(new GpioCallbackTrigger(PinState.LOW, new Callable<Void>() {
+            public Void call() throws Exception {
                 DetectionIR.this.detected(2);
+                return null;
             }
         }));
 	}
@@ -66,8 +71,8 @@ public class DetectionIR extends Thread {
 		}
 	}
 
-	public void detected(int captueur){
-		float angle = this.ax12.getPresentPosition() + this.angles[i] - this.angle;
+	public void detected(int capteur){
+		float angle = this.ax12.getPresentPosition() + this.angles[capteur] - this.angle;
 		this.adversaire.setX(this.nous.getX() + (int) (Math.cos(Math.PI * angle) * DetectionIR.DISTANCE));
 		this.adversaire.setY(this.nous.getY() + (int) (Math.sin(Math.PI * angle) * DetectionIR.DISTANCE));
 	}
