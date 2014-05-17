@@ -44,10 +44,6 @@ public abstract class Navigation {
 	 */
 	protected abstract void initListeObjectifs();
 	
-	public void setGoal(int x, int y) {
-		this.goal = new Point(x, y);
-	}
-	
 	/**
 	 * On vient de rencontrer un obstacle, on met à jours les zones interdites et on recalcule l'itinéraire
 	 * @param obstacleX Position en X de l'obstacle (prendre en cm l'entier le plus proche)
@@ -56,22 +52,26 @@ public abstract class Navigation {
 	 * @param robotY Position en Y du robot (prendre en cm l'entier le plus proche)
 	 * @return true si l'objectif est encore atteignable, false sinon
 	 */
-	public boolean obstacleMobile(int obstacleX, int obstacleY, int robotX, int robotY) {
+	public boolean obstacleMobile(Point adversaire, Point robot) {
 		// On nettoie les anciennes zones interdites
-		for (Point p : this.zonesInterditesMobiles) {
-			this.dStar.updateCell(p.getX(), p.getY(), 1);
-		}
-		this.zonesInterditesMobiles.clear();
+		this.resetObstacleMobile();
 		
 		// On calcule la nouvelle zone et on la stocke
-		this.setZonesInterditesMobiles(obstacleX, obstacleY);
+		this.setZonesInterditesMobiles(adversaire.getX(), adversaire.getY());
 		
 		// On place la nouvelle zone interdite
 		for (Point p : this.zonesInterditesMobiles) {
 			this.dStar.updateCell(p.getX(), p.getY(), -1);
 		}
 		
-		return calculItineraire(robotX, robotY);
+		return calculItineraire(robot);
+	}
+	
+	public void resetObstacleMobile() {
+		for (Point p : this.zonesInterditesMobiles) {
+			this.dStar.updateCell(p.getX(), p.getY(), 1);
+		}
+		this.zonesInterditesMobiles.clear();
 	}
 	
 	/**
@@ -80,8 +80,8 @@ public abstract class Navigation {
 	 * @param startY Position en Y du robot (prendre en cm l'entier le plus proche)
 	 * @return true si l'objectif est atteignable, false sinon
 	 */
-	public boolean calculItineraire(int startX, int startY) {
-		this.dStar.updateStart(startX, startY);
+	public boolean calculItineraire(Point start) {
+		this.dStar.updateStart(start.getX(), start.getY());
 		this.dStar.updateGoal(this.goal.getX(), this.goal.getY());
 		return this.dStar.replan();
 	}
@@ -118,6 +118,38 @@ public abstract class Navigation {
 			System.out.println(state.getX()+";"+state.getY());
 		}
 		System.out.println("================= Fin debug zones interdites mobiles ===================");
+	}
+	
+	public ArrayList<Point> getZonesInterdites() {
+		return zonesInterdites;
+	}
+
+	public void setZonesInterdites(ArrayList<Point> zonesInterdites) {
+		this.zonesInterdites = zonesInterdites;
+	}
+
+	public ArrayList<Point> getZonesInterditesMobiles() {
+		return zonesInterditesMobiles;
+	}
+
+	public void setZonesInterditesMobiles(ArrayList<Point> zonesInterditesMobiles) {
+		this.zonesInterditesMobiles = zonesInterditesMobiles;
+	}
+
+	public ArrayList<Point> getObjectifs() {
+		return objectifs;
+	}
+
+	public void setObjectifs(ArrayList<Point> objectifs) {
+		this.objectifs = objectifs;
+	}
+	
+	public Point getGoal() {
+		return this.goal;
+	}
+	
+	public void setGoal(Point goal) {
+		this.goal = goal;
 	}
 
 }
