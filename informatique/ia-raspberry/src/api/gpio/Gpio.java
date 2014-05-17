@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStreamReader;
+
 import com.pi4j.wiringpi.GpioUtil;
 
 /**
@@ -58,7 +59,7 @@ public class Gpio implements Closeable {
 	/**
 	 * Constructeur d'un GPIO
 	 * 
-	 * @param num Numéro du GPIO
+	 * @param num Numéro du GPIO (not header pin number; not wiringPi pin number but GPIO number : https://projects.drogon.net/raspberry-pi/wiringpi/pins/)
 	 * @param entree Sens du GPIO
 	 * @throws IOException
 	 */
@@ -81,16 +82,20 @@ public class Gpio implements Closeable {
 	 * @return Le GPIO est-il a 1 ?
 	 * @throws IOException
 	 */
-	public boolean isHigh() throws IOException {
-		return com.pi4j.wiringpi.Gpio.digitalRead(this.num) == 1;
+	public boolean isHigh() {
+		boolean res = false;
+		res = com.pi4j.wiringpi.Gpio.digitalRead(this.num) == 1;
+		return res;
 	}
 
 	/**
 	 * @return Le GPIO est-il a 0 ?
 	 * @throws IOException
 	 */
-	public boolean isLow() throws IOException {
-		return !this.isHigh();
+	public boolean isLow() {
+		boolean res = false;
+		res = !this.isHigh();
+		return res;
 	}
 
 	/**
