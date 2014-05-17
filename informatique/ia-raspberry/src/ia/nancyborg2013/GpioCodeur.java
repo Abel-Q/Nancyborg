@@ -18,22 +18,17 @@ public class GpioCodeur {
 					boolean high = false;
 					
 					while(true) {
-						try {
-							boolean highTmp = GpioCodeur.this.gpio.isHigh();
-							if(high != highTmp) {
-								
-								synchronized(this)
-								{
-									if(highTmp) ++value;
-								}
-								
-								System.out.println("Tic");
+						boolean highTmp = GpioCodeur.this.gpio.isHigh();
+						if(high != highTmp) {
+							
+							synchronized(this)
+							{
+								if(highTmp) ++value;
 							}
-							high = highTmp;
+							
+							System.out.println("Tic");
 						}
-						catch(IOException e) {
-							e.printStackTrace();
-						}
+						high = highTmp;
 					}
 				}
 			});

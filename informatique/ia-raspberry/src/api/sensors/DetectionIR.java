@@ -68,8 +68,8 @@ public class DetectionIR extends Thread {
 	public void run(){
 		while(true){
 			// TODO timer pour la rotation
-			this.ax12.setGoalPosition(this.angle0-45.0f, true);
-			this.ax12.setGoalPosition(this.angle0+45.0f, true);
+			this.ax12.setGoalPosition(this.angle0-45.0f, false);
+			this.ax12.setGoalPosition(this.angle0+45.0f, false);
 		}
 	}
 
