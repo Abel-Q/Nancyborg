@@ -1,7 +1,10 @@
 package api.asserv;
 
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import navigation.Point;
 import api.communication.Serial;
 
 /**
@@ -207,5 +210,26 @@ public class Asserv {
 	
 	public void setMotorSpeed(char moteur, int val) {
 		mbed.write("M" + moteur + val + "\n");
+	}
+	
+	public Point getCurrentPosition() {
+		mbed.write("p");
+		String str = mbed.readLine();
+		Pattern p = Pattern.compile("[0-9.-]+");
+		Matcher m = p.matcher(str);
+		int[] coord = new int[3];
+		int i = 0;
+		while (m.find()) {
+			if (i <= 1) {
+				coord[i] = (int)Math.rint(Double.parseDouble(str.substring(m.start(), m.end())));
+			} else {
+				
+				coord[i] = (int)Math.rint(Math.toDegrees(Double.parseDouble(str.substring(m.start(), m.end()))));
+			}
+			i++;
+		}
+		Point point = new Point(coord[0], coord[1]);
+		point.setCap(coord[2]);
+		return point;
 	}
 }
