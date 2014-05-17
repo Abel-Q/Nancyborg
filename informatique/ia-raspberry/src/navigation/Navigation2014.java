@@ -58,4 +58,10 @@ public class Navigation2014 extends Navigation {
 		}
 	}
 
+	@Override
+	protected void initListeObjectifs() {
+		// TODO à remplir
+		this.objectifs.add(new Point(250, 100));
+	}
+
 }

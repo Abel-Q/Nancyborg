@@ -14,13 +14,16 @@ public abstract class Navigation {
 	protected ArrayList<Point> zonesInterdites;
 	protected ArrayList<Point> zonesInterditesMobiles;
 	protected Point goal;
+	protected ArrayList<Point> objectifs;
 	
 	public Navigation() {
 		this.dStar = new DStarLite();
 		this.zonesInterdites = new ArrayList<Point>();
 		this.zonesInterditesMobiles = new ArrayList<Point>();
+		this.objectifs = new ArrayList<>();
 		
 		this.initZonesInterdites();
+		this.initListeObjectifs();
 	}
 	
 	/**
@@ -35,6 +38,11 @@ public abstract class Navigation {
 	 * @param y Position en Y de l'obstacle (prendre en cm l'entier le plus proche)
 	 */
 	protected abstract void setZonesInterditesMobiles(int x, int y);
+	
+	/**
+	 * Remplit la liste d'objectifs
+	 */
+	protected abstract void initListeObjectifs();
 	
 	public void setGoal(int x, int y) {
 		this.goal = new Point(x, y);
