@@ -1,11 +1,11 @@
 package api.sensors;
 
+import fr.nancyborg.ax12.AX12Linux;
 import ia.nancyborg2014.Ia;
 
 import java.util.concurrent.Callable;
 
 import navigation.Point;
-import api.ax12.AX12Base;
 
 import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
@@ -21,14 +21,14 @@ import com.pi4j.io.gpio.trigger.GpioCallbackTrigger;
 
 public class DetectionIR extends Thread {
 	private float[] anglesCapteurs;
-	private AX12Base ax12;
+	private AX12Linux ax12;
 	private Ia ia; // Histoire de signaler à l'IA qu'il y a un adversaire
+	public double distanceDetection;
 
-	public static double DISTANCE = 30.0;
-
-	public DetectionIR(float[] anglesCapteurs, AX12Base ax12, Pin pinCapteur1, Pin pinCapteur2, Pin pinCapteur3){
+	public DetectionIR(float[] anglesCapteurs, double distanceDetection, AX12Linux ax12, Pin pinCapteur1, Pin pinCapteur2, Pin pinCapteur3, Ia ia){
 		this.anglesCapteurs = anglesCapteurs;
 		this.ax12 = ax12;
+		this.distanceDetection = distanceDetection;
 
 		// create gpio controller
         final GpioController gpio = GpioFactory.getInstance();
@@ -73,10 +73,9 @@ public class DetectionIR extends Thread {
 
 	public void detected(int capteur) {
 		Point nous = ia.getPosition();
-		// TODO ça mélange des degrés et des radians, à fixer !!
 		float angle = this.ax12.getPresentPosition() + this.anglesCapteurs[capteur] - nous.getCap();
-		int x = (nous.getX() + (int) (Math.cos(Math.PI * angle) * DetectionIR.DISTANCE));
-		int y = (nous.getY() + (int) (Math.sin(Math.PI * angle) * DetectionIR.DISTANCE));
+		int x = (nous.getX() + (int) (Math.cos(Math.PI * angle) * this.distanceDetection));
+		int y = (nous.getY() + (int) (Math.sin(Math.PI * angle) * this.distanceDetection));
 		ia.detectionAdversaire(new Point(x, y));
 	}
 }
