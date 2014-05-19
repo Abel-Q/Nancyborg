@@ -3,8 +3,8 @@ CONFIG += console
 
 QT += core multimedia
 
-QMAKE_LIBS += `pkg-config opencv --libs`
-QMAKE_LIBDIR += /home/loic/OpenCV-2.4.9-android-sdk/sdk/native/libs/armeabi-v7a/
+#QMAKE_LIBS += `pkg-config opencv --libs`
+#QMAKE_LIBDIR += /home/loic/OpenCV-2.4.9-android-sdk/sdk/native/libs/armeabi-v7a/
 
 LIBS += $$PWD/android/libs/armeabi-v7a/*
 #LIBS += /home/loic/OpenCV-2.4.9-android-sdk/sdk/native/libs/armeabi-v7a/*
