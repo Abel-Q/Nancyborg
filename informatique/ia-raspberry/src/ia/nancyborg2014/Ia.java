@@ -43,7 +43,8 @@ public class Ia {
 			// Détection de l'adversaire
 			float[] anglesCapteurs = {-45.0f, 0.0f, 45.0f};
 			AX12Linux ax12Detection = new AX12Linux("/dev/ttyAMA0", 1, 115200);
-			detection = new DetectionIR(anglesCapteurs, 240.0f, 30.0, ax12Detection, RaspiPin.GPIO_12, RaspiPin.GPIO_13, RaspiPin.GPIO_14, this);
+			// Distance capteur - balise = 56cm
+			detection = new DetectionIR(anglesCapteurs, 240.0f, 56.0, ax12Detection, RaspiPin.GPIO_12, RaspiPin.GPIO_13, RaspiPin.GPIO_14, this);
 			
 			nav = new Navigation2014();
 		} catch (IOException e) {
