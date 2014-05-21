@@ -18,7 +18,7 @@
 
     <target name="jars" depends="build">
         <mkdir dir="dist" />
-        <make-jar name="dist/ia.serieux.jar" mainclass="ia.princessbotik2013.Ia"/>
+        <make-jar name="dist/ia.serieux.jar" mainclass="ia.nancyborg2014.Ia"/>
         <make-jar name="dist/ia.fun.jar" mainclass="ia.nancyborg2013.Ia"/>
         <make-jar name="dist/ia.fetescience.jar" mainclass="ia.fetescience.IA"/>
         <make-jar name="dist/qik.jar" mainclass="api.tools.QikTool"/>

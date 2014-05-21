@@ -11,8 +11,8 @@
     <import file="build-jars.xml"/>
     <path id="raspberry.classpath">
         <pathelement location="bin"/>
-        <pathelement location="libs/jna.jar"/>
-        <pathelement location="libs/purejavacomm.jar"/>
+        <pathelement location="libs/pi4j-core.jar"/>
+        <pathelement location="libs/ax12.jar"/>
     </path>
     <target name="init">
         <mkdir dir="bin"/>
