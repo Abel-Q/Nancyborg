@@ -35,8 +35,8 @@ public class Ia {
 			
 			// On initialise les GPIOs
 			// TODO vérifier que les numéros fonctionne bien
-			tirette = new Gpio(27, true, Gpio.PULL_UP); // Mise = low, Enleve = high; 
-			selecteurCouleur = new Gpio(3, true, Gpio.PULL_UP); // Rouge = high, Jaune = low
+			tirette = new Gpio(22, true, Gpio.PULL_UP); // Mise = low, Enleve = high; 
+			selecteurCouleur = new Gpio(27, true, Gpio.PULL_UP); // Rouge = high, Jaune = low
 			rouge = false;
 			objectifsAtteints = new ArrayList<Point>();
 			
