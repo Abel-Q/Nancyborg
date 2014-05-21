@@ -50,8 +50,9 @@ public class Gpio implements Closeable {
 	 * @throws IOException
 	 */
 	public Gpio(int num, boolean entree, int pull) throws IOException {
-		System.out.println("Configuration Gpio " + this.num);
+		System.out.println("Configuration Gpio " + num);
 		GpioUtil.export(num, entree ? GpioUtil.DIRECTION_IN : GpioUtil.DIRECTION_OUT);
+		System.out.println("Gpio ok");
 		this.num = num;
 		this.setPull(pull);
 	}
@@ -126,7 +127,7 @@ public class Gpio implements Closeable {
 		com.pi4j.wiringpi.Gpio.pullUpDnControl(this.num, pull);
 	}
 
-	public static void main(String[] args) throws IOException {
+	/*public static void main(String[] args) throws IOException {
 		System.out.println("-- Test GPIO --");
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
@@ -149,5 +150,5 @@ public class Gpio implements Closeable {
 
 			gpio.close();
 		}
-	}
+	}*/
 }

@@ -87,7 +87,8 @@ public class Keypad {
 						prev_key = pressed;
 						Thread.sleep(50);
 					}
-				} catch (InterruptedException | IOException e) {
+				} catch (InterruptedException e) {
+				} catch (IOException e) {
 				}
 			}
 		});

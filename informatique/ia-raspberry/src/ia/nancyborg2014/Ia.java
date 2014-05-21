@@ -131,6 +131,36 @@ public class Ia {
 	}
 
 	public static void main(String[] args) {
+		System.out.println("Init test Fuu");
+		/*AX12Linux ax12Detection = new AX12Linux("/dev/ttyAMA0", 1, 115200);
+		System.out.println("Start");
+		ax12Detection.setGoalPosition(240.0f-45.0f, true);
+		long time = System.currentTimeMillis();
+		for (int i = 0; i < 10; i++) {
+			ax12Detection.setGoalPosition(240.0f+45.0f, true);
+			System.out.println("Time = "+(System.currentTimeMillis() - time));
+			time = System.currentTimeMillis();
+			ax12Detection.setGoalPosition(240.0f-45.0f, true);
+			System.out.println("Time = "+(System.currentTimeMillis() - time));
+			time = System.currentTimeMillis();
+		}*/
+		try {
+			Gpio tirette = new Gpio(2, true, Gpio.PULL_UP);
+			Gpio selecteurCouleur = new Gpio(3, true, Gpio.PULL_UP); // Rouge = high, Jaune = low
+			
+			System.out.println("Tirette High = "+tirette.isHigh()+" - Tirette  Low = "+tirette.isLow());
+			System.out.println("Couleur High = "+selecteurCouleur.isHigh()+" - Couleur  Low = "+selecteurCouleur.isLow());
+			
+			tirette.close();
+			selecteurCouleur.close();
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} // Mise = low, Enleve = high; 
+	}
+	
+	public static void mainOld(String[] args) {
 		
 		final Ia ia = new Ia();
 		

@@ -20,7 +20,7 @@ public abstract class Navigation {
 		this.dStar = new DStarLite();
 		this.zonesInterdites = new ArrayList<Point>();
 		this.zonesInterditesMobiles = new ArrayList<Point>();
-		this.objectifs = new ArrayList<>();
+		this.objectifs = new ArrayList<Point>();
 		
 		this.initZonesInterdites();
 		this.initListeObjectifs();
