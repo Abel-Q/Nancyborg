@@ -35,7 +35,7 @@ public class Ia {
 			
 			// On initialise les GPIOs
 			// TODO vérifier que les numéros fonctionne bien
-			tirette = new Gpio(2, true, Gpio.PULL_UP); // Mise = low, Enleve = high; 
+			tirette = new Gpio(27, true, Gpio.PULL_UP); // Mise = low, Enleve = high; 
 			selecteurCouleur = new Gpio(3, true, Gpio.PULL_UP); // Rouge = high, Jaune = low
 			rouge = false;
 			objectifsAtteints = new ArrayList<Point>();
@@ -145,8 +145,8 @@ public class Ia {
 			time = System.currentTimeMillis();
 		}*/
 		try {
-			Gpio tirette = new Gpio(2, true, Gpio.PULL_UP);
-			Gpio selecteurCouleur = new Gpio(3, true, Gpio.PULL_UP); // Rouge = high, Jaune = low
+			Gpio tirette = new Gpio(22, true, Gpio.PULL_UP);
+			Gpio selecteurCouleur = new Gpio(27, true, Gpio.PULL_UP); // Rouge = high, Jaune = low
 			
 			System.out.println("Tirette High = "+tirette.isHigh()+" - Tirette  Low = "+tirette.isLow());
 			System.out.println("Couleur High = "+selecteurCouleur.isHigh()+" - Couleur  Low = "+selecteurCouleur.isLow());
@@ -160,7 +160,7 @@ public class Ia {
 		} // Mise = low, Enleve = high; 
 	}
 	
-	public static void mainOld(String[] args) {
+	public static void mainOld(String[] args) throws IOException {
 		
 		final Ia ia = new Ia();
 		

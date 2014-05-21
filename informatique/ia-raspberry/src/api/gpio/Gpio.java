@@ -4,8 +4,16 @@ import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.List;
 
-import com.pi4j.wiringpi.GpioUtil;
+import api.communication.LibC;
+
+import com.sun.jna.Memory;
+import com.sun.jna.NativeLong;
+import com.sun.jna.Pointer;
 
 /**
  * Classe générique de controle d'un GPIO
@@ -17,20 +25,6 @@ import com.pi4j.wiringpi.GpioUtil;
  */
 
 public class Gpio implements Closeable {
-	/**
-	 * L'entrée est en l'air (flottante)
-	 */
-	public static final int FLOATING = com.pi4j.wiringpi.Gpio.PUD_OFF;
-
-	/**
-	 * L'entrée est reliée à la masse par une résistance interne
-	 */
-	public static final int PULL_DOWN = com.pi4j.wiringpi.Gpio.PUD_DOWN;
-
-	/**
-	 * L'entrée est reliée au 3.3 V par une résistance interne
-	 */
-	public static final int PULL_UP = com.pi4j.wiringpi.Gpio.PUD_UP;
 
 	/**
 	 * Numéro du GPIO (<a
@@ -38,6 +32,11 @@ public class Gpio implements Closeable {
 	 * >http://elinux.org/RPi_Low-level_peripherals#Introduction</a>)
 	 */
 	private int num;
+
+	/**
+	 * Sens du GPIO : true = entrée, false = sortie
+	 */
+	private boolean entree;
 
 	/**
 	 * Constructeur d'un GPIO
@@ -50,22 +49,48 @@ public class Gpio implements Closeable {
 	 * @throws IOException
 	 */
 	public Gpio(int num, boolean entree, int pull) throws IOException {
-		System.out.println("Configuration Gpio " + num);
-		GpioUtil.export(num, entree ? GpioUtil.DIRECTION_IN : GpioUtil.DIRECTION_OUT);
-		System.out.println("Gpio ok");
 		this.num = num;
+		this.entree = entree;
+		this.configGpio();
 		this.setPull(pull);
 	}
 
 	/**
 	 * Constructeur d'un GPIO
 	 * 
-	 * @param num Numéro du GPIO (not header pin number; not wiringPi pin number but GPIO number : https://projects.drogon.net/raspberry-pi/wiringpi/pins/)
+	 * @param num Numéro du GPIO
 	 * @param entree Sens du GPIO
 	 * @throws IOException
 	 */
 	public Gpio(int num, boolean entree) throws IOException {
-		this(num, entree, FLOATING);
+		this.num = num;
+		this.entree = entree;
+		this.configGpio();
+	}
+
+	/**
+	 * Initialisation du GPIO.
+	 * <p>
+	 * Cette méthode est appelé par le constructeur, il est donc inutile de la
+	 * rappeler ensuite
+	 * 
+	 * @throws IOException
+	 */
+	public void configGpio() throws IOException {
+		System.out.println("Configuration Gpio " + this.num);
+
+		// On export le GPIO
+		Files.write(Paths.get("/sys/class/gpio/export"), ("" + this.num).getBytes());
+
+		// On set la direction
+		String direction;
+		if (this.entree) {
+			direction = "in";
+		} else {
+			direction = "out";
+		}
+
+		Files.write(Paths.get("/sys/class/gpio/gpio" + this.num + "/direction"), direction.getBytes());
 	}
 
 	/**
@@ -76,27 +101,36 @@ public class Gpio implements Closeable {
 	 */
 	public void close() {
 		System.out.println("Fermeture Gpio " + this.num);
-		GpioUtil.unexport(this.num);
+
+		// On unexport le GPIO
+		try {
+			Files.write(Paths.get("/sys/class/gpio/unexport"), ("" + this.num).getBytes());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	protected void finalize() throws Throwable {
+		super.finalize();
+		close();
 	}
 
 	/**
 	 * @return Le GPIO est-il a 1 ?
 	 * @throws IOException
 	 */
-	public boolean isHigh() {
-		boolean res = false;
-		res = com.pi4j.wiringpi.Gpio.digitalRead(this.num) == 1;
-		return res;
+	public boolean isHigh() throws IOException {
+		List<String> lines = Files.readAllLines(Paths.get("/sys/class/gpio/gpio" + this.num + "/value"), Charset.defaultCharset());
+		return lines.get(0).equals("1");
 	}
 
 	/**
 	 * @return Le GPIO est-il a 0 ?
 	 * @throws IOException
 	 */
-	public boolean isLow() {
-		boolean res = false;
-		res = !this.isHigh();
-		return res;
+	public boolean isLow() throws IOException {
+		return !this.isHigh();
 	}
 
 	/**
@@ -105,7 +139,7 @@ public class Gpio implements Closeable {
 	 * @throws IOException
 	 */
 	public void setHigh() throws IOException {
-		com.pi4j.wiringpi.Gpio.digitalWrite(this.num, 1);
+		Files.write(Paths.get("/sys/class/gpio/gpio" + this.num + "/value"), ("1").getBytes());
 	}
 
 	/**
@@ -114,8 +148,40 @@ public class Gpio implements Closeable {
 	 * @throws IOException
 	 */
 	public void setLow() throws IOException {
-		com.pi4j.wiringpi.Gpio.digitalWrite(this.num, 0);
+		Files.write(Paths.get("/sys/class/gpio/gpio" + this.num + "/value"), ("0").getBytes());
 	}
+
+	// Attention, pour ceux qui n'aiment pas le bas niveau,
+	// ça devient hautement gore sous cette ligne.
+
+	/**
+	 * L'entrée est en l'air (flottante)
+	 */
+	public static final int FLOATING = 0;
+
+	/**
+	 * L'entrée est reliée à la masse par une résistance interne
+	 */
+	public static final int PULL_DOWN = 1;
+
+	/**
+	 * L'entrée est reliée au 3.3 V par une résistance interne
+	 */
+	public static final int PULL_UP = 2;
+
+	private static final int BCM2708_PERI_BASE = 0x20000000;
+	private static final int GPIO_BASE = (BCM2708_PERI_BASE + 0x200000);
+	private static final int PULLUPDN_OFFSET = 37;  // 0x0094 / 4
+	private static final int PULLUPDNCLK_OFFSET = 38;  // 0x0098 / 4
+
+	private static final int PAGE_SIZE = (4 * 1024);
+	private static final int BLOCK_SIZE = (4 * 1024);
+
+	private static final int PROT_READ = 0x1; /* Page can be read.  */
+	private static final int PROT_WRITE = 0x2; /* Page can be written.  */
+
+	private static final int MAP_SHARED = 0x01; /* Share changes.  */
+	private static final int MAP_FIXED = 0x10; /* Interpret addr exactly.  */
 
 	/**
 	 * Permet d'activer les résistances de pull-up et de pull-down sur le GPIO
@@ -124,10 +190,34 @@ public class Gpio implements Closeable {
 	 *            {@link #FLOATING}
 	 */
 	public void setPull(int pull) {
-		com.pi4j.wiringpi.Gpio.pullUpDnControl(this.num, pull);
+		int fd = LibC.open("/dev/mem", LibC.O_RDWR | LibC.O_SYNC);
+
+		Pointer gpio_mem = new Memory(BLOCK_SIZE + (PAGE_SIZE - 1));
+
+		long align = Pointer.nativeValue(gpio_mem) % PAGE_SIZE;
+
+		if (align != 0) {
+			gpio_mem = gpio_mem.share(PAGE_SIZE - align);
+		}
+
+		Pointer gpio_map = LibC.mmap(gpio_mem, new NativeLong(BLOCK_SIZE), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_FIXED, fd, new NativeLong(GPIO_BASE));
+
+		int clk_offset = PULLUPDNCLK_OFFSET + (this.num / 32);
+		int shift = this.num % 32;
+
+		gpio_map.setInt(4 * PULLUPDN_OFFSET, (gpio_map.getInt(4 * PULLUPDN_OFFSET) & ~3) | pull);
+
+		gpio_map.setInt(4 * clk_offset, 1 << shift);
+
+		gpio_map.setInt(4 * PULLUPDN_OFFSET, gpio_map.getInt(4 * PULLUPDN_OFFSET) & ~3);
+		gpio_map.setInt(4 * clk_offset, 0);
+
+		LibC.munmap(gpio_map, new NativeLong(BLOCK_SIZE));
+
+		LibC.close(fd);
 	}
 
-	/*public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException {
 		System.out.println("-- Test GPIO --");
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
@@ -150,5 +240,5 @@ public class Gpio implements Closeable {
 
 			gpio.close();
 		}
-	}*/
+	}
 }

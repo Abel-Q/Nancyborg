@@ -13,6 +13,8 @@
         <pathelement location="bin"/>
         <pathelement location="libs/pi4j-core.jar"/>
         <pathelement location="libs/ax12.jar"/>
+        <pathelement location="libs/jna.jar"/>
+        <pathelement location="libs/purejavacomm.jar"/>
     </path>
     <target name="init">
         <mkdir dir="bin"/>

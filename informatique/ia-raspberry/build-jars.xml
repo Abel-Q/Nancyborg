@@ -11,6 +11,8 @@
 
                 <fileset dir="bin" />
                 <zipfileset src="libs/pi4j-core.jar"/>
+                <zipfileset src="libs/jna.jar"/>
+                <zipfileset src="libs/purejavacomm.jar"/>
                 <zipfileset src="libs/ax12.jar"/>
             </jar>
         </sequential>
