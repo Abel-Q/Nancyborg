@@ -11,6 +11,8 @@ import api.chrono.Chrono;
 import api.gpio.Gpio;
 import api.sensors.DetectionIR;
 
+import com.pi4j.io.gpio.PinMode;
+import com.pi4j.io.gpio.PinPullResistance;
 import com.pi4j.io.gpio.RaspiPin;
 
 import fr.nancyborg.ax12.AX12Linux;
@@ -35,8 +37,8 @@ public class Ia {
 			
 			// On initialise les GPIOs
 			// TODO vérifier que les numéros fonctionne bien
-			tirette = new Gpio(22, true, Gpio.PULL_UP); // Mise = low, Enleve = high; 
-			selecteurCouleur = new Gpio(27, true, Gpio.PULL_UP); // Rouge = high, Jaune = low
+			tirette = new Gpio(RaspiPin.GPIO_03, PinMode.DIGITAL_INPUT, PinPullResistance.PULL_UP); // Mise = low, Enleve = high; 
+			selecteurCouleur = new Gpio(RaspiPin.GPIO_02, PinMode.DIGITAL_INPUT, PinPullResistance.PULL_UP); // Rouge = high, Jaune = low
 			rouge = false;
 			objectifsAtteints = new ArrayList<Point>();
 			
@@ -145,8 +147,8 @@ public class Ia {
 			time = System.currentTimeMillis();
 		}*/
 		try {
-			Gpio tirette = new Gpio(22, true, Gpio.PULL_UP);
-			Gpio selecteurCouleur = new Gpio(27, true, Gpio.PULL_UP); // Rouge = high, Jaune = low
+			Gpio tirette = new Gpio(RaspiPin.GPIO_03, PinMode.DIGITAL_INPUT, PinPullResistance.PULL_UP); // Mise = low, Enleve = high; 
+			Gpio selecteurCouleur = new Gpio(RaspiPin.GPIO_02, PinMode.DIGITAL_INPUT, PinPullResistance.PULL_UP); // Rouge = high, Jaune = low
 			
 			System.out.println("Tirette High = "+tirette.isHigh()+" - Tirette  Low = "+tirette.isLow());
 			System.out.println("Couleur High = "+selecteurCouleur.isHigh()+" - Couleur  Low = "+selecteurCouleur.isLow());

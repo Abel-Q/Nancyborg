@@ -2,6 +2,9 @@ package api.gpio;
 
 import java.io.IOException;
 
+import com.pi4j.io.gpio.Pin;
+import com.pi4j.io.gpio.PinMode;
+
 /**
  * Classe gérant un interrupteur
  * 
@@ -22,8 +25,8 @@ public class Interrupteur {
 	 * @param gpio Numéro de la num GPIO de l'interrupteur
 	 * @throws IOException
 	 */
-	public Interrupteur(int gpio) throws IOException {
-		this.gpio = new Gpio(gpio, true);
+	public Interrupteur(Pin gpio) throws IOException {
+		this.gpio = new Gpio(gpio, PinMode.DIGITAL_INPUT);
 	}
 
 	/**
