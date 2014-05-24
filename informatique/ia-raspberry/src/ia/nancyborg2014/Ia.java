@@ -8,13 +8,17 @@ import navigation.Navigation2014;
 import navigation.Point;
 import api.asserv.Asserv;
 import api.chrono.Chrono;
-import api.controllers.AX12;
 import api.gpio.Gpio;
 import api.sensors.DetectionIR;
 
+import com.pi4j.io.gpio.GpioController;
+import com.pi4j.io.gpio.GpioFactory;
+import com.pi4j.io.gpio.GpioPinDigitalInput;
 import com.pi4j.io.gpio.PinMode;
 import com.pi4j.io.gpio.PinPullResistance;
 import com.pi4j.io.gpio.RaspiPin;
+
+import fr.nancyborg.ax12.AX12Linux;
 
 public class Ia {
 
@@ -36,16 +40,16 @@ public class Ia {
 
 			// On initialise les GPIOs
 			// TODO vérifier que les numéros fonctionne bien
-			tirette = new Gpio(RaspiPin.GPIO_03, PinMode.DIGITAL_INPUT, PinPullResistance.PULL_UP); // Mise = low, Enleve = high; 
+			tirette = new Gpio(RaspiPin.GPIO_03, PinMode.DIGITAL_INPUT, PinPullResistance.PULL_UP); // Mise = low, Enleve = high;
 			selecteurCouleur = new Gpio(RaspiPin.GPIO_02, PinMode.DIGITAL_INPUT, PinPullResistance.PULL_UP); // Rouge = high, Jaune = low
 			rouge = false;
 			objectifsAtteints = new ArrayList<Point>();
 
 			// Détection de l'adversaire
 			float[] anglesCapteurs = { -45.0f, 0.0f, 45.0f };
-			AX12 ax12Detection = new AX12("/dev/ttyAMA0", 1, 115200);
+			AX12Linux ax12Detection = new AX12Linux("/dev/ttyAMA0", 1, 115200);
 			// Distance capteur - balise = 56cm
-			detection = new DetectionIR(anglesCapteurs, 240.0f, 56.0, ax12Detection, RaspiPin.GPIO_12, RaspiPin.GPIO_13, RaspiPin.GPIO_14, this);
+			detection = new DetectionIR(anglesCapteurs, 240.0f, 56.0, ax12Detection, RaspiPin.GPIO_14, RaspiPin.GPIO_12, RaspiPin.GPIO_13, this);
 
 			nav = new Navigation2014();
 		} catch (IOException e) {
@@ -134,8 +138,39 @@ public class Ia {
 	}
 
 	public static void main(String[] args) {
-		Ia ia = new Ia();
-		ia.detection.run();
+		//Ia ia = new Ia();
+		//ia.detection.run();
+		try {
+			Gpio capteur0 = new Gpio(RaspiPin.GPIO_14, PinMode.DIGITAL_INPUT, PinPullResistance.PULL_UP);
+			Gpio capteur1 = new Gpio(RaspiPin.GPIO_12, PinMode.DIGITAL_INPUT, PinPullResistance.PULL_UP); // OK
+			Gpio capteur2 = new Gpio(RaspiPin.GPIO_13, PinMode.DIGITAL_INPUT, PinPullResistance.PULL_UP);
+			
+			AX12Linux ax12Detection = new AX12Linux("/dev/ttyAMA0", 1, 115200);
+			ax12Detection.setGoalPosition(240.0f-45.0f, true);
+			
+			System.out.println("capteur 0 = "+capteur0.isLow());
+			System.out.println("capteur 1 = "+capteur1.isLow());
+			System.out.println("capteur 2 = "+capteur2.isLow());
+			
+			Point nous = new Point(0,0);
+			float pos = ax12Detection.getPresentPosition();
+			System.out.println("pos = " + pos);
+			System.out.println("nous = "+nous.getX()+" - "+nous.getY()+" - "+nous.getCap());
+			float[] anglesCapteurs = { -45.0f, 0.0f, 45.0f };
+			float angle = pos - 240.f + anglesCapteurs[2] - nous.getCap();
+			System.out.println("angle = "+angle+" et en radians = "+Math.toRadians(angle));
+			int x = (nous.getX() + (int) (Math.cos(Math.toRadians(angle)) * 56));
+			int y = (nous.getY() + (int) (Math.sin(Math.toRadians(angle)) * 56));
+			System.out.println("x = "+x+" - y = "+y);
+			
+			capteur0.close();
+			capteur1.close();
+			capteur2.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} // Mise = low, Enleve = high;
+		
 		/*System.out.println("Init test Fuu");
 		AX12 ax12Detection = new AX12("/dev/ttyAMA0", 1, 115200);
 		DetectionIR ir = new DetectionIR(anglesCapteurs, angle0, distanceDetection, ax12, pinCapteur1, pinCapteur2, pinCapteur3, ia)
