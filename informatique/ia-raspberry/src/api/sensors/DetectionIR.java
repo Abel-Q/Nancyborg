@@ -78,10 +78,11 @@ public class DetectionIR extends Thread {
 	public void detected(int capteur) {
 		Point nous = ia.getPosition();
 		float pos = ax12.getPresentPosition();
-		System.out.println("pos:" + pos);
+		System.out.println("capteur = "+capteur+" - pos = " + pos);
 		float angle = pos - angle0 + this.anglesCapteurs[capteur] - nous.getCap();
-		int x = (nous.getX() + (int) (Math.cos(Math.PI * angle) * this.distanceDetection));
-		int y = (nous.getY() + (int) (Math.sin(Math.PI * angle) * this.distanceDetection));
+		int x = (nous.getX() + (int) (Math.cos(Math.toRadians(angle)) * this.distanceDetection));
+		int y = (nous.getY() + (int) (Math.sin(Math.toRadians(angle)) * this.distanceDetection));
+		System.out.println("x = "+x+" - y = "+y);
 		//ia.detectionAdversaire(new Point(x, y));
 	}
 }
