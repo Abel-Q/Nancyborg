@@ -162,6 +162,7 @@ public class DStarLite implements java.io.Serializable {
 			System.out.println("No Path to Goal");
 			return false;
 		}
+		System.out.println("ShortestPath ok");
 
 		LinkedList<State> n = new LinkedList<State>();
 		State cur = s_start;
@@ -171,6 +172,7 @@ public class DStarLite implements java.io.Serializable {
 			return false;
 		}
 
+		System.out.println("Début du while");
 		while (cur.neq(s_goal)) {
 			path.add(cur);
 			n = new LinkedList<State>();
@@ -206,6 +208,7 @@ public class DStarLite implements java.io.Serializable {
 			cur = new State(smin);
 			//cur = smin;
 		}
+		System.out.println("Fin du while");
 		path.add(s_goal);
 		return true;
 	}

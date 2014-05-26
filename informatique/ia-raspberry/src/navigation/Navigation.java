@@ -90,9 +90,15 @@ public abstract class Navigation {
 	 * @return true si l'objectif est atteignable, false sinon
 	 */
 	public boolean calculItineraire(Point start) {
+		long time = System.currentTimeMillis();
+		System.out.println("DStar start");		
 		this.dStar.updateStart(start.getX(), start.getY());
+		System.out.println("updateStart ok : "+start);
 		this.dStar.updateGoal(this.goal.getX(), this.goal.getY());
-		return this.dStar.replan();
+		System.out.println("updateGoal ok : "+this.goal);
+		boolean res = this.dStar.replan();
+		System.out.println("DStar end : "+(System.currentTimeMillis()-time)+"ms");
+		return res;
 	}
 	
 	/**

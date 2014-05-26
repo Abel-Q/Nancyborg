@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.TimerTask;
 
+import navigation.Navigation;
 import navigation.Navigation2014;
 import navigation.Point;
 import api.asserv.Asserv;
@@ -11,9 +12,6 @@ import api.chrono.Chrono;
 import api.gpio.Gpio;
 import api.sensors.DetectionIR;
 
-import com.pi4j.io.gpio.GpioController;
-import com.pi4j.io.gpio.GpioFactory;
-import com.pi4j.io.gpio.GpioPinDigitalInput;
 import com.pi4j.io.gpio.PinMode;
 import com.pi4j.io.gpio.PinPullResistance;
 import com.pi4j.io.gpio.RaspiPin;
@@ -39,7 +37,6 @@ public class Ia {
 			// TODO initialisation des AX12 du canon
 
 			// On initialise les GPIOs
-			// TODO vérifier que les numéros fonctionne bien
 			tirette = new Gpio(RaspiPin.GPIO_03, PinMode.DIGITAL_INPUT, PinPullResistance.PULL_UP); // Mise = low, Enleve = high;
 			selecteurCouleur = new Gpio(RaspiPin.GPIO_02, PinMode.DIGITAL_INPUT, PinPullResistance.PULL_UP); // Rouge = high, Jaune = low
 			rouge = false;
@@ -150,11 +147,10 @@ public class Ia {
 		return null;
 	}
 	
-	public static void mainFuu(String[] args) {
-		final Ia ia = new Ia();
-		ia.asserv.gotoPosition(500, 0, true);
-		ia.asserv.face(0, 1000, true);
-		ia.asserv.gotoPosition(500, 500, true);
+	public static void mainLol(String[] args) {
+		Navigation nav = new Navigation2014();
+		nav.setGoal(new Point(10,10));
+		System.out.println(nav.calculItineraire(new Point(3,14)));
 	}
 
 	public static void main(String[] args) throws IOException {
@@ -191,17 +187,19 @@ public class Ia {
 		// On attend de remettre la tirette
 		while (ia.tirette.isHigh());
 
-		ia.nav.setGoal(ia.nav.getObjectifs().get(0));
-		System.out.println("Calcul itinéraire départ");
-		long time = System.currentTimeMillis();
-		ia.nav.calculItineraire(ia.asserv.getCurrentPosition());
-		System.out.println("Fin du calcul : "+(System.currentTimeMillis() - time)+"ms");
-
 		System.out.println("Attente enlevage tirette pour départ");
 		// On attend de virer la tirette
 		while (ia.tirette.isLow());
 		System.out.println("Gooo");
 
+		ia.asserv.gotoPosition(300, ia.rouge ? 1200 : -1200, true);
+		
+		ia.nav.setGoal(ia.nav.getObjectifs().get(0));
+		System.out.println("Calcul itinéraire départ");
+		long time = System.currentTimeMillis();
+		ia.nav.calculItineraire(ia.asserv.getCurrentPosition());
+		System.out.println("Fin du calcul : "+(System.currentTimeMillis() - time)+"ms");
+		
 		// On démarre le chrono et la déplacementTask
 		chrono.startChrono(new TimerTask() {
 			@SuppressWarnings("deprecation")

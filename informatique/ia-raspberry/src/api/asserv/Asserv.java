@@ -221,7 +221,7 @@ public class Asserv {
 		int i = 0;
 		while (m.find()) {
 			if (i <= 1) {
-				coord[i] = (int)Math.rint(Double.parseDouble(str.substring(m.start(), m.end())) / 10);
+				coord[i] = (int)Math.rint(Double.parseDouble(str.substring(m.start(), m.end())) / 100);
 			} else {
 				
 				coord[i] = (int)Math.rint(Math.toDegrees(Double.parseDouble(str.substring(m.start(), m.end()))));

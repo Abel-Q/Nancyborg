@@ -5,41 +5,43 @@ public class Navigation2014 extends Navigation {
 	@Override
 	protected void initZonesInterdites() {
 		// On interdit les bords de la table pour que le robot ne se coince pas sur une bordure comme un con
-		for (int i = 17; i <= 283; i++) {
-			this.zonesInterdites.add(new Point(i, 17));
-			this.zonesInterdites.add(new Point(i, 183));
+		for (int i = 2; i <= 28; i++) {
+			this.zonesInterdites.add(new Point(i, 2));
+			this.zonesInterdites.add(new Point(i, 18));
 		}
-		for (int i = 17; i <= 183; i++) {
-			this.zonesInterdites.add(new Point(17, i));
-			this.zonesInterdites.add(new Point(283, i));
+		for (int i = 2; i <= 18; i++) {
+			this.zonesInterdites.add(new Point(2, i));
+			this.zonesInterdites.add(new Point(28, i));
 		}
 		
 		// On bloque les quarts de cercle de dépose dans les coins (on bloque un carré, c'est moins chiant)
-		for (int i = 0; i <= 42; i++) {
-			this.zonesInterdites.add(new Point(i, 42));
-			this.zonesInterdites.add(new Point(42, i));
-			this.zonesInterdites.add(new Point(258+i, 42));
-			this.zonesInterdites.add(new Point(258, i));
+		for (int i = 0; i <= 5; i++) {
+			this.zonesInterdites.add(new Point(i, 5));
+			this.zonesInterdites.add(new Point(5, i));
+			this.zonesInterdites.add(new Point(25+i, 5));
+			this.zonesInterdites.add(new Point(25, i));
 		}
 		
 		// On bloque le cercle central (encore un carré)
-		for (int i = 0; i <= 64; i++) {
-			this.zonesInterdites.add(new Point(118+i, 73));
-			this.zonesInterdites.add(new Point(118, 73+i));
-			this.zonesInterdites.add(new Point(118+i, 137));
-			this.zonesInterdites.add(new Point(182, 73+i));
+		for (int i = 0; i <= 8; i++) {
+			this.zonesInterdites.add(new Point(11+i, 7));
+			this.zonesInterdites.add(new Point(11+i, 14));
+		}
+		for (int i = 0; i <= 7; i++) {
+			this.zonesInterdites.add(new Point(11, 7+i));
+			this.zonesInterdites.add(new Point(19, 7+i));
 		}
 		
 		// On bloque les dépôts de fruits
-		for (int i = 0; i <= 104; i++) {
-			this.zonesInterdites.add(new Point(23+i, 153));
-			this.zonesInterdites.add(new Point(173+i, 153));
+		for (int i = 0; i <= 11; i++) {
+			this.zonesInterdites.add(new Point(2+i, 15));
+			this.zonesInterdites.add(new Point(17+i, 15));
 		}
-		for (int i = 0; i <= 47; i++) {
-			this.zonesInterdites.add(new Point(23, 200-i));
-			this.zonesInterdites.add(new Point(127, 200-i));
-			this.zonesInterdites.add(new Point(173, 200-i));
-			this.zonesInterdites.add(new Point(277, 200-i));
+		for (int i = 0; i <= 5; i++) {
+			this.zonesInterdites.add(new Point(2, 20-i));
+			this.zonesInterdites.add(new Point(13, 20-i));
+			this.zonesInterdites.add(new Point(17, 20-i));
+			this.zonesInterdites.add(new Point(28, 20-i));
 		}
 		
 		// On remplit DStar
@@ -50,26 +52,26 @@ public class Navigation2014 extends Navigation {
 
 	@Override
 	protected void setZonesInterditesMobiles(int x, int y) {
-		for (int i = 0; i <= 72; i++) {
-			this.zonesInterditesMobiles.add(new Point(x-36, y-36+i));
-			this.zonesInterditesMobiles.add(new Point(x-36+i, y-36));
-			this.zonesInterditesMobiles.add(new Point(x+36, y-36+i));
-			this.zonesInterditesMobiles.add(new Point(x-36+i, y+36));
+		for (int i = 0; i <= 8; i++) {
+			this.zonesInterditesMobiles.add(new Point(x-4, y-4+i));
+			this.zonesInterditesMobiles.add(new Point(x-4+i, y-4));
+			this.zonesInterditesMobiles.add(new Point(x+4, y-4+i));
+			this.zonesInterditesMobiles.add(new Point(x-4+i, y+4));
 		}
 	}
 	
 	@Override
 	public Point[] getExtremeZoneInterdite(Point adversaire) {
 		Point[] res = new Point[2];
-		res[0] = new Point(adversaire.getX()-36, adversaire.getY()-36);
-		res[1] = new Point(adversaire.getX()+36, adversaire.getY()+36);
+		res[0] = new Point(adversaire.getX()-4, adversaire.getY()-4);
+		res[1] = new Point(adversaire.getX()+4, adversaire.getY()+4);
 		return res;
 	}
 
 	@Override
 	protected void initListeObjectifs() {
 		// TODO à remplir
-		this.objectifs.add(new Point(100, 100));
+		this.objectifs.add(new Point(10, 10));
 	}
 
 }
