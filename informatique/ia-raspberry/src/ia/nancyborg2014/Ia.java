@@ -147,10 +147,9 @@ public class Ia {
 		return null;
 	}
 	
-	public static void mainLol(String[] args) {
-		Navigation nav = new Navigation2014();
-		nav.setGoal(new Point(10,10));
-		System.out.println(nav.calculItineraire(new Point(3,14)));
+	public static void mainFuu(String[] args) {
+		Ia ia = new Ia();
+		System.out.println(ia.getPosition());
 	}
 
 	public static void main(String[] args) throws IOException {
@@ -178,11 +177,13 @@ public class Ia {
 		// On attend de virer la tirette
 		while (ia.tirette.isLow());
 
+		System.out.println(ia.getPosition());
+		
 		System.out.println("Mise en position");
 		ia.asserv.gotoPosition(200, ia.rouge ? 1700 : -1700, true);
 		ia.asserv.face(200, 0, true);
 		while (!ia.asserv.lastCommandFinished());
-
+		
 		System.out.println("Attente remise tirette");
 		// On attend de remettre la tirette
 		while (ia.tirette.isHigh());
@@ -193,6 +194,8 @@ public class Ia {
 		System.out.println("Gooo");
 
 		ia.asserv.gotoPosition(300, ia.rouge ? 1200 : -1200, true);
+		
+		System.out.println("je suis arrivé lol");
 		
 		ia.nav.setGoal(ia.nav.getObjectifs().get(0));
 		System.out.println("Calcul itinéraire départ");
@@ -215,9 +218,14 @@ public class Ia {
 		});
 
 		// On lance la détection et le déplacement vers le premier objectif
+		System.out.println("Lancement détection");
 		ia.detection.run();
+		System.out.println("Lancement déplacement");
 		ia.deplacement = new DeplacementTask(ia.asserv, ia.rouge, ia.nav.getCommandeAsserv(), ia);
 		ia.deplacement.run();
+		System.out.println("Deplacement run ok");
+		
+		while(true);
 
 		/*
 		//nav.debugZoneInterdites();

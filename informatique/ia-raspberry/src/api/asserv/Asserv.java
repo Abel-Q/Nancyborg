@@ -153,11 +153,11 @@ public class Asserv {
 			@Override
 			public void run() {
 				while (!lastCommandFinished) {
-					char check = mbed.readChar();
+					String check = mbed.readLine();
 
 					System.out.println("reçu : " + check);
 
-					if (check == 'd') {
+					if (check.equals("d")) {
 						lastCommandFinished = true;
 					}
 				}
@@ -223,7 +223,6 @@ public class Asserv {
 			if (i <= 1) {
 				coord[i] = (int)Math.rint(Double.parseDouble(str.substring(m.start(), m.end())) / 100);
 			} else {
-				
 				coord[i] = (int)Math.rint(Math.toDegrees(Double.parseDouble(str.substring(m.start(), m.end()))));
 			}
 			i++;
