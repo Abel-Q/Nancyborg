@@ -57,6 +57,14 @@ public class Navigation2014 extends Navigation {
 			this.zonesInterditesMobiles.add(new Point(x-36+i, y+36));
 		}
 	}
+	
+	@Override
+	public Point[] getExtremeZoneInterdite(Point adversaire) {
+		Point[] res = new Point[2];
+		res[0] = new Point(adversaire.getX()-36, adversaire.getY()-36);
+		res[1] = new Point(adversaire.getX()+36, adversaire.getY()+36);
+		return res;
+	}
 
 	@Override
 	protected void initListeObjectifs() {

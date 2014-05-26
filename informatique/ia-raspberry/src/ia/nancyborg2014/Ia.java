@@ -60,6 +60,14 @@ public class Ia {
 	public Point getPosition() {
 		return asserv.getCurrentPosition();
 	}
+	
+	public ArrayList<Point> getCachedCommandesAsserv() {
+		return this.nav.getCachedCommandeAsserv();
+	}
+	
+	public Point[] getZoneInterdite(Point adversaire) {
+		return this.nav.getExtremeZoneInterdite(adversaire);
+	}
 
 	// On a vu quelqu'un
 	public void detectionAdversaire(Point adversaire) {
@@ -161,31 +169,26 @@ public class Ia {
 
 		System.out.println("Attente remise tirette");
 		// On attend de remettre la tirette
-		while (ia.tirette.isHigh())
-			;
+		while (ia.tirette.isHigh());
 		System.out.println("Attente enlevage tirette");
 		// On attend de virer la tirette
-		while (ia.tirette.isLow())
-			;
+		while (ia.tirette.isLow());
 
 		System.out.println("Mise en position");
 		ia.asserv.gotoPosition(20, 160, true);
 		ia.asserv.face(20, 0, true);
-		while (!ia.asserv.lastCommandFinished())
-			;
+		while (!ia.asserv.lastCommandFinished());
 
 		System.out.println("Attente remise tirette");
 		// On attend de remettre la tirette
-		while (ia.tirette.isHigh())
-			;
+		while (ia.tirette.isHigh());
 
 		ia.nav.setGoal(ia.nav.getObjectifs().get(0));
 		ia.nav.calculItineraire(ia.asserv.getCurrentPosition());
 
 		System.out.println("Attente enlevage tirette");
 		// On attend de virer la tirette
-		while (ia.tirette.isLow())
-			;
+		while (ia.tirette.isLow());
 		System.out.println("Gooo");
 
 		// On démarre le chrono et la déplacementTask

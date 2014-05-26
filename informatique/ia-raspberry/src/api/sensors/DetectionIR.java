@@ -1,8 +1,8 @@
 package api.sensors;
 
-import fr.nancyborg.ax12.AX12Linux;
 import ia.nancyborg2014.Ia;
 
+import java.util.ArrayList;
 import java.util.concurrent.Callable;
 
 import navigation.Point;
@@ -14,6 +14,8 @@ import com.pi4j.io.gpio.Pin;
 import com.pi4j.io.gpio.PinPullResistance;
 import com.pi4j.io.gpio.PinState;
 import com.pi4j.io.gpio.trigger.GpioCallbackTrigger;
+
+import fr.nancyborg.ax12.AX12Linux;
 
 //TODO: - mettre a jour l'angle de notre robot
 // - mettre a jour les GPIO
@@ -83,6 +85,44 @@ public class DetectionIR extends Thread {
 		int x = (nous.getX() + (int) (Math.cos(Math.toRadians(angle)) * this.distanceDetection));
 		int y = (nous.getY() + (int) (Math.sin(Math.toRadians(angle)) * this.distanceDetection));
 		System.out.println("x = "+x+" - y = "+y);
-		//ia.detectionAdversaire(new Point(x, y));
+		Point adversaire = new Point(x, y);
+		if (checkColision(adversaire)) {
+			ia.detectionAdversaire(new Point(x, y));
+		}
+	}
+	
+	public boolean checkColision(Point adversaire) {
+		ArrayList<Point> commandes = this.ia.getCachedCommandesAsserv();
+		Point[] zi = this.ia.getZoneInterdite(adversaire);
+		int xmin = zi[0].getX();
+		int xmax = zi[1].getX();
+		int ymin = zi[0].getY();
+		int ymax = zi[1].getY();
+		for (int i = 1; i < commandes.size(); i++) {
+			if (commandes.get(i-1).getX() == commandes.get(i).getX()) {
+				if (commandes.get(i-1).getX() > xmin && commandes.get(i-1).getX() < xmax) {
+					return true;
+				}
+			} else {
+				int xa = commandes.get(i-1).getX();
+				int ya = commandes.get(i-1).getY();
+				int xb = commandes.get(i).getX();
+				int yb = commandes.get(i).getY();
+				double a = (double)(ya-yb)/(double)(xa-xb);
+				double b = (double)ya-a*(double)xa;
+				
+				double xint1 = (ymin-b)/a;
+				double xint2 = (ymin-b)/a;
+				
+				double yint1 = a*xmax+b;
+				double yint2 = a*xmax+b;
+				
+				if ((xint1 > xmin  && xint1 < xmax) || (xint2 > xmin  && xint2 < xmax) ||
+						(yint1 > ymin  && yint1 < ymax) || (yint2 > ymin  && yint2 < ymax)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 }
