@@ -78,6 +78,9 @@ public class DetectionIR extends Thread {
 	}
 
 	public void detected(int capteur) {
+		if (!this.isAlive()) {
+			return;
+		}
 		Point nous = ia.getPosition();
 		float pos = ax12.getPresentPosition();
 		System.out.println("capteur = "+capteur+" - pos = " + pos);

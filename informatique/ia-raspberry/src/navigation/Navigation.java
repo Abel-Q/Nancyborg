@@ -106,7 +106,7 @@ public abstract class Navigation {
 		for (State i : path) {
 			commandes.add(new Point(i.x,i.y));
 		}
-		
+		System.out.println(commandes);
 		return commandes;
 		
 		// Méthode JBG, semble moins legèrement moins bonne mais plus propre

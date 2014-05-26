@@ -71,6 +71,7 @@ public class Ia {
 
 	// On a vu quelqu'un
 	public void detectionAdversaire(Point adversaire) {
+		System.out.println("Stooooooop");
 		if (this.deplacement != null) {
 			this.deplacement.stop();
 		}
@@ -87,12 +88,16 @@ public class Ia {
 		this.asserv.resetHalt();
 
 		// On recalcul l'itinéraire ou on trouve un autre objectif
+		System.out.println("Nouveau calcul");
+		long time = System.currentTimeMillis();
 		boolean goalReachable = this.nav.obstacleMobile(adversaire, this.asserv.getCurrentPosition());
 		if (goalReachable) {
 			this.deplacement = new DeplacementTask(this.asserv, this.rouge, this.nav.getCommandeAsserv(), this);
 		} else {
+			System.out.println("Changement d'objectif");
 			this.deplacement = this.nouvelObjectif();
 		}
+		System.out.println("Fin du calcul : "+(System.currentTimeMillis()-time)+"ms");
 
 		// On se met en route ou si l'on n'a plus d'objectif, on attend et on recommence
 		if (this.deplacement != null) {
@@ -144,13 +149,15 @@ public class Ia {
 		}
 		return null;
 	}
-
-	public static void main(String[] args) {
-		Ia ia = new Ia();
-		ia.detection.run();
+	
+	public static void mainFuu(String[] args) {
+		final Ia ia = new Ia();
+		ia.asserv.gotoPosition(500, 0, true);
+		ia.asserv.face(0, 1000, true);
+		ia.asserv.gotoPosition(500, 500, true);
 	}
 
-	public static void mainOld(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException {
 
 		final Ia ia = new Ia();
 
@@ -159,13 +166,14 @@ public class Ia {
 
 		System.out.println("Attente enlevage tirette");
 		// On attend de virer la tirette
-		while (ia.tirette.isLow())
-			;
+		while (ia.tirette.isLow());
+		
 		ia.rouge = ia.selecteurCouleur.isHigh();
+		System.out.println("couleur isHigh = "+ia.selecteurCouleur.isHigh()+" - rouge = "+ia.rouge);
 
 		System.out.println("Callage bordure");
 		// On lance le callage bordure
-		ia.asserv.calageBordure(ia.rouge);
+		ia.asserv.calageBordure(!ia.rouge);
 
 		System.out.println("Attente remise tirette");
 		// On attend de remettre la tirette
@@ -175,8 +183,8 @@ public class Ia {
 		while (ia.tirette.isLow());
 
 		System.out.println("Mise en position");
-		ia.asserv.gotoPosition(20, 160, true);
-		ia.asserv.face(20, 0, true);
+		ia.asserv.gotoPosition(200, ia.rouge ? 1700 : -1700, true);
+		ia.asserv.face(200, 0, true);
 		while (!ia.asserv.lastCommandFinished());
 
 		System.out.println("Attente remise tirette");
@@ -184,9 +192,12 @@ public class Ia {
 		while (ia.tirette.isHigh());
 
 		ia.nav.setGoal(ia.nav.getObjectifs().get(0));
+		System.out.println("Calcul itinéraire départ");
+		long time = System.currentTimeMillis();
 		ia.nav.calculItineraire(ia.asserv.getCurrentPosition());
+		System.out.println("Fin du calcul : "+(System.currentTimeMillis() - time)+"ms");
 
-		System.out.println("Attente enlevage tirette");
+		System.out.println("Attente enlevage tirette pour départ");
 		// On attend de virer la tirette
 		while (ia.tirette.isLow());
 		System.out.println("Gooo");

@@ -39,7 +39,7 @@ public class DeplacementTask extends Thread {
 		System.out.println("C'est parti !");
 		int mult = rouge ? 1 : -1;
 		for (Point p : points) {
-			this.asserv.gotoPosition(p.getX(), mult * p.getY(), false);
+			this.asserv.gotoPosition(p.getX()*10, mult * p.getY()*10, false);
 			this.waitForFinish();
 		}
 		ia.objectifAtteint(points.get(points.size()-1));
