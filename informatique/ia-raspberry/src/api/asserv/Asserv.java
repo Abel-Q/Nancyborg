@@ -32,6 +32,7 @@ public class Asserv {
 	 * Booléen signalant l'exécution complète de la dernière commande
 	 */
 	private boolean lastCommandFinished;
+	private int lastD = 2;
 	/**
 	 * Position courante du robot
 	 */
@@ -45,11 +46,27 @@ public class Asserv {
 		public void run() {
 			while (true) {
 				String check = mbed.readLine();
-				System.out.println("check = "+check);
 				if (check.isEmpty() || check.charAt(0) != '#') {
 					continue;
 				}
-				nous = parseCurrentPosition(check);
+				//nous = parseCurrentPosition(check);
+				try {
+					Pattern p = Pattern.compile("#x([0-9.-]+)y([0-9.-]+)a([0-9.-]+)d([0-2])");
+					Matcher m = p.matcher(check);
+					if (m.find()) {
+						if (m.group(4).equals("1") || (lastD == 0 && m.group(4).equals("2"))) {
+							System.out.println("finished !!");
+							lastCommandFinished = true;
+						}
+						
+						Point point = new Point((int)Double.parseDouble(m.group(1)), (int)Double.parseDouble(m.group(2)));
+						point.setCap((int)Double.parseDouble(m.group(3)));
+						nous = point;
+						lastD = Integer.parseInt(m.group(4));
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	});
@@ -74,8 +91,14 @@ public class Asserv {
 	public void reset() throws IOException {
 		mbed.write('R'); // autrefois il y avait un break...
 		lastCommandFinished = true;
-		while(!mbed.readLine().endsWith("ok"));
-		System.out.println("Asserv ready (la salope)");
+		while(true) {
+			String blabla = mbed.readLine();
+			if (blabla.endsWith("ok")) {
+				System.out.println("Asserv ready (la salope)");
+			} else {
+				System.out.println(blabla);
+			}
+		}
 	}
 
 	/**
