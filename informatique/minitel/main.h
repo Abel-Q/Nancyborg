@@ -6,8 +6,8 @@
  */
 #define AMOTEURD 27
 #define AMOTEURG 32
-#define RMOTEURD -34
-#define RMOTEURG -34
+#define RMOTEURD -27
+#define RMOTEURG -27
 
 /* ################################################################## */
 

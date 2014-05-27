@@ -196,9 +196,12 @@ void match()
 		while (!ultraD.rangingFinished()) wait(0.01);
 		remplirTab(distanceDroit,ultraD.getRange());
 
-        while(moyenne(distanceGauche) < DISTANCE_CAPTEUR && moyenne(distanceDroit) < DISTANCE_CAPTEUR && timeOut.read() < 20)
-        {
-			timeOut.start();
+        while(moyenne(distanceGauche) < DISTANCE_CAPTEUR && moyenne(distanceDroit) < DISTANCE_CAPTEUR)
+        {			
+			if(timeEnd.read() >= 89)
+			{
+				exit(EXIT_FAILURE);
+			}
 			
             qik.stopBothMotors(); 
             
@@ -209,6 +212,10 @@ void match()
 			ultraD.startRanging();
 			while (!ultraD.rangingFinished()) wait(0.01);
 			remplirTab(distanceDroit,ultraD.getRange());
+			
+			printf("\rTemps de jeu : %f\n",timeEnd.read());	
+			printf("\rDistance moyenne capteur droit : %d\n",moyenne(distanceDroit));		
+			printf("\rDistance moyenne capteur gauche : %d\n",moyenne(distanceGauche));
         }        
 		avancer();       
     }
@@ -251,13 +258,13 @@ void avancer()
     if(!capteurDroit)
     {
 		printf("\rje n'ai pas le capteur droit\n");
-        qik.setMotor1Speed(0);
+        qik.setMotor1Speed(RMOTEURG);
     }
 
     if(!capteurGauche)
     {
 		printf("\rje n'ai pas le capteur gauche\n");
-        qik.setMotor0Speed(0);
+        qik.setMotor0Speed(RMOTEURD);
     }
 }
 
