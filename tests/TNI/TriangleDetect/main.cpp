@@ -4,6 +4,8 @@
 //#include "opencv2/imgproc/imgproc.hpp"
 
 #include <QDebug>
+#include <QTcpServer>
+#include <QTcpSocket>
 #include <QThread>
 
 #include <iostream>
