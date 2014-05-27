@@ -2,11 +2,11 @@ package api.canon2014;
 
 public class Tir {
 
-	private int x = 0;
-	private int y = 0;
-	private int z = 0;
+	private double x = 0;
+	private double y = 0;
+	private double z = 0;
 	
-	public Tir(int x, int y, int z){
+	public Tir(double x, double y, double z){
 		this.x = x;
 		this.y = y;
 		this.z = z;
@@ -24,15 +24,15 @@ public class Tir {
 		this.z = z;
 	}
 
-	public int getX() {
+	public double getX() {
 		return x;
 	}
 
-	public int getY() {
+	public double getY() {
 		return y;
 	}
 	
-	public int getZ() {
+	public double getZ() {
 		return z;
 	}
 }

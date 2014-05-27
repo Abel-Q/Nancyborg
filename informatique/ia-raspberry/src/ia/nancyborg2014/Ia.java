@@ -246,11 +246,10 @@ public class Ia {
 		System.out.println(ia.getPosition());
 		
 		System.out.println("Mise en position");
-		ia.asserv.gotoPosition(750, ia.rouge ? 1400 : -1400, true);
-		ia.asserv.face(200, 0, true);
+		ia.asserv.gotoPosition(750, ia.rouge ? 2000-790 : -(2000-790), true);
 		while (!ia.asserv.lastCommandFinished());
 		
-		ia.canon.tirSurMammouthCible(DirectionTir.MILIEU, true);
+		ia.canon.tirSurMammouthCible(DirectionTir.MILIEU, false);
 		
 		/*System.out.println("Mise en position");
 		ia.asserv.gotoPosition(200, ia.rouge ? 1700 : -1700, true);
