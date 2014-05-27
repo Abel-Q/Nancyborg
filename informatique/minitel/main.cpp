@@ -8,7 +8,7 @@
 /* ################# Informations générales sur le robot ############ */
 /* 
  * Si on se met dans le sens de l'avancer du robot
- * 		qik.setMotor0Speentrôle le moteur droite
+ * 		qik.setMotor0Speentrôle qui contrôle le moteur droite
  *  	qik.setMotor1Speed qui contrôle le moteur gauche
  * 
  * 		qikP.setMotor1Speed qui contrôle le moteur de la porte
@@ -113,7 +113,7 @@ int main()
         /*
          * On ouvre le clavier
          */
-        actionClavier(-40,5);
+        actionClavier(40,5);
         
         /*
          * On part du coin et on avance tant que le robot ne trouvre pas
@@ -178,14 +178,8 @@ void match()
      */
     while(timeEnd.read() <= 89)
     {	
-        /*
-         * Information qu'on envoie pour affichage dans le cas où 
-         * on veut voir ce qu'il se passe
-         */
-        printf("\rcapteurDroit: %d\n", (int) capteurDroit);
-        printf("\rcapteurGauche: %d\n", (int) capteurGauche);
-        printf("\rtemps de jeu : %f\n", timeEnd.read());
-
+		printf("\rTemps de jeu : %f\n",timeEnd.read());		
+		
         /*
          * On affiche sur les leds l'état des capteurs
          * 	=> allumés : pas de détection
@@ -193,12 +187,6 @@ void match()
          */
         ledGauche = !capteurGauche;
         ledDroite = !capteurDroit;
-
-        /*
-         * On démarre les capteurs avant pour savoir s'il y a quelque
-         * chose devant ou derrière le robot. On attend quand même que les capteurs
-         * aient une information en retour.
-         */
          
 		ultraG.startRanging();
 		while (!ultraG.rangingFinished()) wait(0.01);
@@ -208,11 +196,6 @@ void match()
 		while (!ultraD.rangingFinished()) wait(0.01);
 		remplirTab(distanceDroit,ultraD.getRange());
 
-        /*
-         * Si les deux capteurs à l'avant détectent une présence 
-         * à moins de 40 cm le robot s'arrête et repart dès
-         * qu'on a plus rien devant.
-         */
         while(moyenne(distanceGauche) < DISTANCE_CAPTEUR && moyenne(distanceDroit) < DISTANCE_CAPTEUR && timeOut.read() < 20)
         {
 			timeOut.start();
@@ -226,32 +209,8 @@ void match()
 			ultraD.startRanging();
 			while (!ultraD.rangingFinished()) wait(0.01);
 			remplirTab(distanceDroit,ultraD.getRange());
-
-            printf("\rJ'ai détecté un obstacle\n");
-            printf("\r distance capteur gauche : %d\n",moyenne(distanceGauche));
-            printf("\r distance capteur droit : %d\n",moyenne(distanceDroit));
-        }
-		
-        /*
-         * Si on a perdu les deux capteurs alors on recule
-         * mais on vérifie qu'il n'y a personne derrière 
-         */
-        if(!capteurDroit && !capteurGauche)
-        {
-            if(ultraArr.getRange() < 15)
-            {
-                qik.stopBothMotors(); 
-            }
-            else
-            {
-                reculer();
-            }
-        }
-		
-		printf("\r distance capteur gauche : %d\n",moyenne(distanceGauche));
-        printf("\r distance capteur droit : %d\n",moyenne(distanceDroit));
-		
-        avancer();
+        }        
+		avancer();       
     }
 
 	qikP.setMotor1Speed(-20);
@@ -279,9 +238,16 @@ void actionClavier(int vitesse, int tempsAttente)
 void avancer()
 {
 	printf("\rje suis dans la fonction avancer\n");
+	
 	qik.setMotor0Speed(AMOTEURD);
     qik.setMotor1Speed(AMOTEURG);
-
+	
+	if(!capteurDroit && !capteurGauche)
+	{
+		qik.setMotor0Speed(RMOTEURD);
+		qik.setMotor1Speed(RMOTEURG);
+	}
+	
     if(!capteurDroit)
     {
 		printf("\rje n'ai pas le capteur droit\n");
@@ -292,23 +258,6 @@ void avancer()
     {
 		printf("\rje n'ai pas le capteur gauche\n");
         qik.setMotor0Speed(0);
-    }
-}
-
-void reculer()
-{
-	qik.setMotor0Speed(RMOTEURD);
-	qik.setMotor1Speed(RMOTEURG);
-	
-	printf("\rje suis dans la fonction reculer\n");
-    if(!capteurGauche)
-    {
-        qik.setMotor0Speed(0);
-    }
-
-    if(!capteurDroit)
-    {
-        qik.setMotor1Speed(0);
     }
 }
 

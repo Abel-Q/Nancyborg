@@ -4,7 +4,7 @@
  * Vitesse positive pour mettre les moteurs en marche avant 
  * et vitesse négative pour mettre les moteurs en marche arrière
  */
-#define AMOTEURD 34
+#define AMOTEURD 27
 #define AMOTEURG 32
 #define RMOTEURD -34
 #define RMOTEURG -34
