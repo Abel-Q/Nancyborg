@@ -28,6 +28,8 @@ public:
     //Calage bordure
     void calageBordureGros(int sens);
     void calageBordurePetit(int sens);
+    int getLastCommandStatus() { return lastStatus; }
+    void setLastCommandStatus(int s) { lastStatus = s; }
 
 private:
     CMDList *liste; //File d'attente des commandes
@@ -39,6 +41,7 @@ private:
     bool emergencyStop; //arrêt d'urgence : si le robot adverse est dans les parages
 
     bool currentConsignFinished; //signale si la consigne courante est terminée. Reste à vrai tant qu'une nouvelle consigne n'est pas arrivée.
+    int lastStatus;
 
     double computeDeltaTheta(double deltaX, double deltaY); // Calcul de l'angle à parcourir
     int64_t computeDeltaDist(double deltaX, double deltaY); // Calcul de la distance à parcourir

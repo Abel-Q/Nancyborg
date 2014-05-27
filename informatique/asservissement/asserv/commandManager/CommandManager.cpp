@@ -20,6 +20,7 @@ CommandManager::CommandManager(int capacity , ConsignController *ctrlr, Odometri
     nextCMD.type = CMD_NULL;
     emergencyStop = false;
     currentConsignFinished = true;
+    lastStatus = 2;
 }
 
 CommandManager::~CommandManager()
@@ -33,26 +34,31 @@ CommandManager::~CommandManager()
  */
 bool CommandManager::addStraightLine(int64_t valueInmm)
 {
+    lastStatus = 0;
     return liste->enqueue(CMD_GO , Utils::mmToUO(odometrie, valueInmm), 0);
 }
 
 bool CommandManager::addTurn(int64_t angleInDeg)
 {
+    lastStatus = 0;
     return liste->enqueue(CMD_TURN , Utils::degToUO(odometrie, angleInDeg) , 0);
 }
 
 bool CommandManager::addGoTo(int64_t posXInmm, int64_t posYInmm)
 {
+    lastStatus = 0;
     return liste->enqueue(CMD_GOTO , Utils::mmToUO(odometrie, posXInmm) , Utils::mmToUO(odometrie, posYInmm));
 }
 
 bool CommandManager::addGoToEnchainement(int64_t posXInmm, int64_t posYInmm)
 {
+    lastStatus = 0;
     return liste->enqueue(CMD_GOTOENCHAIN , Utils::mmToUO(odometrie, posXInmm) , Utils::mmToUO(odometrie, posYInmm));
 }
 
 bool CommandManager::addGoToAngle(int64_t posXInmm, int64_t posYInmm)
 {
+    lastStatus = 0;
     return liste->enqueue(CMD_GOTOANGLE , Utils::mmToUO(odometrie, posXInmm) , Utils::mmToUO(odometrie, posYInmm));
 }
 
@@ -66,9 +72,9 @@ void CommandManager::perform()
     * On demande un arrêt d'urgence, donc on fixe la consigne à atteindre sur la position courante
     */
     if (emergencyStop) {
-        cnsgCtrl->set_dist_consigne(cnsgCtrl->getAccuDist());
+/*        cnsgCtrl->set_dist_consigne(cnsgCtrl->getAccuDist());
         cnsgCtrl->set_angle_consigne(cnsgCtrl->getAccuAngle());
-
+*/
         while (currCMD.type != CMD_NULL) { //On s'assure que la liste des commandes est vide
             currCMD = liste->dequeue();
         }
@@ -114,9 +120,10 @@ void CommandManager::perform()
         // On vient de terminer la consigne courante, on le signale en haut lieu
         if (currentConsignFinished == false) {
             //iaCom.printf("d\n"); //ou iaCom.putc('d');
-            putchar('d');
-            putchar('\n');
+//            putchar('d');
+//            putchar('\n');
             //printf("D sent \n");
+            lastStatus = 1;
         }
 
         currentConsignFinished = false;
@@ -292,6 +299,7 @@ void CommandManager::setEmergencyStop()   //Gestion d'un éventuel arrêt d'urge
     }
 
     currentConsignFinished = true;
+    lastStatus = 2;
 }
 
 void CommandManager::resetEmergencyStop()
