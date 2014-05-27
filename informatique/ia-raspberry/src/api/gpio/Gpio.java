@@ -1,11 +1,14 @@
 package api.gpio;
 
-import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.IOException;
-import java.io.InputStreamReader;
 
-import com.pi4j.wiringpi.GpioUtil;
+import com.pi4j.io.gpio.GpioFactory;
+import com.pi4j.io.gpio.GpioPinDigitalMultipurpose;
+import com.pi4j.io.gpio.Pin;
+import com.pi4j.io.gpio.PinMode;
+import com.pi4j.io.gpio.PinPullResistance;
+import com.pi4j.io.gpio.RaspiPin;
 
 /**
  * Classe générique de controle d'un GPIO
@@ -16,55 +19,29 @@ import com.pi4j.wiringpi.GpioUtil;
  * 
  */
 
-public class Gpio implements Closeable {
-	/**
-	 * L'entrée est en l'air (flottante)
-	 */
-	public static final int FLOATING = com.pi4j.wiringpi.Gpio.PUD_OFF;
-
-	/**
-	 * L'entrée est reliée à la masse par une résistance interne
-	 */
-	public static final int PULL_DOWN = com.pi4j.wiringpi.Gpio.PUD_DOWN;
-
-	/**
-	 * L'entrée est reliée au 3.3 V par une résistance interne
-	 */
-	public static final int PULL_UP = com.pi4j.wiringpi.Gpio.PUD_UP;
-
-	/**
-	 * Numéro du GPIO (<a
-	 * href="http://elinux.org/RPi_Low-level_peripherals#Introduction"
-	 * >http://elinux.org/RPi_Low-level_peripherals#Introduction</a>)
-	 */
-	private int num;
+public class Gpio implements Closeable {	
+	private GpioPinDigitalMultipurpose gpioPin;
 
 	/**
 	 * Constructeur d'un GPIO
-	 * 
-	 * @param num Numéro du GPIO
-	 * @param entree Sens du GPIO
-	 * @param pull une des constantes {@link #PULL_UP}, {@link #PULL_DOWN} et
-	 *            {@link #FLOATING}
-	 * @see #setPull(int)
+	 * @param pin Broche du GPIO (numéro WiringPi : voir http://wiringpi.com/pins/)
 	 * @throws IOException
 	 */
-	public Gpio(int num, boolean entree, int pull) throws IOException {
-		System.out.println("Configuration Gpio " + this.num);
-		GpioUtil.export(num, entree ? GpioUtil.DIRECTION_IN : GpioUtil.DIRECTION_OUT);
-		this.num = num;
-		this.setPull(pull);
+	public Gpio(Pin pin, PinMode mode, PinPullResistance pull) throws IOException {
+		System.out.println("Configuration Gpio " + pin);
+		gpioPin = GpioFactory.getInstance().provisionDigitalMultipurposePin(pin, mode, pull);
+		System.out.println("Gpio ok");
 	}
 
 	/**
 	 * Constructeur d'un GPIO
 	 * 
-	 * @param num Numéro du GPIO (not header pin number; not wiringPi pin number but GPIO number : https://projects.drogon.net/raspberry-pi/wiringpi/pins/)
+	 * @param pin pin
 	 * @param entree Sens du GPIO
 	 * @throws IOException
 	 */
-	public Gpio(int num, boolean entree) throws IOException {
-		this(num, entree, FLOATING);
+	public Gpio(Pin pin, PinMode mode) throws IOException {
+		this(pin, mode, PinPullResistance.OFF);
 	}
 
 	/**
@@ -74,8 +51,7 @@ public class Gpio implements Closeable {
 	 * GPIO
 	 */
 	public void close() {
-		System.out.println("Fermeture Gpio " + this.num);
-		GpioUtil.unexport(this.num);
+		System.out.println("Fermeture Gpio " + gpioPin);
 	}
 
 	/**
@@ -83,9 +59,7 @@ public class Gpio implements Closeable {
 	 * @throws IOException
 	 */
 	public boolean isHigh() {
-		boolean res = false;
-		res = com.pi4j.wiringpi.Gpio.digitalRead(this.num) == 1;
-		return res;
+		return gpioPin.isHigh();
 	}
 
 	/**
@@ -93,9 +67,7 @@ public class Gpio implements Closeable {
 	 * @throws IOException
 	 */
 	public boolean isLow() {
-		boolean res = false;
-		res = !this.isHigh();
-		return res;
+		return gpioPin.isLow();
 	}
 
 	/**
@@ -104,7 +76,7 @@ public class Gpio implements Closeable {
 	 * @throws IOException
 	 */
 	public void setHigh() throws IOException {
-		com.pi4j.wiringpi.Gpio.digitalWrite(this.num, 1);
+		gpioPin.setState(true);
 	}
 
 	/**
@@ -113,20 +85,17 @@ public class Gpio implements Closeable {
 	 * @throws IOException
 	 */
 	public void setLow() throws IOException {
-		com.pi4j.wiringpi.Gpio.digitalWrite(this.num, 0);
+		gpioPin.setState(false);
 	}
 
 	/**
 	 * Permet d'activer les résistances de pull-up et de pull-down sur le GPIO
-	 * 
-	 * @param pull une des constantes {@link #PULL_UP}, {@link #PULL_DOWN} et
-	 *            {@link #FLOATING}
 	 */
-	public void setPull(int pull) {
-		com.pi4j.wiringpi.Gpio.pullUpDnControl(this.num, pull);
+	public void setPull(PinPullResistance pull) {
+		gpioPin.setPullResistance(pull);
 	}
 
-	public static void main(String[] args) throws IOException {
+	/*public static void main(String[] args) throws IOException {
 		System.out.println("-- Test GPIO --");
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
@@ -149,5 +118,5 @@ public class Gpio implements Closeable {
 
 			gpio.close();
 		}
-	}
+	}*/
 }

@@ -11,6 +11,8 @@
 
                 <fileset dir="bin" />
                 <zipfileset src="libs/pi4j-core.jar"/>
+                <zipfileset src="libs/jna.jar"/>
+                <zipfileset src="libs/purejavacomm.jar"/>
                 <zipfileset src="libs/ax12.jar"/>
             </jar>
         </sequential>
@@ -18,8 +20,7 @@
 
     <target name="jars" depends="build">
         <mkdir dir="dist" />
-        <make-jar name="dist/ia.serieux.jar" mainclass="ia.princessbotik2013.Ia"/>
-        <make-jar name="dist/ia.fun.jar" mainclass="ia.nancyborg2013.Ia"/>
+        <make-jar name="dist/ia2014.jar" mainclass="ia.nancyborg2014.Ia"/>
         <make-jar name="dist/ia.fetescience.jar" mainclass="ia.fetescience.IA"/>
         <make-jar name="dist/qik.jar" mainclass="api.tools.QikTool"/>
         <make-jar name="dist/srf-address.jar" mainclass="api.tools.ChangeSRFAddress"/>

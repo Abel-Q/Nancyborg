@@ -15,12 +15,14 @@ public abstract class Navigation {
 	protected ArrayList<Point> zonesInterditesMobiles;
 	protected Point goal;
 	protected ArrayList<Point> objectifs;
+	protected ArrayList<Point> commandes;
 	
 	public Navigation() {
 		this.dStar = new DStarLite();
 		this.zonesInterdites = new ArrayList<Point>();
 		this.zonesInterditesMobiles = new ArrayList<Point>();
-		this.objectifs = new ArrayList<>();
+		this.objectifs = new ArrayList<Point>();
+		this.commandes = new ArrayList<Point>();
 		
 		this.initZonesInterdites();
 		this.initListeObjectifs();
@@ -38,6 +40,13 @@ public abstract class Navigation {
 	 * @param y Position en Y de l'obstacle (prendre en cm l'entier le plus proche)
 	 */
 	protected abstract void setZonesInterditesMobiles(int x, int y);
+	
+	/**
+	 * Renvoit les extrêmes d'une zone interdites
+	 * @param adversaire Position de l'adversaire (prendre en cm l'entier le plus proche)
+	 * @return Un tableau de deux Point contenant (xmin, ymin) et (xmax, ymax) d'une zone interdite
+	 */
+	public abstract Point[] getExtremeZoneInterdite(Point adversaire);
 	
 	/**
 	 * Remplit la liste d'objectifs
@@ -91,17 +100,25 @@ public abstract class Navigation {
 	 * @return ArrayList<Point> des positions du parcours
 	 */
 	public ArrayList<Point> getCommandeAsserv() {
-		ArrayList<Point> commandes = new ArrayList<Point>();
+		this.commandes = new ArrayList<Point>();
 		List<State> path = this.dStar.getPathReduced();
 		
 		for (State i : path) {
 			commandes.add(new Point(i.x,i.y));
 		}
-		
+		System.out.println(commandes);
 		return commandes;
 		
 		// Méthode JBG, semble moins legèrement moins bonne mais plus propre
 		//return this.dStar.getRoute();
+	}
+	
+	/**
+	 * Permet de récupérer les points de passage sans tout recalculer
+	 * @return ArrayList<Point> this.commandes
+	 */
+	public ArrayList<Point> getCachedCommandeAsserv() {
+		return this.commandes;
 	}
 	
 	public void debugZoneInterdites() {

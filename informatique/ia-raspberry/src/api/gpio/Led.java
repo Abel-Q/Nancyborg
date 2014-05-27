@@ -2,6 +2,9 @@ package api.gpio;
 
 import java.io.IOException;
 
+import com.pi4j.io.gpio.Pin;
+import com.pi4j.io.gpio.PinMode;
+
 /**
  * Classe gérant une Led
  * 
@@ -22,8 +25,8 @@ public class Led {
 	 * @param gpio Numéro de la num GPIO de la Led
 	 * @throws IOException
 	 */
-	public Led(int gpio) throws IOException {
-		this.gpio = new Gpio(gpio, false);
+	public Led(Pin gpio) throws IOException {
+		this.gpio = new Gpio(gpio, PinMode.DIGITAL_OUTPUT);
 		this.gpio.setLow();
 	}
 
