@@ -225,10 +225,12 @@ public class DStarLite implements java.io.Serializable {
 		if (openList.isEmpty()) return 1;
 
 		int k=0;
+		System.out.println("compute");
 		while ((!openList.isEmpty()) &&
 			   (openList.peek().lt(s_start = calculateKey(s_start))) ||
 			   (getRHS(s_start) != getG(s_start))) {
-
+			
+			System.out.println("k = "+k);
 			if (k++ > maxSteps) {
 				System.out.println("At maxsteps");
 				return -1;

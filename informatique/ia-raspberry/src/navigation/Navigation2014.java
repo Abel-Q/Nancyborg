@@ -71,7 +71,12 @@ public class Navigation2014 extends Navigation {
 	@Override
 	protected void initListeObjectifs() {
 		// TODO à remplir
-		this.objectifs.add(new Point(10, 10));
+		this.objectifs.add(new Point(25, 10));
+	}
+
+	@Override
+	protected void init() {
+		this.pas = 100;
 	}
 
 }

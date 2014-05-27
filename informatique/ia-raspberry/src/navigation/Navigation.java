@@ -16,6 +16,7 @@ public abstract class Navigation {
 	protected Point goal;
 	protected ArrayList<Point> objectifs;
 	protected ArrayList<Point> commandes;
+	protected int pas;
 	
 	public Navigation() {
 		this.dStar = new DStarLite();
@@ -24,9 +25,12 @@ public abstract class Navigation {
 		this.objectifs = new ArrayList<Point>();
 		this.commandes = new ArrayList<Point>();
 		
+		this.init();
 		this.initZonesInterdites();
 		this.initListeObjectifs();
 	}
+	
+	protected abstract void init();
 	
 	/**
 	 * Contient les zones interdites fixes
@@ -92,7 +96,7 @@ public abstract class Navigation {
 	public boolean calculItineraire(Point start) {
 		long time = System.currentTimeMillis();
 		System.out.println("DStar start");		
-		this.dStar.updateStart(start.getX(), start.getY());
+		this.dStar.updateStart((int)Math.rint((double)start.getX()/(double)pas), (int)Math.rint((double)start.getY()/(double)pas));
 		System.out.println("updateStart ok : "+start);
 		this.dStar.updateGoal(this.goal.getX(), this.goal.getY());
 		System.out.println("updateGoal ok : "+this.goal);

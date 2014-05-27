@@ -29,6 +29,28 @@ public class Asserv {
 	 * Booléen signalant l'exécution complète de la dernière commande
 	 */
 	private boolean lastCommandFinished;
+	/**
+	 * Position courante du robot
+	 */
+	private Point nous;
+	
+	/**
+	 * Checker
+	 */
+	Thread checker = new Thread(new Runnable() {
+		@Override
+		public void run() {
+			while (true) {
+				String check = mbed.readLine();
+				//System.out.println("check = "+check);
+				if (check.isEmpty() || check.charAt(0) != '#') {
+					continue;
+				}
+				nous = parseCurrentPosition(check);
+				
+			}
+		}
+	});
 
 	/**
 	 * Constructeur
@@ -42,8 +64,9 @@ public class Asserv {
 	public Asserv(String serie) throws IOException {
 		System.out.println("Connexion à l'asserv...");
 		commande = "";
-		mbed = new Serial(serie, 115200);
+		mbed = new Serial(serie, /*115200*/230400);
 		reset();
+		checker.start();
 	}
 	
 	public void reset() throws IOException {
@@ -138,32 +161,10 @@ public class Asserv {
 			synchronized (this) {
 				mbed.write(commande);
 				lastCommandFinished = false;
-				launchFinishedChecker();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-
-	/**
-	 * Ecoute l'asserv pour surveiller la finalisation de la commande
-	 */
-	private void launchFinishedChecker() {
-		Thread checker = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				while (!lastCommandFinished) {
-					String check = mbed.readLine();
-
-					System.out.println("reçu : " + check);
-
-					if (check.equals("d")) {
-						lastCommandFinished = true;
-					}
-				}
-			}
-		});
-		checker.start();
 	}
 
 	/**
@@ -186,12 +187,13 @@ public class Asserv {
 	 * Attend que la dernière commande ait fini son exécution 
 	 */
 	public synchronized void waitForFinish() {
-		while (!lastCommandFinished)
+		while (!lastCommandFinished) {
 			try {
 				Thread.sleep(10);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
+		}
 	}
 
 	/**
@@ -212,23 +214,29 @@ public class Asserv {
 		mbed.write("M" + moteur + val + "\n");
 	}
 	
-	public Point getCurrentPosition() {
-		mbed.write("p");
-		String str = mbed.readLine();
-		Pattern p = Pattern.compile("[0-9.-]+");
-		Matcher m = p.matcher(str);
-		int[] coord = new int[3];
-		int i = 0;
-		while (m.find()) {
-			if (i <= 1) {
-				coord[i] = (int)Math.rint(Double.parseDouble(str.substring(m.start(), m.end())) / 100);
-			} else {
-				coord[i] = (int)Math.rint(Math.toDegrees(Double.parseDouble(str.substring(m.start(), m.end()))));
+	public Point parseCurrentPosition(String str) {
+		try {
+			Pattern p = Pattern.compile("#x([0-9.-]+)y([0-9.-]+)a([0-9.-]+)d([0-2])");
+			Matcher m = p.matcher(str);
+			System.out.println(str);
+			if (m.find()) {
+				if (m.group(4).equals("1") || (!lastCommandFinished) && m.group(4).equals("2")) {
+					System.out.println("finished !!");
+					lastCommandFinished = true;
+				}
+				
+				Point point = new Point((int)Double.parseDouble(m.group(1)), (int)Double.parseDouble(m.group(2)));
+				point.setCap((int)Double.parseDouble(m.group(3)));
+				return point;
 			}
-			i++;
+			return nous;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return nous;
 		}
-		Point point = new Point(coord[0], coord[1]);
-		point.setCap(coord[2]);
-		return point;
+	}
+	
+	public Point getCurrentPosition() {
+		return this.nous;
 	}
 }

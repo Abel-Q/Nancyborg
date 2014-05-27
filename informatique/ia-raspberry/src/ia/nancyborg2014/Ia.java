@@ -43,15 +43,19 @@ public class Ia {
 			objectifsAtteints = new ArrayList<Point>();
 
 			// Détection de l'adversaire
-			float[] anglesCapteurs = { -45.0f, 0.0f, 45.0f };
-			AX12Linux ax12Detection = new AX12Linux("/dev/ttyAMA0", 1, 115200);
-			// Distance capteur - balise = 56cm
-			detection = new DetectionIR(anglesCapteurs, 240.0f, 56.0, ax12Detection, RaspiPin.GPIO_14, RaspiPin.GPIO_12, RaspiPin.GPIO_13, this);
+			this.detection = this.getDetecteur();
 
 			nav = new Navigation2014();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public DetectionIR getDetecteur() {
+		float[] anglesCapteurs = { -45.0f, 0.0f, 45.0f };
+		AX12Linux ax12Detection = new AX12Linux("/dev/ttyAMA0", 1, 115200);
+		// Distance capteur - balise = 56cm
+		return new DetectionIR(anglesCapteurs, 240.0f, 56.0, ax12Detection, RaspiPin.GPIO_14, RaspiPin.GPIO_12, RaspiPin.GPIO_13, this);
 	}
 
 	public Point getPosition() {
@@ -98,19 +102,9 @@ public class Ia {
 
 		// On se met en route ou si l'on n'a plus d'objectif, on attend et on recommence
 		if (this.deplacement != null) {
-			this.deplacement.run();
+			this.deplacement.start();
 		} else {
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			this.nav.resetObstacleMobile();
-			this.detection.run();
-			this.deplacement = this.nouvelObjectif();
-			if (this.deplacement != null) {
-				this.deplacement.run();
-			}
+			this.detectionAdversaire(adversaire);
 		}
 	}
 
@@ -118,6 +112,7 @@ public class Ia {
 	public void objectifAtteint(Point objectif) {
 		// On coupe la détection, le déplacement est déjà fini et on note l'objectif atteint
 		this.detection.stop();
+		this.deplacement.stop();
 		this.objectifsAtteints.add(objectif);
 
 		// On lance la séquence de marquage de point
@@ -129,8 +124,9 @@ public class Ia {
 
 		// On cherche un nouvel objectif et on y va
 		this.deplacement = this.nouvelObjectif();
-		this.detection.run();
-		this.deplacement.run();
+		this.detection = this.getDetecteur();
+		this.detection.start();
+		this.deplacement.start();
 	}
 
 	// On trouve un nouvelle objectif, en éliminant ceux déjà réalisé
@@ -219,10 +215,10 @@ public class Ia {
 
 		// On lance la détection et le déplacement vers le premier objectif
 		System.out.println("Lancement détection");
-		ia.detection.run();
+		ia.detection.start();
 		System.out.println("Lancement déplacement");
 		ia.deplacement = new DeplacementTask(ia.asserv, ia.rouge, ia.nav.getCommandeAsserv(), ia);
-		ia.deplacement.run();
+		ia.deplacement.start();
 		System.out.println("Deplacement run ok");
 		
 		while(true);
