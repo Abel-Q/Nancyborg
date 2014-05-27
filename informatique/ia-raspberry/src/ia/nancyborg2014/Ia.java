@@ -145,16 +145,29 @@ public class Ia {
 	// Objectif atteint
 	public void objectifAtteint(Point objectif) {
 		System.out.println("Je suis arrivé : "+objectif);
+		System.out.println("Kill de déplacement");
+		this.deplacement = null;
+		
 		// On coupe la détection, le déplacement est déjà fini et on note l'objectif atteint
+		System.out.println("Stop détection");
 		this.detection.setDetect(false);
-		this.objectifsAtteints.add(objectif);
+		if (!objectif.equals(new Point(1100, 1100))) {
+			System.out.println("Marquage objectif");
+			this.objectifsAtteints.add(objectif);
+		}
+		
+		int mult = this.rouge ? 1 : -1;
 
+		System.out.println(this.objectifs);
+		System.out.println(this.objectifsAtteints);
 		System.out.println(this.objectifs.indexOf(objectif));
 		// On lance la séquence de marquage de point
 		switch (this.objectifs.indexOf(objectif)) {
 			case 0:
 				// On place les fresques
 				System.out.println("Pose ta fresque Biatch !!!");
+				this.asserv.gotoPosition(1280, mult * 1800, true);
+				this.asserv.go(-400, true);
 				break;
 			case 1:
 				// On tire sur le mamouth
@@ -172,6 +185,10 @@ public class Ia {
 				// Foyer
 				System.out.println("C'est chaud ça brule, c'est le foyer !!");
 				break;
+			default:
+				// Je sais pas
+				System.out.println("Mais qu'est ce que je fou là ??");
+				break;
 		}
 		
 		// On cherche un nouvel objectif et on y va
@@ -187,6 +204,7 @@ public class Ia {
 		System.out.println("Recherche d'objectifs");
 		ArrayList<Point> todo = new ArrayList<Point>(this.objectifs);
 		todo.removeAll(this.objectifsAtteints);
+		System.out.println("todo : "+todo);
 		
 		// TODO plus d'objectifs
 		if (this.objectifs.size() == this.objectifsAtteints.size()) {
@@ -244,7 +262,7 @@ public class Ia {
 		ArrayList<Point> liste = new ArrayList<Point>();
 		if (newObjectif != -1) {
 			System.out.println("J'ai !!!");
-			liste.add(this.objectifs.get(newObjectif));
+			liste.add(todo.get(newObjectif));
 		} else {
 			System.out.println("Fail !!");
 			liste.add(new Point(1100, 1100));
