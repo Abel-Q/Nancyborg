@@ -78,20 +78,27 @@ public class DetectionIR extends Thread {
 	}
 
 	public void detected(int capteur) {
+		System.out.println("************************** detected "+capteur+" : "+this.isAlive());
+		long time = System.currentTimeMillis();
 		if (!this.isAlive()) {
 			return;
 		}
+
 		Point nous = ia.getPosition();
 		float pos = ax12.getPresentPosition();
-		System.out.println("capteur = "+capteur+" - pos = " + pos);
-		float angle = pos - angle0 + this.anglesCapteurs[capteur] - nous.getCap();
-		int x = (nous.getX() + (int) (Math.cos(Math.toRadians(angle)) * this.distanceDetection));
-		int y = (nous.getY() + (int) (Math.sin(Math.toRadians(angle)) * this.distanceDetection));
+		System.out.println("capteur = "+capteur+" - pos = " + pos+" - nous = "+nous);
+		float angle = pos - angle0 + this.anglesCapteurs[capteur] - (float)nous.getCap();
+
+		// Position de l'adversaire en mm
+		int x = (nous.getX() + ((int) (Math.cos(Math.toRadians(angle)) * this.distanceDetection * 10)));
+		int y = (nous.getY() + ((int) (Math.sin(Math.toRadians(angle)) * this.distanceDetection * 10)));
 		System.out.println("x = "+x+" - y = "+y);
-		Point adversaire = new Point(x, y);
-		if (checkColision(adversaire)) {
-			ia.detectionAdversaire(new Point(x, y));
-		}
+		Point adversaire = new Point((int)Math.rint((double)x/100.0), (int)Math.rint((double)y/100.0));
+		System.out.println("Nous = "+nous+" - Adversaire = "+adversaire);
+		//if (checkColision(adversaire)) {
+			//ia.detectionAdversaire(adversaire, time);
+		//}
+		
 	}
 	
 	public boolean checkColision(Point adversaire) {

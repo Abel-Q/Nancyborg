@@ -5,6 +5,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import navigation.Point;
+import purejavacomm.NoSuchPortException;
+import purejavacomm.PortInUseException;
+import purejavacomm.UnsupportedCommOperationException;
 import api.communication.Serial;
 
 /**
@@ -29,6 +32,44 @@ public class Asserv {
 	 * Booléen signalant l'exécution complète de la dernière commande
 	 */
 	private boolean lastCommandFinished;
+	private int lastD = 2;
+	/**
+	 * Position courante du robot
+	 */
+	private Point nous;
+	
+	/**
+	 * Checker
+	 */
+	Thread checker = new Thread(new Runnable() {
+		@Override
+		public void run() {
+			while (true) {
+				String check = mbed.readLine();
+				if (check.isEmpty() || check.charAt(0) != '#') {
+					continue;
+				}
+				//nous = parseCurrentPosition(check);
+				try {
+					Pattern p = Pattern.compile("#x([0-9.-]+)y([0-9.-]+)a([0-9.-]+)d([0-2])");
+					Matcher m = p.matcher(check);
+					if (m.find()) {
+						if (m.group(4).equals("1") || (lastD == 0 && m.group(4).equals("2"))) {
+							System.out.println("finished !!");
+							lastCommandFinished = true;
+						}
+						
+						Point point = new Point((int)Double.parseDouble(m.group(1)), (int)Double.parseDouble(m.group(2)));
+						point.setCap(Double.parseDouble(m.group(3)));
+						nous = point;
+						lastD = Integer.parseInt(m.group(4));
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	});
 
 	/**
 	 * Constructeur
@@ -42,15 +83,24 @@ public class Asserv {
 	public Asserv(String serie) throws IOException {
 		System.out.println("Connexion à l'asserv...");
 		commande = "";
-		mbed = new Serial(serie, 115200);
+		mbed = new Serial(serie, /*115200*/230400);
+		System.out.println("Serie ok");
 		reset();
+		checker.start();
 	}
 	
 	public void reset() throws IOException {
 		mbed.write('R'); // autrefois il y avait un break...
 		lastCommandFinished = true;
-		while(!mbed.readLine().endsWith("ok"));
-		System.out.println("Asserv ready (la salope)");
+		while(true) {
+			String blabla = mbed.readLine();
+			if (blabla.endsWith("ok")) {
+				System.out.println("Asserv ready (la salope)");
+				return;
+			} else {
+				System.out.println(blabla);
+			}
+		}
 	}
 
 	/**
@@ -138,32 +188,10 @@ public class Asserv {
 			synchronized (this) {
 				mbed.write(commande);
 				lastCommandFinished = false;
-				launchFinishedChecker();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-
-	/**
-	 * Ecoute l'asserv pour surveiller la finalisation de la commande
-	 */
-	private void launchFinishedChecker() {
-		Thread checker = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				while (!lastCommandFinished) {
-					char check = mbed.readChar();
-
-					System.out.println("reçu : " + check);
-
-					if (check == 'd') {
-						lastCommandFinished = true;
-					}
-				}
-			}
-		});
-		checker.start();
 	}
 
 	/**
@@ -186,12 +214,13 @@ public class Asserv {
 	 * Attend que la dernière commande ait fini son exécution 
 	 */
 	public synchronized void waitForFinish() {
-		while (!lastCommandFinished)
+		while (!lastCommandFinished) {
 			try {
 				Thread.sleep(10);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
+		}
 	}
 
 	/**
@@ -212,24 +241,30 @@ public class Asserv {
 		mbed.write("M" + moteur + val + "\n");
 	}
 	
-	public Point getCurrentPosition() {
-		mbed.write("p");
-		String str = mbed.readLine();
-		Pattern p = Pattern.compile("[0-9.-]+");
-		Matcher m = p.matcher(str);
-		int[] coord = new int[3];
-		int i = 0;
-		while (m.find()) {
-			if (i <= 1) {
-				coord[i] = (int)Math.rint(Double.parseDouble(str.substring(m.start(), m.end())) / 10);
-			} else {
+	public synchronized Point parseCurrentPosition(String str) {
+		try {
+			System.out.println(str);
+			Pattern p = Pattern.compile("#x([0-9.-]+)y([0-9.-]+)a([0-9.-]+)d([0-2])");
+			Matcher m = p.matcher(str);
+			if (m.find()) {
+				if (m.group(4).equals("1")/* || (!lastCommandFinished) && m.group(4).equals("2")*/) {
+					System.out.println("finished !!");
+					lastCommandFinished = true;
+				}
 				
-				coord[i] = (int)Math.rint(Math.toDegrees(Double.parseDouble(str.substring(m.start(), m.end()))));
+				Point point = new Point((int)Double.parseDouble(m.group(1)), (int)Double.parseDouble(m.group(2)));
+				point.setCap((int)Double.parseDouble(m.group(3)));
+				return point;
 			}
-			i++;
+			return nous;
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("Error on : "+str);
+			return nous;
 		}
-		Point point = new Point(coord[0], coord[1]);
-		point.setCap(coord[2]);
-		return point;
+	}
+	
+	public Point getCurrentPosition() {
+		return this.nous;
 	}
 }
