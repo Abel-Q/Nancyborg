@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.TimerTask;
 
+import navigation.Navigation;
 import navigation.Navigation2014;
 import navigation.Point;
 import api.asserv.Asserv;
@@ -11,9 +12,6 @@ import api.chrono.Chrono;
 import api.gpio.Gpio;
 import api.sensors.DetectionIR;
 
-import com.pi4j.io.gpio.GpioController;
-import com.pi4j.io.gpio.GpioFactory;
-import com.pi4j.io.gpio.GpioPinDigitalInput;
 import com.pi4j.io.gpio.PinMode;
 import com.pi4j.io.gpio.PinPullResistance;
 import com.pi4j.io.gpio.RaspiPin;
@@ -151,10 +149,12 @@ public class Ia {
 	}
 	
 	public static void mainFuu(String[] args) {
-		final Ia ia = new Ia();
-		ia.asserv.gotoPosition(500, 0, true);
-		ia.asserv.face(0, 1000, true);
-		ia.asserv.gotoPosition(500, 500, true);
+		Navigation nav = new Navigation2014();
+		nav.setGoal(new Point(100, 100));
+		long time = System.currentTimeMillis();
+		System.out.println("Heya");
+		System.out.println(nav.calculItineraire(new Point(30, 140)));
+		System.out.println((System.currentTimeMillis()-time)+"ms");
 	}
 
 	public static void main(String[] args) throws IOException {
@@ -192,10 +192,6 @@ public class Ia {
 		while (ia.tirette.isHigh());
 
 		ia.nav.setGoal(ia.nav.getObjectifs().get(0));
-		System.out.println("Calcul itinéraire départ");
-		long time = System.currentTimeMillis();
-		ia.nav.calculItineraire(ia.asserv.getCurrentPosition());
-		System.out.println("Fin du calcul : "+(System.currentTimeMillis() - time)+"ms");
 
 		System.out.println("Attente enlevage tirette pour départ");
 		// On attend de virer la tirette
@@ -215,6 +211,13 @@ public class Ia {
 				System.exit(0);
 			}
 		});
+		
+		ia.asserv.gotoPosition(200, ia.rouge ? 1400 : -1400, true);
+		
+		System.out.println("Calcul itinéraire départ");
+		long time = System.currentTimeMillis();
+		System.out.println(ia.nav.calculItineraire(ia.asserv.getCurrentPosition()));
+		System.out.println("Fin du calcul : "+(System.currentTimeMillis() - time)+"ms");
 
 		// On lance la détection et le déplacement vers le premier objectif
 		ia.detection.run();
