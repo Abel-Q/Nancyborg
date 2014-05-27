@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.pi4j.io.serial.SerialDataEvent;
+import com.pi4j.io.serial.SerialDataListener;
+
 import navigation.Point;
 import api.communication.Serial;
 
@@ -42,12 +45,11 @@ public class Asserv {
 		public void run() {
 			while (true) {
 				String check = mbed.readLine();
-				//System.out.println("check = "+check);
+				System.out.println("check = "+check);
 				if (check.isEmpty() || check.charAt(0) != '#') {
 					continue;
 				}
 				nous = parseCurrentPosition(check);
-				
 			}
 		}
 	});
@@ -214,13 +216,13 @@ public class Asserv {
 		mbed.write("M" + moteur + val + "\n");
 	}
 	
-	public Point parseCurrentPosition(String str) {
+	public synchronized Point parseCurrentPosition(String str) {
 		try {
+			System.out.println(str);
 			Pattern p = Pattern.compile("#x([0-9.-]+)y([0-9.-]+)a([0-9.-]+)d([0-2])");
 			Matcher m = p.matcher(str);
-			System.out.println(str);
 			if (m.find()) {
-				if (m.group(4).equals("1") || (!lastCommandFinished) && m.group(4).equals("2")) {
+				if (m.group(4).equals("1")/* || (!lastCommandFinished) && m.group(4).equals("2")*/) {
 					System.out.println("finished !!");
 					lastCommandFinished = true;
 				}
@@ -232,6 +234,7 @@ public class Asserv {
 			return nous;
 		} catch (Exception e) {
 			e.printStackTrace();
+			System.out.println("Error on : "+str);
 			return nous;
 		}
 	}

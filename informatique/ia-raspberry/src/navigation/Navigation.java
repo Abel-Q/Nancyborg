@@ -97,7 +97,7 @@ public abstract class Navigation {
 		long time = System.currentTimeMillis();
 		System.out.println("DStar start");		
 		this.dStar.updateStart((int)Math.rint((double)start.getX()/(double)pas), (int)Math.rint((double)start.getY()/(double)pas));
-		System.out.println("updateStart ok : "+start);
+		System.out.println("updateStart ok : "+start+" - "+(int)Math.rint((double)start.getX()/(double)pas)+";"+(int)Math.rint((double)start.getY()/(double)pas));
 		this.dStar.updateGoal(this.goal.getX(), this.goal.getY());
 		System.out.println("updateGoal ok : "+this.goal);
 		boolean res = this.dStar.replan();

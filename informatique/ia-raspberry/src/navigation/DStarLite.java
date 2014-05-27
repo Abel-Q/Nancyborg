@@ -230,7 +230,6 @@ public class DStarLite implements java.io.Serializable {
 			   (openList.peek().lt(s_start = calculateKey(s_start))) ||
 			   (getRHS(s_start) != getG(s_start))) {
 			
-			System.out.println("k = "+k);
 			if (k++ > maxSteps) {
 				System.out.println("At maxsteps");
 				return -1;

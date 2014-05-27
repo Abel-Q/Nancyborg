@@ -117,4 +117,12 @@ public class Serial {
 	public synchronized boolean ready() {
 		return serial.availableBytes() > 0;
 	}
+
+	public com.pi4j.io.serial.Serial getSerial() {
+		return serial;
+	}
+
+	public void setSerial(com.pi4j.io.serial.Serial serial) {
+		this.serial = serial;
+	}
 }
