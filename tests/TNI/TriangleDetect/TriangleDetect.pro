@@ -1,7 +1,7 @@
 TEMPLATE = app
 CONFIG += console
 
-QT += core multimedia
+QT += core multimedia network
 
 #QMAKE_LIBS += `pkg-config opencv --libs`
 #QMAKE_LIBDIR += /home/loic/OpenCV-2.4.9-android-sdk/sdk/native/libs/armeabi-v7a/
