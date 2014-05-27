@@ -7,6 +7,8 @@ import java.util.TimerTask;
 import navigation.Navigation2014;
 import navigation.Point;
 import api.asserv.Asserv;
+import api.canon2014.Canon;
+import api.canon2014.Canon.DirectionTir;
 import api.chrono.Chrono;
 import api.gpio.Gpio;
 import api.sensors.DetectionIR;
@@ -29,6 +31,7 @@ public class Ia {
 	public Navigation2014 nav;
 	public DeplacementTask deplacement;
 	public ArrayList<Point> objectifsAtteints;
+	public Canon canon;
 
 	public Ia() {
 		try {
@@ -52,6 +55,8 @@ public class Ia {
 			detection = new DetectionIR(anglesCapteurs, 240.0f, 56.0, ax12Detection, RaspiPin.GPIO_14, RaspiPin.GPIO_12, RaspiPin.GPIO_13, this);
 
 			nav = new Navigation2014();
+			canon = new Canon(RaspiPin.GPIO_07, this);
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -157,7 +162,7 @@ public class Ia {
 		ia.asserv.gotoPosition(500, 500, true);
 	}
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException, InterruptedException {
 
 		final Ia ia = new Ia();
 
@@ -183,6 +188,13 @@ public class Ia {
 		while (ia.tirette.isLow());
 
 		System.out.println("Mise en position");
+		ia.asserv.gotoPosition(750, ia.rouge ? 1400 : -1400, true);
+		ia.asserv.face(200, 0, true);
+		while (!ia.asserv.lastCommandFinished());
+		
+		ia.canon.tirSurMammouthCible(DirectionTir.MILIEU, true);
+		
+		/*System.out.println("Mise en position");
 		ia.asserv.gotoPosition(200, ia.rouge ? 1700 : -1700, true);
 		ia.asserv.face(200, 0, true);
 		while (!ia.asserv.lastCommandFinished());
