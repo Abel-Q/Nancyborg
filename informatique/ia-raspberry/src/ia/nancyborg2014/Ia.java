@@ -28,12 +28,12 @@ public class Ia {
 	public DetectionSRFThread detection;
 	public Navigation2014 nav;
 	public DeplacementTask deplacement;
+	public ArrayList<Point> objectifs;
 	public ArrayList<Point> objectifsAtteints;
 
 	public Ia() {
 		try {
 			// On initialise l'asservissement
-			// TODO vérifier adresse
 			asserv = new Asserv("/dev/serial/by-id/usb-mbed_Microcontroller_101000000000000000000002F7F04F94-if01");
 
 			// TODO initialisation des AX12 du canon
@@ -43,12 +43,13 @@ public class Ia {
 			selecteurCouleur = new Gpio(RaspiPin.GPIO_02, PinMode.DIGITAL_INPUT, PinPullResistance.PULL_UP); // Rouge = high, Jaune = low
 			rouge = false;
 			objectifsAtteints = new ArrayList<Point>();
+			objectifs = new ArrayList<Point>();
 
 			// Détection de l'adversaire
 			//this.detection = this.getDetecteur();
 			this.detection = new DetectionSRFThread(0xE4, 0xE8, 30, this);
 
-			nav = new Navigation2014();
+			//nav = new Navigation2014();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -91,31 +92,12 @@ public class Ia {
 		// On reset l'arret d'urgence de l'asserv
 		this.asserv.resetHalt();
 		
-		// On regarde  derrière nous pour stopper la détection
 		this.asserv.turn(180, true);
 		
-		// On relance  DStar
-		System.out.println("Nouveau calcul");
-		long time = System.currentTimeMillis();
-		adversaire.setX((int)Math.rint((double)adversaire.getX()/(double)100));
-		adversaire.setY((int)Math.rint((double)adversaire.getY()/(double)100));
-		
-		Point nous = new Point((int)Math.rint((double)this.getPosition().getX()/(double)100), (int)Math.rint((double)this.getPosition().getY()/(double)100));
-		boolean goalReachable = this.nav.obstacleMobile(adversaire, nous);
-		if (goalReachable) {
-			this.deplacement = new DeplacementTask(this.asserv, this.rouge, this.nav.getCommandeAsserv(), this);
-		} else {
-			System.out.println("Changement d'objectif");
-			this.deplacement = this.nouvelObjectif();
-		}
-		System.out.println("Fin du calcul : "+(System.currentTimeMillis()-time)+"ms");
-
-		// On se met en route ou si l'on n'a plus d'objectif, on attend et on recommence
+		this.detection.setDetect(true);
+		this.deplacement = this.nouvelObjectif();
 		if (this.deplacement != null) {
-			this.detection.setDetect(true);
 			this.deplacement.start();
-		} else {
-			this.detectionAdversaire(adversaire, time);
 		}
 	}
 	
@@ -162,36 +144,112 @@ public class Ia {
 
 	// Objectif atteint
 	public void objectifAtteint(Point objectif) {
+		System.out.println("Je suis arrivé : "+objectif);
 		// On coupe la détection, le déplacement est déjà fini et on note l'objectif atteint
 		this.detection.setDetect(false);
-		this.deplacement.stop();
 		this.objectifsAtteints.add(objectif);
 
+		System.out.println(this.objectifs.indexOf(objectif));
 		// On lance la séquence de marquage de point
-		switch (this.nav.getObjectifs().indexOf(objectif)) {
-		case 0:
-			// On tire les lances
-			break;
+		switch (this.objectifs.indexOf(objectif)) {
+			case 0:
+				// On place les fresques
+				System.out.println("Pose ta fresque Biatch !!!");
+				break;
+			case 1:
+				// On tire sur le mamouth
+				System.out.println("Oh oui, tire moi grand fou !!");
+				break;
+			case 2:
+				// Feu extérieur
+				System.out.println("Feu extérieur : éteind moi !!!");
+				break;
+			case 3:
+				// Feu bas
+				System.out.println("Feu bas : éteind moi !!!");
+				break;
+			case 4:
+				// Foyer
+				System.out.println("C'est chaud ça brule, c'est le foyer !!");
+				break;
 		}
-
+		
 		// On cherche un nouvel objectif et on y va
 		this.deplacement = this.nouvelObjectif();
 		this.detection.setDetect(true);
-		this.deplacement.start();
+		if (deplacement != null) {
+			this.deplacement.start();
+		}
 	}
 
 	// On trouve un nouvelle objectif, en éliminant ceux déjà réalisé
 	public DeplacementTask nouvelObjectif() {
-		ArrayList<Point> liste = this.nav.getObjectifs();
-		liste.removeAll(this.objectifsAtteints);
-		for (Point point : liste) {
-			this.nav.setGoal(point);
-			boolean goalReachable = this.nav.calculItineraire(this.asserv.getCurrentPosition());
-			if (goalReachable) {
-				return new DeplacementTask(this.asserv, this.rouge, this.nav.getCommandeAsserv(), this);
+		System.out.println("Recherche d'objectifs");
+		ArrayList<Point> todo = new ArrayList<Point>(this.objectifs);
+		todo.removeAll(this.objectifsAtteints);
+		
+		// TODO plus d'objectifs
+		if (this.objectifs.size() == this.objectifsAtteints.size()) {
+			System.out.println("J'ai fini mon taff, je vous emmerde et je rentre à ma maison !!");
+		}
+		
+		double dist = 10000;
+		int newObjectif = -1;
+		for (int i = 0; i < todo.size(); i++) {
+			// Check colision centre et torches
+			int xmin = 1150;
+			int xmax = 1850;
+			int ymin = 700;
+			int ymax = 1400;
+			
+			int xa = this.asserv.getCurrentPosition().getX();
+			int ya = this.asserv.getCurrentPosition().getY();
+			int xb = todo.get(i).getX();
+			int yb = todo.get(i).getY();
+			double a = (double)(ya-yb)/(double)(xa-xb);
+			double b = (double)ya-a*(double)xa;
+			
+			double xint1 = (ymin-b)/a;
+			double xint2 = (ymin-b)/a;
+			
+			double yint1 = a*xmax+b;
+			double yint2 = a*xmax+b;
+			
+			boolean colisionCentre = ((xint1 > xmin  && xint1 < xmax) || (xint2 > xmin  && xint2 < xmax) ||
+					(yint1 > ymin  && yint1 < ymax) || (yint2 > ymin  && yint2 < ymax));
+			
+			xmin = 700;
+			xmax = 1100;
+			ymin = 700;
+			ymax = 1100;
+			
+			xint1 = (ymin-b)/a;
+			xint2 = (ymin-b)/a;
+			
+			yint1 = a*xmax+b;
+			yint2 = a*xmax+b;
+			
+			boolean colisionTorche = ((xint1 > xmin  && xint1 < xmax) || (xint2 > xmin  && xint2 < xmax) ||
+					(yint1 > ymin  && yint1 < ymax) || (yint2 > ymin  && yint2 < ymax));
+			
+			if (!colisionCentre && !colisionTorche) {
+				double newdist = Math.hypot(xb-xa, yb-ya);
+				if (newdist < dist) {
+					dist = newdist;
+					newObjectif = i;
+				}
 			}
 		}
-		return null;
+		
+		ArrayList<Point> liste = new ArrayList<Point>();
+		if (newObjectif != -1) {
+			System.out.println("J'ai !!!");
+			liste.add(this.objectifs.get(newObjectif));
+		} else {
+			System.out.println("Fail !!");
+			liste.add(new Point(1100, 1100));
+		}
+		return new DeplacementTask(this.asserv, this.rouge, liste, this);
 	}
 	
 	public static void mainFuu(String[] args) {
@@ -241,13 +299,20 @@ public class Ia {
 		System.out.println(ia.getPosition());
 		
 		System.out.println("Mise en position");
-		ia.asserv.gotoPosition(200, ia.rouge ? 1700 : -1700, true);
+		int mult = ia.rouge ? 1 : -1;
+		ia.asserv.gotoPosition(200, mult * 1700, true);
 		ia.asserv.face(200, 0, true);
 		while (!ia.asserv.lastCommandFinished());
 		
 		System.out.println("Attente remise tirette");
 		// On attend de remettre la tirette
 		while (ia.tirette.isHigh());
+		
+		// On initialise les objectifs
+		ia.initObjectif();
+		
+		// On fait la première route
+		ArrayList<Point> path = ia.getPath(0);
 
 		System.out.println("Attente enlevage tirette pour départ");
 		// On attend de virer la tirette
@@ -275,51 +340,34 @@ public class Ia {
 		System.out.println("Lancement détection");
 		ia.detection.start();
 
-		ia.asserv.gotoPosition(300, ia.rouge ? 1200 : -1200, true);
-		
-		System.out.println("je suis arrivé lol");
-		
-		ia.asserv.gotoPosition(1350, ia.rouge ? 1900 : -1900, true);
-		
-		/*ia.nav.setGoal(ia.nav.getObjectifs().get(0));
-		System.out.println("Calcul itinéraire départ");
-		long time = System.currentTimeMillis();
-		ia.nav.calculItineraire(ia.asserv.getCurrentPosition());
-		System.out.println("Fin du calcul : "+(System.currentTimeMillis() - time)+"ms");
-		
 		System.out.println("Lancement déplacement");
-		ia.deplacement = new DeplacementTask(ia.asserv, ia.rouge, ia.nav.getCommandeAsserv(), ia);
+		ia.deplacement = new DeplacementTask(ia.asserv, ia.rouge, path, ia);
 		ia.deplacement.start();
-		System.out.println("Deplacement run ok");*/
+		System.out.println("Deplacement run ok");
 		
 		while(true);
 
-		/*
-		//nav.debugZoneInterdites();
-		ia.nav.setGoal(250, 100);
-		long begin = System.currentTimeMillis();
-		ia.nav.calculItineraire(20, 160);
-		ArrayList<Point> commandes = ia.nav.getCommandeAsserv();
-		long end = System.currentTimeMillis();
-		System.out.println("================= Commandes asserv ===================");
-		for (Point str : commandes) {
-			System.out.println(str);
+	}
+	
+	public void initObjectif() {
+		int mult = this.rouge ? 1 : -1;
+		this.objectifs.add(new Point(1280, mult * 1400)); // Fresques
+		this.objectifs.add(new Point(750, mult * 1500)); // Mamouth
+		this.objectifs.add(new Point(400, mult * 1200)); // Feu extérieur
+		this.objectifs.add(new Point(1100, mult * 400)); // Feu bas
+		this.objectifs.add(new Point(700, mult * 900)); // Foyer
+	}
+	
+	public ArrayList<Point> getPath(int cas) {
+		int mult = this.rouge ? 1 : -1;
+		switch (cas) {
+			case 0: // Feu sur ligne noir et fresque
+				ArrayList<Point> path = new ArrayList<Point>();
+				path.add(new Point(200, mult * 1400));
+				path.add(new Point(1280, mult * 1400));
+				return path;
 		}
-		System.out.println("Time: " + (end-begin) + "ms");
-		System.out.println("================= Fin Commandes asserv ===================");
-		
-		ia.nav.obstacleMobile(80, 150, 25, 152);
-		
-		begin = System.currentTimeMillis();
-		ia.nav.calculItineraire(20, 160);
-		commandes = ia.nav.getCommandeAsserv();
-		end = System.currentTimeMillis();
-		System.out.println("================= Commandes asserv ===================");
-		for (Point str : commandes) {
-			System.out.println(str);
-		}
-		System.out.println("Time: " + (end-begin) + "ms");
-		System.out.println("================= Fin Commandes asserv ===================");*/
+		return new ArrayList<Point>();
 	}
 
 }
