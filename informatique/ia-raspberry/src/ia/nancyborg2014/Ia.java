@@ -279,7 +279,9 @@ public class Ia {
 		
 		System.out.println("je suis arrivé lol");
 		
-		ia.nav.setGoal(ia.nav.getObjectifs().get(0));
+		ia.asserv.gotoPosition(1350, ia.rouge ? 1900 : -1900, true);
+		
+		/*ia.nav.setGoal(ia.nav.getObjectifs().get(0));
 		System.out.println("Calcul itinéraire départ");
 		long time = System.currentTimeMillis();
 		ia.nav.calculItineraire(ia.asserv.getCurrentPosition());
@@ -288,7 +290,7 @@ public class Ia {
 		System.out.println("Lancement déplacement");
 		ia.deplacement = new DeplacementTask(ia.asserv, ia.rouge, ia.nav.getCommandeAsserv(), ia);
 		ia.deplacement.start();
-		System.out.println("Deplacement run ok");
+		System.out.println("Deplacement run ok");*/
 		
 		while(true);
 
