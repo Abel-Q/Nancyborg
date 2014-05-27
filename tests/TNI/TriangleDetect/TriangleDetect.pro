@@ -1,7 +1,7 @@
 TEMPLATE = app
 CONFIG += console
 
-QT += core multimedia network
+QT += core multimedia network gui widgets
 
 #QMAKE_LIBS += `pkg-config opencv --libs`
 #QMAKE_LIBDIR += /home/loic/OpenCV-2.4.9-android-sdk/sdk/native/libs/armeabi-v7a/
@@ -9,7 +9,8 @@ QT += core multimedia network
 LIBS += $$PWD/android/libs/armeabi-v7a/*
 #LIBS += /home/loic/OpenCV-2.4.9-android-sdk/sdk/native/libs/armeabi-v7a/*
 
-INCLUDEPATH += /home/loic/OpenCV-2.4.9-android-sdk/sdk/native/jni/include/
+#INCLUDEPATH += /home/loic/OpenCV-2.4.9-android-sdk/sdk/native/jni/include/
+INCLUDEPATH += /home/naruto/Téléchargements/OpenCV-2.4.9-android-sdk/sdk/native/jni/include
 
 SOURCES += \
     main.cpp

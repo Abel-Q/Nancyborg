@@ -7,12 +7,64 @@
 #include <QTcpServer>
 #include <QTcpSocket>
 #include <QThread>
+#include <QApplication>
+#include <QLabel>
+#include <QMainWindow>
 
 #include <iostream>
 #include <stdio.h>
 
 using namespace std;
 using namespace cv;
+
+
+
+QImage  cvMatToQImage( const cv::Mat &inMat )
+   {
+      switch ( inMat.type() )
+      {
+         // 8-bit, 4 channel
+         case CV_8UC4:
+         {
+            QImage image( inMat.data, inMat.cols, inMat.rows, inMat.step, QImage::Format_RGB32 );
+
+            return image;
+         }
+
+         // 8-bit, 3 channel
+         case CV_8UC3:
+         {
+            QImage image( inMat.data, inMat.cols, inMat.rows, inMat.step, QImage::Format_RGB888 );
+
+            return image.rgbSwapped();
+         }
+
+         // 8-bit, 1 channel
+         case CV_8UC1:
+         {
+            static QVector<QRgb>  sColorTable;
+
+            // only create our color table once
+            if ( sColorTable.isEmpty() )
+            {
+               for ( int i = 0; i < 256; ++i )
+                  sColorTable.push_back( qRgb( i, i, i ) );
+            }
+
+            QImage image( inMat.data, inMat.cols, inMat.rows, inMat.step, QImage::Format_Indexed8 );
+
+            image.setColorTable( sColorTable );
+
+            return image;
+         }
+
+         default:
+            qWarning() << "ASM::cvMatToQImage() - cv::Mat image type not handled in switch:" << inMat.type();
+            break;
+      }
+
+      return QImage();
+   }
 
 /** Function Headers */
 //void detectAndDisplay(Mat frame);
@@ -21,8 +73,14 @@ using namespace cv;
 String window_name = "Triangle detection";
 
 /** @function main */
-int main(void)
+int main(int argc, char** argv)
 {
+    QApplication a(argc, argv);
+    QWidget window;
+
+    QLabel label("Image", &window);
+    window.showMaximized();
+
 //	VideoCapture capture;
 	VideoCapture capture(0);
 	unsigned int i = 0;
@@ -120,6 +178,7 @@ int main(void)
 		}
 
 		imwrite("/sdcard/test.jpg", frame);
+        label.setPixmap(QPixmap::fromImage(cvMatToQImage(frame)));
 
 		QThread::msleep(3000);
 
@@ -130,5 +189,5 @@ int main(void)
 //        if( (char)c == 27 ) { break; } // escape
 	}
 
-    return 0;
+    return a.exec();
 }
