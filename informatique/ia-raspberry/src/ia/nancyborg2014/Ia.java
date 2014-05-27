@@ -176,10 +176,16 @@ public class Ia {
 			case 2:
 				// Feu extérieur
 				System.out.println("Feu extérieur : éteind moi !!!");
+				this.asserv.face(400, 0, true);
+				this.asserv.go(300, true);
+				this.asserv.go(-300, true);
 				break;
 			case 3:
 				// Feu bas
 				System.out.println("Feu bas : éteind moi !!!");
+				this.asserv.face(0, mult * 400, true);
+				this.asserv.go(300, true);
+				this.asserv.go(-300, true);
 				break;
 			case 4:
 				// Foyer
@@ -280,7 +286,8 @@ public class Ia {
 			ia.asserv.gotoPosition(1000, 0, false);
 			while (true) {
 				if (detectionDroite.doitStopper() || detectionGauche.doitStopper()) {
-					ia.asserv.halt();System.out.println("STOOOOOOOOOOOOOOOOOOOOOP");
+					ia.asserv.halt();
+					System.out.println("STOOOOOOOOOOOOOOOOOOOOOP");
 					System.exit(0);
 				}
 			}
