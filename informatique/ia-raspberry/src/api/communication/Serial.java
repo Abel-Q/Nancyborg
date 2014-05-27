@@ -53,6 +53,7 @@ public class Serial {
 	 * @param str
 	 */
 	public synchronized void write(String str) {
+		System.out.println("asserv : "+str);
 		serial.write(str);
 	}
 

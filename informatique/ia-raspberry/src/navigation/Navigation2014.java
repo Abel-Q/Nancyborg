@@ -52,11 +52,11 @@ public class Navigation2014 extends Navigation {
 
 	@Override
 	protected void setZonesInterditesMobiles(int x, int y) {
-		for (int i = 0; i <= 8; i++) {
-			this.zonesInterditesMobiles.add(new Point(x-4, y-4+i));
-			this.zonesInterditesMobiles.add(new Point(x-4+i, y-4));
-			this.zonesInterditesMobiles.add(new Point(x+4, y-4+i));
-			this.zonesInterditesMobiles.add(new Point(x-4+i, y+4));
+		for (int i = 0; i <= 6; i++) {
+			this.zonesInterditesMobiles.add(new Point(x+3, y+i));
+			this.zonesInterditesMobiles.add(new Point(x-3, y+i));
+			this.zonesInterditesMobiles.add(new Point(x-3-i, y));
+			this.zonesInterditesMobiles.add(new Point(x-3+i, y+6));
 		}
 	}
 	

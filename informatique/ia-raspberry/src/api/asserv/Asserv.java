@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.pi4j.io.serial.SerialDataEvent;
-import com.pi4j.io.serial.SerialDataListener;
-
 import navigation.Point;
+import purejavacomm.NoSuchPortException;
+import purejavacomm.PortInUseException;
+import purejavacomm.UnsupportedCommOperationException;
 import api.communication.Serial;
 
 /**
@@ -60,7 +60,7 @@ public class Asserv {
 						}
 						
 						Point point = new Point((int)Double.parseDouble(m.group(1)), (int)Double.parseDouble(m.group(2)));
-						point.setCap((int)Double.parseDouble(m.group(3)));
+						point.setCap(Double.parseDouble(m.group(3)));
 						nous = point;
 						lastD = Integer.parseInt(m.group(4));
 					}
@@ -84,6 +84,7 @@ public class Asserv {
 		System.out.println("Connexion à l'asserv...");
 		commande = "";
 		mbed = new Serial(serie, /*115200*/230400);
+		System.out.println("Serie ok");
 		reset();
 		checker.start();
 	}
@@ -95,6 +96,7 @@ public class Asserv {
 			String blabla = mbed.readLine();
 			if (blabla.endsWith("ok")) {
 				System.out.println("Asserv ready (la salope)");
+				return;
 			} else {
 				System.out.println(blabla);
 			}

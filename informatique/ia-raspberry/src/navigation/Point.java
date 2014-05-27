@@ -9,7 +9,7 @@ public class Point {
 
 	private int x;
 	private int y;
-	private float cap;
+	private double cap;
 	
 	/**
 	 * Représente une direction dans laquelle il faut aller pour aller d'un point à un autre
@@ -50,11 +50,11 @@ public class Point {
 		return y;
 	}
 	
-	public float getCap() {
+	public double getCap() {
 		return cap;
 	}
 
-	public void setCap(float cap) {
+	public void setCap(double cap) {
 		this.cap = cap;
 	}
 	
