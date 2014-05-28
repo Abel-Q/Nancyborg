@@ -315,8 +315,8 @@ void CommandManager::calageBordureGros(int sens)
     cnsgCtrl->setLowSpeed(true);
 
     // On recule 2sec
-    cnsgCtrl->add_dist_consigne(Utils::mmToUO(odometrie, -300));
-    wait(3);
+    cnsgCtrl->add_dist_consigne(Utils::mmToUO(odometrie, -150));
+    wait(2);
     cnsgCtrl->angle_Regu_On(false); //on coupe le régu d'angle pour s'aligner avec la bordure
     wait(2); //et on attend encore
 
@@ -330,17 +330,17 @@ void CommandManager::calageBordureGros(int sens)
     cnsgCtrl->angle_Regu_On(true);
 
     // On avance un peu pour sortir de la zone
-    cnsgCtrl->add_dist_consigne(Utils::mmToUO(odometrie, 600));
-    wait(4);
+    cnsgCtrl->add_dist_consigne(Utils::mmToUO(odometrie, 140));
+    wait(2);
 
     // En fonction de la couleur, on tourne dans un sens ou l'autre
     int mult = sens == 0 ? 1 : -1;
-    cnsgCtrl->add_angle_consigne(mult * Utils::degToUO(odometrie, 90));
+    cnsgCtrl->add_angle_consigne(mult * Utils::degToUO(odometrie, -90));
     wait(2);
 
     // On recule dans la bordure
-    cnsgCtrl->add_dist_consigne(Utils::mmToUO(odometrie, -800));
-    wait(4);
+    cnsgCtrl->add_dist_consigne(Utils::mmToUO(odometrie, -150));
+    wait(2);
     cnsgCtrl->angle_Regu_On(false); //on coupe le régu d'angle pour s'aligner avec la bordure
     wait(2); //et on attend encore
 
@@ -348,22 +348,11 @@ void CommandManager::calageBordureGros(int sens)
     odometrie->resetY();
     cnsgCtrl->reset_regu_dist();
     cnsgCtrl->angle_Regu_On(true);
-    cnsgCtrl->add_dist_consigne(Utils::mmToUO(odometrie, 500));
-    wait(3);
-
-
-    // On tourne pour entrer à nouveau dans la zone de depart
-    mult = sens == 0 ? -1 : 1;
-    cnsgCtrl->add_angle_consigne(mult * Utils::degToUO(odometrie, 90));
+    cnsgCtrl->add_dist_consigne(Utils::mmToUO(odometrie, 150));
     wait(2);
-
-    // On se met en postion de départ
-    cnsgCtrl->add_dist_consigne(Utils::mmToUO(odometrie, -380));
-    wait(4);
 
     // On remet la marche arrière à vitesse normale
     cnsgCtrl->setLowSpeed(false);
-
 }
 
 void CommandManager::calageBordurePetit(int sens)
@@ -405,16 +394,6 @@ void CommandManager::calageBordurePetit(int sens)
     cnsgCtrl->angle_Regu_On(true);
     cnsgCtrl->add_dist_consigne(Utils::mmToUO(odometrie, 140));
     wait(3);
-
-
-    // On tourne pour entrer à nouveau dans la zone de départ
-    mult = sens == 0 ? -1 : 1;
-    cnsgCtrl->add_angle_consigne(mult * Utils::degToUO(odometrie, 90));
-    wait(3);
-
-    // On se met en postion de départ
-    cnsgCtrl->add_dist_consigne(Utils::mmToUO(odometrie, -500));
-    wait(5);
 
     // On remet la marche arrière à vitesse normale
     cnsgCtrl->setLowSpeed(false);
