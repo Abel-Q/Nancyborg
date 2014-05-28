@@ -30,6 +30,8 @@ public class Ia {
 	public DeplacementTask deplacement;
 	public ArrayList<Point> objectifs;
 	public ArrayList<Point> objectifsAtteints;
+	public Point objectifCourant;
+	public DetectionSRF capteurArriere;
 
 	public Ia() {
 		try {
@@ -48,6 +50,7 @@ public class Ia {
 			// Détection de l'adversaire
 			//this.detection = this.getDetecteur();
 			this.detection = new DetectionSRFThread(0xE4, 0xE8, 30, this);
+			this.capteurArriere = new DetectionSRF(0xE0, 30, 30);
 
 			//nav = new Navigation2014();
 		} catch (IOException e) {
@@ -166,8 +169,34 @@ public class Ia {
 			case 0:
 				// On place les fresques
 				System.out.println("Pose ta fresque Biatch !!!");
-				this.asserv.gotoPosition(1280, mult * 1800, true);
-				this.asserv.go(-400, true);
+				this.asserv.gotoPosition(1280, mult * 200, false);
+				while (!this.asserv.lastCommandFinished()) {
+					try {
+						if (this.detection.getCapteurDroit().doitStopper() || this.detection.getCapteurGauche().doitStopper()) {
+							this.asserv.halt();
+							Thread.sleep(200);
+							this.asserv.reset();
+							while (!(this.detection.getCapteurDroit().peutRepartir() && this.detection.getCapteurGauche().peutRepartir()));
+							this.asserv.gotoPosition(1280, mult * 200, false);
+						}
+					} catch (IOException | InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+				this.asserv.go(-400, false);
+				while (!this.asserv.lastCommandFinished()) {
+					try {
+						if (this.capteurArriere.doitStopper()) {
+							this.asserv.halt();
+							Thread.sleep(200);
+							this.asserv.reset();
+							while (!(this.capteurArriere.peutRepartir()));
+							this.asserv.go(-400, false);
+						}
+					} catch (IOException | InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
 				break;
 			case 1:
 				// On tire sur le mamouth
@@ -178,14 +207,66 @@ public class Ia {
 				System.out.println("Feu extérieur : éteind moi !!!");
 				this.asserv.face(400, 0, true);
 				this.asserv.go(300, true);
+				while (!this.asserv.lastCommandFinished()) {
+					try {
+						if (this.detection.getCapteurDroit().doitStopper() || this.detection.getCapteurGauche().doitStopper()) {
+							this.asserv.halt();
+							Thread.sleep(200);
+							this.asserv.reset();
+							while (!(this.detection.getCapteurDroit().peutRepartir() && this.detection.getCapteurGauche().peutRepartir()));
+							this.asserv.go(300, true);
+						}
+					} catch (IOException | InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
 				this.asserv.go(-300, true);
+				while (!this.asserv.lastCommandFinished()) {
+					try {
+						if (this.capteurArriere.doitStopper()) {
+							this.asserv.halt();
+							Thread.sleep(200);
+							this.asserv.reset();
+							while (!(this.capteurArriere.peutRepartir()));
+							this.asserv.go(-300, true);
+						}
+					} catch (IOException | InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
 				break;
 			case 3:
 				// Feu bas
 				System.out.println("Feu bas : éteind moi !!!");
-				this.asserv.face(0, mult * 400, true);
+				this.asserv.face(0, mult * 1600, true);
 				this.asserv.go(300, true);
+				while (!this.asserv.lastCommandFinished()) {
+					try {
+						if (this.detection.getCapteurDroit().doitStopper() || this.detection.getCapteurGauche().doitStopper()) {
+							this.asserv.halt();
+							Thread.sleep(200);
+							this.asserv.reset();
+							while (!(this.detection.getCapteurDroit().peutRepartir() && this.detection.getCapteurGauche().peutRepartir()));
+							this.asserv.go(300, true);
+						}
+					} catch (IOException | InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
 				this.asserv.go(-300, true);
+				while (!this.asserv.lastCommandFinished()) {
+					try {
+						if (this.capteurArriere.doitStopper()) {
+							this.asserv.halt();
+							Thread.sleep(200);
+							this.asserv.reset();
+							while (!(this.capteurArriere.peutRepartir()));
+							this.asserv.go(-300, true);
+						}
+					} catch (IOException | InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
 				break;
 			case 4:
 				// Foyer
@@ -210,21 +291,23 @@ public class Ia {
 		System.out.println("Recherche d'objectifs");
 		ArrayList<Point> todo = new ArrayList<Point>(this.objectifs);
 		todo.removeAll(this.objectifsAtteints);
+		todo.remove(this.objectifCourant);
+		System.out.println("Objectif courant");
 		System.out.println("todo : "+todo);
 		
-		// TODO plus d'objectifs
 		if (this.objectifs.size() == this.objectifsAtteints.size()) {
 			System.out.println("J'ai fini mon taff, je vous emmerde et je rentre à ma maison !!");
 		}
 		
 		double dist = 10000;
 		int newObjectif = -1;
+		int mult = this.rouge ? 1 : -1;
 		for (int i = 0; i < todo.size(); i++) {
 			// Check colision centre et torches
 			int xmin = 1150;
 			int xmax = 1850;
-			int ymin = 700;
-			int ymax = 1400;
+			int ymin = mult * 1300;
+			int ymax = mult * 600;
 			
 			int xa = this.asserv.getCurrentPosition().getX();
 			int ya = this.asserv.getCurrentPosition().getY();
@@ -244,8 +327,8 @@ public class Ia {
 			
 			xmin = 700;
 			xmax = 1100;
-			ymin = 700;
-			ymax = 1100;
+			ymin = mult * 1300;
+			ymax = mult * 900;
 			
 			xint1 = (ymin-b)/a;
 			xint2 = (ymin-b)/a;
@@ -266,13 +349,15 @@ public class Ia {
 		}
 		
 		ArrayList<Point> liste = new ArrayList<Point>();
+		Point point;
 		if (newObjectif != -1) {
 			System.out.println("J'ai !!!");
-			liste.add(todo.get(newObjectif));
+			point = todo.get(newObjectif);
 		} else {
 			System.out.println("Fail !!");
-			liste.add(new Point(1100, 1100));
+			point = new Point(1100, mult * 900);
 		}
+		liste.add(point);
 		return new DeplacementTask(this.asserv, this.rouge, liste, this);
 	}
 	
@@ -323,12 +408,6 @@ public class Ia {
 
 		System.out.println(ia.getPosition());
 		
-		System.out.println("Mise en position");
-		int mult = ia.rouge ? 1 : -1;
-		ia.asserv.gotoPosition(200, mult * 1700, true);
-		ia.asserv.face(200, 0, true);
-		while (!ia.asserv.lastCommandFinished());
-		
 		System.out.println("Attente remise tirette");
 		// On attend de remettre la tirette
 		while (ia.tirette.isHigh());
@@ -338,6 +417,7 @@ public class Ia {
 		
 		// On fait la première route
 		ArrayList<Point> path = ia.getPath(0);
+		ia.objectifCourant = ia.objectifs.get(0);
 
 		System.out.println("Attente enlevage tirette pour départ");
 		// On attend de virer la tirette
@@ -376,11 +456,11 @@ public class Ia {
 	
 	public void initObjectif() {
 		int mult = this.rouge ? 1 : -1;
-		this.objectifs.add(new Point(1280, mult * 1400)); // Fresques
-		this.objectifs.add(new Point(750, mult * 1500)); // Mamouth
-		this.objectifs.add(new Point(400, mult * 1200)); // Feu extérieur
-		this.objectifs.add(new Point(1100, mult * 400)); // Feu bas
-		this.objectifs.add(new Point(700, mult * 900)); // Foyer
+		this.objectifs.add(new Point(1280, mult * 600)); // Fresques
+		this.objectifs.add(new Point(750, mult * 500)); // Mamouth
+		this.objectifs.add(new Point(400, mult * 800)); // Feu extérieur
+		this.objectifs.add(new Point(1100, mult * 1600)); // Feu bas
+		this.objectifs.add(new Point(700, mult * 1100)); // Foyer
 	}
 	
 	public ArrayList<Point> getPath(int cas) {
@@ -388,8 +468,8 @@ public class Ia {
 		switch (cas) {
 			case 0: // Feu sur ligne noir et fresque
 				ArrayList<Point> path = new ArrayList<Point>();
-				path.add(new Point(200, mult * 1400));
-				path.add(new Point(1280, mult * 1400));
+				path.add(new Point(200, mult * 600));
+				path.add(new Point(1280, mult * 600));
 				return path;
 		}
 		return new ArrayList<Point>();

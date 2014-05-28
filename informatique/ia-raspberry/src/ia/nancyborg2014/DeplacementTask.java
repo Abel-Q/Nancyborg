@@ -42,6 +42,7 @@ public class DeplacementTask extends Thread {
 			this.asserv.gotoPosition(p.getX(), mult * p.getY(), false);
 			this.waitForFinish();
 		}
+		// TODO récupérer code de marquage
 		ia.objectifAtteint(points.get(points.size()-1));
 	}
 }
