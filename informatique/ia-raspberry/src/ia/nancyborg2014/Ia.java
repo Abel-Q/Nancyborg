@@ -8,7 +8,7 @@ import navigation.Navigation2014;
 import navigation.Point;
 import api.asserv.Asserv;
 import api.canon2014.Canon;
-import api.canon2014.Canon.DirectionTir;
+import api.canon2014.Canon.ModeTir;
 import api.chrono.Chrono;
 import api.gpio.Gpio;
 import api.sensors.DetectionIR;
@@ -53,12 +53,12 @@ public class Ia {
 
 			nav = new Navigation2014();
 			canon = new Canon(RaspiPin.GPIO_07, this);
-			
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public DetectionIR getDetecteur() {
 		float[] anglesCapteurs = { -45.0f, 0.0f, 45.0f };
 		AX12Linux ax12Detection = new AX12Linux("/dev/ttyAMA0", 1, 115200);
@@ -69,22 +69,22 @@ public class Ia {
 	public Point getPosition() {
 		return asserv.getCurrentPosition();
 	}
-	
+
 	public ArrayList<Point> getCachedCommandesAsserv() {
 		return this.nav.getCachedCommandeAsserv();
 	}
-	
+
 	public Point[] getZoneInterdite(Point adversaire) {
 		return this.nav.getExtremeZoneInterdite(adversaire);
 	}
 
-	public void detectionAdversaire(Point  adversaire) {
+	public void detectionAdversaire(Point adversaire) {
 		// La détectionSRF nous a stoppé, l'asserv est déjà coupée
 		if (this.deplacement != null) {
 			this.deplacement.stop();
 		}
 		this.deplacement = null;
-		
+
 		this.asserv.halt();
 		try {
 			Thread.sleep(200);
@@ -92,20 +92,20 @@ public class Ia {
 			e.printStackTrace();
 		}
 		this.detection.setDetect(false);
-		
+
 		// On reset l'arret d'urgence de l'asserv
 		this.asserv.resetHalt();
-		
+
 		// On regarde  derrière nous pour stopper la détection
 		this.asserv.turn(180, true);
-		
+
 		// On relance  DStar
 		System.out.println("Nouveau calcul");
 		long time = System.currentTimeMillis();
-		adversaire.setX((int)Math.rint((double)adversaire.getX()/(double)100));
-		adversaire.setY((int)Math.rint((double)adversaire.getY()/(double)100));
-		
-		Point nous = new Point((int)Math.rint((double)this.getPosition().getX()/(double)100), (int)Math.rint((double)this.getPosition().getY()/(double)100));
+		adversaire.setX((int) Math.rint((double) adversaire.getX() / (double) 100));
+		adversaire.setY((int) Math.rint((double) adversaire.getY() / (double) 100));
+
+		Point nous = new Point((int) Math.rint((double) this.getPosition().getX() / (double) 100), (int) Math.rint((double) this.getPosition().getY() / (double) 100));
 		boolean goalReachable = this.nav.obstacleMobile(adversaire, nous);
 		if (goalReachable) {
 			this.deplacement = new DeplacementTask(this.asserv, this.rouge, this.nav.getCommandeAsserv(), this);
@@ -113,7 +113,7 @@ public class Ia {
 			System.out.println("Changement d'objectif");
 			this.deplacement = this.nouvelObjectif();
 		}
-		System.out.println("Fin du calcul : "+(System.currentTimeMillis()-time)+"ms");
+		System.out.println("Fin du calcul : " + (System.currentTimeMillis() - time) + "ms");
 
 		// On se met en route ou si l'on n'a plus d'objectif, on attend et on recommence
 		if (this.deplacement != null) {
@@ -123,19 +123,19 @@ public class Ia {
 			this.detectionAdversaire(adversaire, time);
 		}
 	}
-	
+
 	// On a vu quelqu'un mais ça marche pas
 	public void detectionAdversaire(Point adversaire, long time) {
 		System.out.println("Stooooooop");
 		if (this.deplacement != null) {
 			this.deplacement.stop();
 		}
-		System.out.println("stop thread : "+(System.currentTimeMillis()-time)+"ms");
+		System.out.println("stop thread : " + (System.currentTimeMillis() - time) + "ms");
 		this.deplacement = null;
-		System.out.println("null : "+(System.currentTimeMillis()-time)+"ms");
+		System.out.println("null : " + (System.currentTimeMillis() - time) + "ms");
 		// On s'arrête et on attend de perdre notre inertie
 		this.asserv.halt();
-		System.out.println("Temps avant d'envoyer halt : "+(System.currentTimeMillis()-time)+"ms");
+		System.out.println("Temps avant d'envoyer halt : " + (System.currentTimeMillis() - time) + "ms");
 		try {
 			Thread.sleep(500);
 		} catch (InterruptedException e) {
@@ -155,7 +155,7 @@ public class Ia {
 			System.out.println("Changement d'objectif");
 			this.deplacement = this.nouvelObjectif();
 		}
-		System.out.println("Fin du calcul : "+(System.currentTimeMillis()-time)+"ms");
+		System.out.println("Fin du calcul : " + (System.currentTimeMillis() - time) + "ms");
 
 		// On se met en route ou si l'on n'a plus d'objectif, on attend et on recommence
 		if (this.deplacement != null) {
@@ -198,7 +198,7 @@ public class Ia {
 		}
 		return null;
 	}
-	
+
 	public static void mainFuu(String[] args) {
 		//System.out.println("Atteint");
 		try {
@@ -209,7 +209,8 @@ public class Ia {
 			ia.asserv.gotoPosition(1000, 0, false);
 			while (true) {
 				if (detectionDroite.doitStopper() || detectionGauche.doitStopper()) {
-					ia.asserv.halt();System.out.println("STOOOOOOOOOOOOOOOOOOOOOP");
+					ia.asserv.halt();
+					System.out.println("STOOOOOOOOOOOOOOOOOOOOOP");
 					System.exit(0);
 				}
 			}
@@ -224,13 +225,14 @@ public class Ia {
 
 		// On initialise le chrono
 		Chrono chrono = new Chrono(89 * 1000);
-
+/*
 		System.out.println("Attente enlevage tirette");
 		// On attend de virer la tirette
-		while (ia.tirette.isLow());
-		
+		while (ia.tirette.isLow())
+			;
+
 		ia.rouge = ia.selecteurCouleur.isHigh();
-		System.out.println("couleur isHigh = "+ia.selecteurCouleur.isHigh()+" - rouge = "+ia.rouge);
+		System.out.println("couleur isHigh = " + ia.selecteurCouleur.isHigh() + " - rouge = " + ia.rouge);
 
 		System.out.println("Callage bordure");
 		// On lance le callage bordure
@@ -238,19 +240,27 @@ public class Ia {
 
 		System.out.println("Attente remise tirette");
 		// On attend de remettre la tirette
-		while (ia.tirette.isHigh());
+		while (ia.tirette.isHigh())
+			;
 		System.out.println("Attente enlevage tirette");
 		// On attend de virer la tirette
-		while (ia.tirette.isLow());
+		while (ia.tirette.isLow())
+			;
 
 		System.out.println(ia.getPosition());
-		
+
 		System.out.println("Mise en position");
-		ia.asserv.gotoPosition(750, ia.rouge ? 2000-790 : -(2000-790), true);
-		while (!ia.asserv.lastCommandFinished());
-		
-		ia.canon.tirSurMammouthCible(DirectionTir.MILIEU, false);
-		
+		ia.asserv.gotoPosition(750, ia.rouge ? 2000 - 790 : -(2000 - 790), true);
+		while (!ia.asserv.lastCommandFinished())
+			;
+*/
+		ia.canon.tir(ModeTir.HAUT);
+		ia.canon.tir(ModeTir.HAUT);
+		ia.canon.tir(ModeTir.HAUT);
+		ia.canon.tir(ModeTir.BAS);
+		ia.canon.tir(ModeTir.BAS);
+		ia.canon.tir(ModeTir.BAS);
+
 		/*System.out.println("Mise en position");
 		ia.asserv.gotoPosition(200, ia.rouge ? 1700 : -1700, true);
 		ia.asserv.face(200, 0, true);
@@ -302,8 +312,9 @@ public class Ia {
 		ia.deplacement = new DeplacementTask(ia.asserv, ia.rouge, ia.nav.getCommandeAsserv(), ia);
 		ia.deplacement.start();
 		System.out.println("Deplacement run ok");*/
-		
-		while(true);
+
+		while (true)
+			;
 
 		/*
 		//nav.debugZoneInterdites();

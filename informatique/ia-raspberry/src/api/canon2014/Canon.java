@@ -11,107 +11,49 @@ import com.pi4j.io.gpio.Pin;
 import com.pi4j.io.gpio.PinMode;
 
 public class Canon {
-
-	public enum DirectionTir {
+	public enum ModeTir {
 		HAUT,
-		MILIEU,
 		BAS
 	}
+	private static final float alphaMin = 218; //en degrés
+	private static final float alphaMax = 237; //en degrés
+	private static final float angleHaut = 220;
+	private static final float angleBas = 226;
 
-	private float alphaMin = 224; //en degré
-	private float alphaMax = 245; //en degré
-	private double hauteurLanceur = 16.5 * 10; //en mm
 	private Ia ia;
-	private Pin pinCanon;
-	private AX12Linux axRotation;
+	private AX12Linux axElevation;
 	private AX12Linux axBarilet;
-	private boolean collaboration = true; // Si true on collabore, sinon on tire nos 6 balles dans le tas !
 	private Gpio gpio;
-	private Point currentPosition;
-	private Tir[] objectifs = new Tir[9]; //[0],[1],[2] pour le haut; [3],[4],[5] pour milieu et [6],[7],[8] pour bas
-	private Tir centreMammouth;
-	private Tir centreLanceur;
+	private int numBalle = 0;
 
 	public Canon(Pin pinCanon, Ia ia) throws IOException {
-		this.axRotation = new AX12Linux("/dev/ttyAMA0", 2, 115200);
+		this.axElevation = new AX12Linux("/dev/ttyAMA0", 2, 115200);
 		this.axBarilet = new AX12Linux("/dev/ttyAMA0", 3, 115200);
 		this.ia = ia;
-		this.pinCanon = pinCanon;
 
-		axRotation.setCWLimit(alphaMin); // A VERIFIER SI LE SENS EST CORRECT !!!
-		axRotation.setCCWLimit(alphaMax); // A VERIFIER SI LE SENS EST CORRECT !!!
+		axElevation.setCWLimit(alphaMin);
+		axElevation.setCCWLimit(alphaMax);
 		this.axBarilet.setGoalPosition(0, true);
 
 		gpio = new Gpio(pinCanon, PinMode.DIGITAL_OUTPUT);
 		gpio.setLow();
-
-		centreMammouth = new Tir(750, 2000, 370);
-		for(int k=0;k<3;k++) {
-			for(int i=0;i<3;i++) {
-				objectifs[i + 3*k] = new Tir(centreMammouth.getX() + (i-1) * 30, centreMammouth.getY(), centreMammouth.getZ() + (k-1) * 25);
-			}
-		}
 	}
 
-	public void lancer(double angleLanceur, int numBalle) throws IOException, InterruptedException{
+	public void lancer(float angleLanceur, int numBalle) throws IOException, InterruptedException{
 		System.out.println("lancer: " + angleLanceur);
-		this.axRotation.setGoalPosition((float) angleLanceur + alphaMin, true);
+		this.axElevation.setGoalPosition((float) angleLanceur, true);
 		this.axBarilet.setGoalPosition(60.0f * numBalle, true);
 		gpio.setHigh();
-		Thread.sleep(20);
+		Thread.sleep(40);
 		gpio.setLow();
-		//this.axRotation.setGoalPosition(-angleLanceur, true);
-		//this.axRotation.setGoalPosition(alphaMin, true);
 	}
 
-	public void tirSurMammouthCible(DirectionTir directionTir, boolean collaboration) throws IOException, InterruptedException {
-		boolean rouge = ia.rouge; //si True => y >= 0
-		this.currentPosition = ia.getPosition();
-		this.centreLanceur = new Tir(currentPosition.getX(),currentPosition.getY(),hauteurLanceur);
-		double normeDistance;
-		
-		if(!rouge) {
-			centreMammouth = new Tir(3000-750, 2000, 370);
-		}
-		
-		if(collaboration) {
-			switch (directionTir) {
-			case BAS:
-				for(int i=0;i<3;i++) {
-					//ia.asserv.turn(angleTir(objectifs[i], currentPosition) - currentPosition.getCap(), false);
-					ia.asserv.face(objectifs[i].getX(), objectifs[i].getY(), true);
-					normeDistance = Math.sqrt(Math.pow((objectifs[i].getX()-currentPosition.getX()),2)+Math.pow((objectifs[i].getY()-currentPosition.getY()),2));
-					lancer(Math.atan((objectifs[i].getZ()-hauteurLanceur)/normeDistance) + 12, i%7);
-				}
-				break;
-			case HAUT:
-				for(int i=6;i<9;i++) {
-					ia.asserv.face(objectifs[i].getX(), objectifs[i].getY(), true);
-					normeDistance = Math.sqrt(Math.pow((objectifs[i].getX()-currentPosition.getX()),2)+Math.pow((objectifs[i].getY()-currentPosition.getY()),2));
-					lancer(Math.atan((objectifs[i].getZ()-hauteurLanceur)/normeDistance) + 12, i%7);
-				}
-				break;
-			case MILIEU:
-				for(int i=3;i<6;i++) {
-					ia.asserv.face(objectifs[i].getX(), objectifs[i].getY(), true);
-					normeDistance = Math.sqrt(Math.pow((objectifs[i].getX()-currentPosition.getX()),2)+Math.pow((objectifs[i].getY()-currentPosition.getY()),2));
-					lancer(Math.atan((objectifs[i].getZ()-hauteurLanceur)/normeDistance) + 12, i%7);
-				}
-				break;
-			default:
-				break;
-
-			}
-		}
-		else {
-			for(int i=0;i<9;i++) {
-				ia.asserv.face(objectifs[i].getX(), objectifs[i].getY(), true);
-				normeDistance = Math.sqrt(Math.pow((objectifs[i].getX()-currentPosition.getX()),2)+Math.pow((objectifs[i].getY()-currentPosition.getY()),2));
-				System.out.println("angle =" + Math.atan((objectifs[i].getZ()-hauteurLanceur)/normeDistance) + " en degré c'est mieux "+ Math.toDegrees(Math.atan((objectifs[i].getZ()-hauteurLanceur)/normeDistance)));
-				lancer(Math.toDegrees(Math.atan((objectifs[i].getZ()-hauteurLanceur)/normeDistance) + 12), i%7);
-				//Thread.sleep(7000);
-			}
+	public void tir(ModeTir mode) throws IOException, InterruptedException {
+		if (mode == ModeTir.HAUT) {
+			// on tire nos 3 balles en haut et 3 en bas
+			lancer(angleHaut, numBalle++);
+		} else if (mode == ModeTir.BAS) {
+			lancer(angleBas, numBalle++);
 		}
 	}
-
 }
