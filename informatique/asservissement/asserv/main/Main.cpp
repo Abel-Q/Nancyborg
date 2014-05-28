@@ -259,10 +259,12 @@ void Live_isr()
 
 
     if ((mod++) % 20 == 0) {
-        printf("#x%lfy%lfa%lfd%d\n", (double)Utils::UOTomm(odometrie, odometrie->getX()),
+        printf("#x%lfy%lfa%lfd%dvg%dvd%d\n", (double)Utils::UOTomm(odometrie, odometrie->getX()),
                                    (double)Utils::UOTomm(odometrie, odometrie->getY()),
                                    odometrie->getTheta(),
-                                   commandManager->getLastCommandStatus());
+                                   commandManager->getLastCommandStatus(),
+                                   motorController->getVitesseG(),
+                                   motorController->getVitesseD());
 
         if (commandManager->getLastCommandStatus() == 1)
             commandManager->setLastCommandStatus(2);
