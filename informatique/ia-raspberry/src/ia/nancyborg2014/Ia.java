@@ -35,7 +35,7 @@ public class Ia {
 	public Point objectifCourant;
 	public DetectionSRF capteurArriere;
 	public Canon canon;
-	public Fillet filet;
+	//public Fillet filet;
 
 	public Ia() {
 		try {
@@ -58,7 +58,7 @@ public class Ia {
 
 			//nav = new Navigation2014();
 			canon = new Canon(RaspiPin.GPIO_07, this);
-			filet = new Fillet(this);
+			//filet = new Fillet(this);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -392,10 +392,14 @@ public class Ia {
 		// On initialise le chrono
 		Chrono chrono = new Chrono(89 * 1000);
 		
-/*
 		System.out.println("Attente enlevage tirette");
 		// On attend de virer la tirette
 		while (ia.tirette.isLow());
+		
+		for (int n = 0; n < 6; n++) {
+			ia.canon.positionnerCanon(n);
+			Thread.sleep(2000);
+		}
 		
 		ia.rouge = ia.selecteurCouleur.isHigh();
 		System.out.println("couleur isHigh = "+ia.selecteurCouleur.isHigh()+" - rouge = "+ia.rouge);
@@ -403,7 +407,7 @@ public class Ia {
 		System.out.println("Callage bordure");
 		// On lance le callage bordure
 		ia.asserv.calageBordure(!ia.rouge);
-
+/*
 		System.out.println("Attente remise tirette");
 		// On attend de remettre la tirette
 		while (ia.tirette.isHigh());
@@ -446,21 +450,30 @@ public class Ia {
 		ia.deplacement.start();
 		System.out.println("Deplacement run ok");
 */
-		ia.asserv.gotoPosition(750, ia.fuckingMult() * (2000-790), true);
+		
+		
+		final int angle_delta = 10;
+		ia.asserv.gotoPosition(750, ia.fuckingMult() * 500, true);
 		ia.asserv.face(750, 0, true);
+		
+		ia.asserv.turn(-angle_delta, true);
 		ia.canon.tir(ModeTir.HAUT);
-		ia.asserv.turn(5, true);
+		
+		ia.asserv.turn(angle_delta, true);
 		ia.canon.tir(ModeTir.HAUT);
-		ia.asserv.turn(5, true);
+		
+		ia.asserv.turn(angle_delta, true);
 		ia.canon.tir(ModeTir.HAUT);
-		ia.asserv.turn(-15, true);
-		ia.canon.tir(ModeTir.BAS);
-		ia.asserv.turn(-5, true);
-		ia.canon.tir(ModeTir.BAS);
-		ia.asserv.turn(-5, true);
+
 		ia.canon.tir(ModeTir.BAS);
 		
-		ia.filet.lancer();
+		ia.asserv.turn(-angle_delta, true);
+		ia.canon.tir(ModeTir.BAS);
+		
+		ia.asserv.turn(-angle_delta, true);
+		ia.canon.tir(ModeTir.BAS);
+		
+		//ia.filet.lancer();
 
 		while(true);
 

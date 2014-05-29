@@ -36,11 +36,15 @@ public class Canon {
 		gpio = new Gpio(pinCanon, PinMode.DIGITAL_OUTPUT);
 		gpio.setLow();
 	}
+	
+	public void positionnerCanon(int numBalle) {
+		this.axBarilet.setGoalPosition(60.0f * numBalle, true);
+	}
 
 	public void lancer(float angleLanceur, int numBalle) throws IOException, InterruptedException{
 		System.out.println("lancer: " + angleLanceur);
 		this.axElevation.setGoalPosition((float) angleLanceur, true);
-		this.axBarilet.setGoalPosition(60.0f * numBalle, true);
+		positionnerCanon(numBalle);
 		gpio.setHigh();
 		Thread.sleep(40);
 		gpio.setLow();
