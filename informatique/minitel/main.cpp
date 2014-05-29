@@ -56,6 +56,7 @@ PololuQik2 qikP(TX_QIK_P,RX_QIK_P,RESET_QIK_P,ERROR_QIK_P,NULL,true);
 SRF08 ultraArr(SDA, SCL, 0xE2); //SRF08 ranging module 1 capteur arrière
 SRF08 ultraG(SDA, SCL, 0xE4); //SRF08 ranging module 2 capteur gauche
 SRF08 ultraD(SDA, SCL, 0xE6); //SRF08 ranging module 3 capteur droit
+SRF08 ultraM(SDA, SCL, 0xE0); //SRF08 ranging module 4 capteur milieu petit
 
 /* ################################################################## */
 
@@ -68,8 +69,10 @@ Timer timeAngle;
 /* #############  DECLARATION des variables globales ################ */
 int distanceGauche[TAILLE_MAX];
 int distanceDroit[TAILLE_MAX];
+int distanceMilieu[TAILLE_MAX];
+int distanceArr[TAILLE_MAX];
 int cptPosition = 0;
-int detectEnnemi = 1;
+int angleGo = 0;
 /* ################################################################## */
 
 int main()
@@ -85,6 +88,8 @@ int main()
     {
         distanceGauche[cpt] = 0;
         distanceDroit[cpt] = 0;
+        distanceMilieu[cpt] = 0;
+        distanceArr[cpt] = 0;
     }
 
     init();
@@ -104,6 +109,14 @@ int main()
         ultraD.startRanging();
         while (!ultraD.rangingFinished()) wait(0.01);
         distanceDroit[cpt] = ultraD.getRange();
+        
+        ultraM.startRanging();
+        while (!ultraM.rangingFinished()) wait(0.01);
+        distanceMilieu[cpt] = ultraM.getRange();
+        
+        ultraArr.startRanging();
+        while (!ultraArr.rangingFinished()) wait(0.01);
+        distanceArr[cpt] = ultraArr.getRange();
     }
 
     qikP.setMotor1Speed(-50);
@@ -123,6 +136,7 @@ int main()
 
     qik.setMotor0Speed(AMOTEURD);
     qik.setMotor1Speed(AMOTEURG);
+    printf("\rAttente de %f secondes pour rejoindre la ligne\n", HAND_TROLL_TIMEOUT);
     wait(HAND_TROLL_TIMEOUT);
 
     qik.stopBothMotors();
@@ -162,7 +176,7 @@ void init()
  */
 void match()
 {
-	int angleGo = 0;
+	int hasTurned = 0;
 	printf("\r%f : Début de match !\n", timeEnd.read());
 	
 	// Lancement timer avant mesure de l'angle
@@ -175,9 +189,8 @@ void match()
      * read_ms() pour un temps en miliseconde et renvoi un int
      * read_us() pour un temps en microseconde et renvoi un int
      */
-    while(timeEnd.read() <= 89)
+    while(timeEnd.read() < 90.0)
     {	
-        //printf("\rTemps de jeu : %f\n",timeEnd.read());		
 
         /*
          * On affiche sur les leds l'état des capteurs
@@ -201,21 +214,22 @@ void match()
         /*
          * Gestion de la détection des ennemis
          */
-        if(detectEnnemi)
+		if(moyenne(distanceGauche) < DISTANCE_CAPTEUR || moyenne(distanceDroit) < DISTANCE_CAPTEUR)
+		{
+			printf("\r%f : Ennemi détecté :o\n", timeEnd.read());
+			qik.stopBothMotors();
+			continue;
+		}
+		
+		// Gestion de la pose de la fresque
+		if(hasTurned)
         {
-            if(moyenne(distanceGauche) < DISTANCE_CAPTEUR || moyenne(distanceDroit) < DISTANCE_CAPTEUR)
-            {
-				printf("\r%f : Ennemi détecté :o\n", timeEnd.read());
-                qik.stopBothMotors(); 
-            }
-            else     
-            {
-                avancer(1);       
-            }
-        }	
-        else // gestion de la pose de la fresque
-        {
-            if((Couleur && moyenne(distanceGauche) < DISTANCE_FRESQUE) || (!Couleur && moyenne(distanceDroit) < DISTANCE_FRESQUE))
+			// Lancement détection mur à scratch
+			ultraM.startRanging();
+			while (!ultraM.rangingFinished()) wait(0.01);
+			remplirTab(distanceMilieu,ultraM.getRange());
+			
+            if(moyenne(distanceMilieu) < DISTANCE_FRESQUE)
             {
 				printf("\r%f : Fresque détectée, on fait l'accrochage =)\n", timeEnd.read());
                 /*
@@ -226,36 +240,42 @@ void match()
                 qikP.setMotor1Speed(-1);
                 wait(1);
                 qikP.setMotor1Speed(0);
-
-                ultraArr.startRanging();
-                while (!ultraArr.rangingFinished()) wait(0.01);
-                remplirTab(distanceDroit,ultraArr.getRange());
-
+                
+				// On recule, mettez les feux de recul et la sirène !
+				printf("\r%f : Mettez les feux de recul et la sirène !\n", timeEnd.read());
                 int count = 0;
-                while(count < 10) {
+                while(count < 5) {					
+					ultraArr.startRanging();
+					while (!ultraArr.rangingFinished()) wait(0.01);
+					remplirTab(distanceArr,ultraArr.getRange());
+                
                     if(ultraArr.getRange() < DISTANCE_CAPTEUR)
                     {
+						printf("\r%f : Ennemi détecté :o\n", timeEnd.read());			
                         qik.stopBothMotors();
                     }
                     else
                     {
-                        reculer(1);
-                        if(angleGo)
-							++count;
+                        reculer(2);
                     }
                 }
                 break;
             }
             else
             {
-                avancer(0.75);
+                avancer(0.80);
             }
         }
+        else     
+		{
+			avancer(1);       
+		}
+		
         printf("\r%f : Angle %d sur %d \n", timeEnd.read(), cptPosition, SEUIL);
-        if(detectEnnemi) {
-			detectEnnemi = abs(cptPosition)<= SEUIL;
-			if(!detectEnnemi)
-				printf("\r%f : Fin de détection Ennemis => Passage à détection Fresque\n", timeEnd.read());
+        if(!hasTurned) {
+			hasTurned = abs(cptPosition) > SEUIL;
+			if(hasTurned)
+				printf("\r%f : On a tourné, on peut détecter la Fresque\n", timeEnd.read());
 		}
         	
         // Update timer angle
@@ -312,7 +332,8 @@ void avancer(double rate)
     if(!capteurDroit)
     {
         printf("\r%f : Gauche !\n", timeEnd.read());
-        cptPosition ++;
+		if(angleGo)
+			cptPosition ++;
         qik.setMotor1Speed((int)RMOTEURG*rate);
     }
 
@@ -356,7 +377,8 @@ void reculer(double rate)
     if(!capteurGauche)
     {
         printf("\r%f : Droite !\n", timeEnd.read());
-        cptPosition --;
+        if(angleGo)
+			cptPosition --;
         qik.setMotor0Speed((int)AMOTEURD*rate);
     }
 }

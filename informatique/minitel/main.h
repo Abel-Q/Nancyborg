@@ -15,7 +15,7 @@
 #define HAND_TROLL_TIMEOUT 3.5
 #define TAILLE_MAX 5
 #define DISTANCE_CAPTEUR 40
-#define DISTANCE_FRESQUE 18
+#define DISTANCE_FRESQUE 15
 #define SEUIL 8
 #define ANGLE_MAX_TIMER 8
 /* ################################################################## */
