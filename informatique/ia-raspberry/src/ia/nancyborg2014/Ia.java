@@ -1,5 +1,7 @@
 package ia.nancyborg2014;
 
+import ia.nancyborg2014.Canon.ModeTir;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.TimerTask;
@@ -7,8 +9,6 @@ import java.util.TimerTask;
 import navigation.Navigation2014;
 import navigation.Point;
 import api.asserv.Asserv;
-import api.canon2014.Canon;
-import api.canon2014.Canon.ModeTir;
 import api.chrono.Chrono;
 import api.gpio.Gpio;
 import api.sensors.DetectionIR;
@@ -34,7 +34,8 @@ public class Ia {
 	public ArrayList<Point> objectifsAtteints;
 	public Point objectifCourant;
 	public DetectionSRF capteurArriere;
-public Canon canon;
+	public Canon canon;
+	public Fillet filet;
 
 	public Ia() {
 		try {
@@ -57,6 +58,7 @@ public Canon canon;
 
 			//nav = new Navigation2014();
 			canon = new Canon(RaspiPin.GPIO_07, this);
+			filet = new Fillet(this);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -382,7 +384,7 @@ public Canon canon;
 		}
 	}
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws Exception {
 
 		System.out.println("############################################################## IA #################################################");
 		final Ia ia = new Ia();
@@ -444,12 +446,21 @@ public Canon canon;
 		ia.deplacement.start();
 		System.out.println("Deplacement run ok");
 */
+		ia.asserv.gotoPosition(750, ia.fuckingMult() * (2000-790), true);
+		ia.asserv.face(750, 0, true);
 		ia.canon.tir(ModeTir.HAUT);
+		ia.asserv.turn(5, true);
 		ia.canon.tir(ModeTir.HAUT);
+		ia.asserv.turn(5, true);
 		ia.canon.tir(ModeTir.HAUT);
+		ia.asserv.turn(-15, true);
 		ia.canon.tir(ModeTir.BAS);
+		ia.asserv.turn(-5, true);
 		ia.canon.tir(ModeTir.BAS);
+		ia.asserv.turn(-5, true);
 		ia.canon.tir(ModeTir.BAS);
+		
+		ia.filet.lancer();
 
 		while(true);
 

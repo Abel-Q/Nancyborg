@@ -1,10 +1,8 @@
-package api.canon2014;
+package ia.nancyborg2014;
 
 import java.io.IOException;
 
-import navigation.Point;
 import fr.nancyborg.ax12.AX12Linux;
-import ia.nancyborg2014.Ia;
 import api.gpio.Gpio;
 
 import com.pi4j.io.gpio.Pin;
@@ -50,7 +48,6 @@ public class Canon {
 
 	public void tir(ModeTir mode) throws IOException, InterruptedException {
 		if (mode == ModeTir.HAUT) {
-			// on tire nos 3 balles en haut et 3 en bas
 			lancer(angleHaut, numBalle++);
 		} else if (mode == ModeTir.BAS) {
 			lancer(angleBas, numBalle++);
