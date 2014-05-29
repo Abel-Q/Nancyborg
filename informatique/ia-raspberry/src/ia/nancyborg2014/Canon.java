@@ -17,6 +17,7 @@ public class Canon {
 	private static final float alphaMax = 237; //en degrés
 	private static final float angleHaut = 218;
 	private static final float angleBas = 226;
+	private static final int   tempsCanon = 50; // en ms
 
 	private Ia ia;
 	private AX12Linux axElevation;
@@ -46,7 +47,7 @@ public class Canon {
 		this.axElevation.setGoalPosition((float) angleLanceur, true);
 		positionnerCanon(numBalle);
 		gpio.setHigh();
-		Thread.sleep(200);
+		Thread.sleep(tempsCanon);
 		gpio.setLow();
 	}
 

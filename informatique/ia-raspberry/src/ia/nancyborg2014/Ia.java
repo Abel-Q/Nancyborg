@@ -174,6 +174,15 @@ public class Ia {
 				// On place les fresques
 				System.out.println("Pose ta fresque Biatch !!!");
 				this.asserv.gotoPosition(1280, this.fuckingMult() * 150, true);
+				this.asserv.go(20, false);
+				try {
+					Thread.sleep(200);
+				} catch (InterruptedException e2) {
+					// TODO Auto-generated catch block
+					e2.printStackTrace();
+				}
+				this.asserv.halt();
+				this.asserv.resetHalt();
 				this.asserv.go(-550, false);
 				while (!this.asserv.lastCommandFinished()) {
 					try {
