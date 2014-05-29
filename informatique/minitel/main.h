@@ -12,9 +12,12 @@
 /* ################################################################## */
 
 /* #####################  AUTRES DEFINE  ############################ */
+#define HAND_TROLL_TIMEOUT 3.5
 #define TAILLE_MAX 5
-#define DISTANCE_CAPTEUR 50
-
+#define DISTANCE_CAPTEUR 40
+#define DISTANCE_FRESQUE 18
+#define SEUIL 8
+#define ANGLE_MAX_TIMER 8
 /* ################################################################## */
 
 /* ##################  ENTREES SUR L'MBED  ########################## */
@@ -34,16 +37,16 @@
 #define ERROR_QIK_P p26
 
 /* ======= define des autres entrées sur la Mbed  =================== */
-#define MODE_PIN p7
+#define COULEUR_PIN p7
 #define TIRETTE_PIN p18
-#define CAPTEUR_DROIT p19
-#define CAPTEUR_GAUCHE p20
+#define CAPTEUR_DROIT p22
+#define CAPTEUR_GAUCHE p21
 
 /* ################################################################## */
 
 /* ###################  SORTIES SUR L'MBED  ######################### */
-#define LED_DROITE p22
-#define LED_GAUCHE p21
+#define LED_DROITE p19
+#define LED_GAUCHE p20
 
 /* ################################################################## */
 
@@ -57,7 +60,7 @@ void actionClavier(int vitesse, int tempsAttente);
 /**
  * Fait avancer le robot en suivant la ligne
  */
-void avancer();
+void avancer(double rate);
 
 /**
  * Initialise les QIK au démarrage du robot pour qu'elles ne soient pas
@@ -68,12 +71,7 @@ void init();
 /**
  * Fait reculer le robot en suivant la ligne
  */
-void reculer();
-
-/**
- * Fonction qui gére la maintenance du robot hors d'un match
- */
-void maintenance();
+void reculer(double rate);
 
 /**
  * Fonction qui gére le match
