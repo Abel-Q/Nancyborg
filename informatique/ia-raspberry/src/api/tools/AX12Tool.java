@@ -11,11 +11,13 @@ public class AX12Tool {
 		ax.pingWait();
 		System.out.println("ok");
 		
-		for (;;) {
-			if (args.length > 1) {
-				ax.setGoalPosition(Integer.parseInt(args[1]), true);
+		if (args.length > 1) {
+			ax.setGoalPosition(Integer.parseInt(args[1]), true);
+		}
+		else {
+			for (;;) {
+				System.out.println("pos: " + ax.getPresentPosition());
 			}
-			System.out.println("pos: " + ax.getPresentPosition());
 		}
 	}
 }
