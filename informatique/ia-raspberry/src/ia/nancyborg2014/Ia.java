@@ -173,20 +173,7 @@ public class Ia {
 			case 0:
 				// On place les fresques
 				System.out.println("Pose ta fresque Biatch !!!");
-				this.asserv.gotoPosition(1280, this.fuckingMult() * 300, false);
-				while (!this.asserv.lastCommandFinished()) {
-					try {
-						if (this.detection.getCapteurDroit().doitStopper() || this.detection.getCapteurGauche().doitStopper()) {
-							this.asserv.halt();
-							Thread.sleep(200);
-							this.asserv.reset();
-							while (!(this.detection.getCapteurDroit().peutRepartir() && this.detection.getCapteurGauche().peutRepartir()));
-							this.asserv.gotoPosition(1280, this.fuckingMult() * 300, false);
-						}
-					} catch (IOException | InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
+				this.asserv.gotoPosition(1280, this.fuckingMult() * 300, true);
 				this.asserv.go(-400, false);
 				while (!this.asserv.lastCommandFinished()) {
 					try {
@@ -205,6 +192,11 @@ public class Ia {
 			case 1:
 				// On tire sur le mamouth
 				System.out.println("Oh oui, tire moi grand fou !!");
+				try {
+					this.canon();
+				} catch (IOException | InterruptedException e1) {
+					e1.printStackTrace();
+				}
 				break;
 			case 2:
 				// Feu extérieur
@@ -407,7 +399,7 @@ public class Ia {
 		System.out.println("Callage bordure");
 		// On lance le callage bordure
 		ia.asserv.calageBordure(!ia.rouge);
-/*
+
 		System.out.println("Attente remise tirette");
 		// On attend de remettre la tirette
 		while (ia.tirette.isHigh());
@@ -449,34 +441,32 @@ public class Ia {
 		ia.deplacement = new DeplacementTask(ia.asserv, ia.rouge, path, ia);
 		ia.deplacement.start();
 		System.out.println("Deplacement run ok");
-*/
-		
-		
-		final int angle_delta = 10;
-		ia.asserv.gotoPosition(750, ia.fuckingMult() * 500, true);
-		ia.asserv.face(750, 0, true);
-		
-		ia.asserv.turn(-angle_delta, true);
-		ia.canon.tir(ModeTir.HAUT);
-		
-		ia.asserv.turn(angle_delta, true);
-		ia.canon.tir(ModeTir.HAUT);
-		
-		ia.asserv.turn(angle_delta, true);
-		ia.canon.tir(ModeTir.HAUT);
 
-		ia.canon.tir(ModeTir.BAS);
-		
-		ia.asserv.turn(-angle_delta, true);
-		ia.canon.tir(ModeTir.BAS);
-		
-		ia.asserv.turn(-angle_delta, true);
-		ia.canon.tir(ModeTir.BAS);
-		
-		//ia.filet.lancer();
 
 		while(true);
 
+	}
+
+	public void canon() throws IOException, InterruptedException {
+		final int angle_delta = 10;
+		this.asserv.face(750, 0, true);
+		
+		this.asserv.turn(-angle_delta, true);
+		this.canon.tir(ModeTir.HAUT);
+		
+		this.asserv.turn(angle_delta, true);
+		this.canon.tir(ModeTir.HAUT);
+		
+		this.asserv.turn(angle_delta, true);
+		this.canon.tir(ModeTir.HAUT);
+
+		this.canon.tir(ModeTir.BAS);
+		
+		this.asserv.turn(-angle_delta, true);
+		this.canon.tir(ModeTir.BAS);
+		
+		this.asserv.turn(-angle_delta, true);
+		this.canon.tir(ModeTir.BAS);
 	}
 	
 	public void initObjectif() {
