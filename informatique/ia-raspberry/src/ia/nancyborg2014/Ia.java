@@ -1,5 +1,7 @@
 package ia.nancyborg2014;
 
+import ia.nancyborg2014.Canon.ModeTir;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.TimerTask;
@@ -32,6 +34,8 @@ public class Ia {
 	public ArrayList<Point> objectifsAtteints;
 	public Point objectifCourant;
 	public DetectionSRF capteurArriere;
+	public Canon canon;
+	//public Fillet filet;
 
 	public Ia() {
 		try {
@@ -53,6 +57,8 @@ public class Ia {
 			this.capteurArriere = new DetectionSRF(0xE0, 30, 30);
 
 			//nav = new Navigation2014();
+			canon = new Canon(RaspiPin.GPIO_07, this);
+			//filet = new Fillet(this);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -167,21 +173,7 @@ public class Ia {
 			case 0:
 				// On place les fresques
 				System.out.println("Pose ta fresque Biatch !!!");
-				this.asserv.gotoPosition(1280, this.fuckingMult() * 150, false);
-				while (!this.asserv.lastCommandFinished()) {
-					try {
-						if (this.detection.getCapteurDroit().doitStopper() || this.detection.getCapteurGauche().doitStopper()) {
-							System.out.println("Stop fresque 1");
-							this.asserv.halt();
-							Thread.sleep(200);
-							this.asserv.reset();
-							while (!(this.detection.getCapteurDroit().peutRepartir() && this.detection.getCapteurGauche().peutRepartir()));
-							this.asserv.gotoPosition(1280, this.fuckingMult() * 150, false);
-						}
-					} catch (IOException | InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
+				this.asserv.gotoPosition(1280, this.fuckingMult() * 150, true);
 				this.asserv.go(-550, false);
 				while (!this.asserv.lastCommandFinished()) {
 					try {
@@ -201,6 +193,11 @@ public class Ia {
 			case 1:
 				// On tire sur le mamouth
 				System.out.println("Oh oui, tire moi grand fou !!");
+				try {
+					this.canon();
+				} catch (IOException | InterruptedException e1) {
+					e1.printStackTrace();
+				}
 				break;
 			case 2:
 				// Feu extérieur
@@ -384,7 +381,7 @@ public class Ia {
 		}
 	}
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws Exception {
 
 		System.out.println("############################################################## IA #################################################");
 		final Ia ia = new Ia();
@@ -392,10 +389,14 @@ public class Ia {
 		// On initialise le chrono
 		Chrono chrono = new Chrono(89 * 1000);
 		
-
 		System.out.println("Attente enlevage tirette");
 		// On attend de virer la tirette
 		while (ia.tirette.isLow());
+		
+		for (int n = 0; n < 6; n++) {
+			ia.canon.positionnerCanon(n);
+			Thread.sleep(2000);
+		}
 		
 		ia.rouge = ia.selecteurCouleur.isHigh();
 		System.out.println("couleur isHigh = "+ia.selecteurCouleur.isHigh()+" - rouge = "+ia.rouge);
@@ -445,9 +446,32 @@ public class Ia {
 		ia.deplacement = new DeplacementTask(ia.asserv, ia.rouge, path, ia);
 		ia.deplacement.start();
 		System.out.println("Deplacement run ok");
-		
+
+
 		while(true);
 
+	}
+
+	public void canon() throws IOException, InterruptedException {
+		final int angle_delta = 10;
+		this.asserv.face(750, 0, true);
+		
+		this.asserv.turn(-angle_delta, true);
+		this.canon.tir(ModeTir.HAUT);
+		
+		this.asserv.turn(angle_delta, true);
+		this.canon.tir(ModeTir.HAUT);
+		
+		this.asserv.turn(angle_delta, true);
+		this.canon.tir(ModeTir.HAUT);
+
+		this.canon.tir(ModeTir.BAS);
+		
+		this.asserv.turn(-angle_delta, true);
+		this.canon.tir(ModeTir.BAS);
+		
+		this.asserv.turn(-angle_delta, true);
+		this.canon.tir(ModeTir.BAS);
 	}
 	
 	public void initObjectif() {
