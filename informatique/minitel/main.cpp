@@ -216,10 +216,8 @@ void match()
                 /*
                  * Dépose fresque
                  */
-                qikP.setMotor1Speed(-30);
-                wait(3);
-                qikP.setMotor1Speed(-1);
-                wait(1);
+                qikP.setMotor1Speed(-40);
+                wait(6);
                 qikP.setMotor1Speed(0);
                 
 				// On recule, mettez les feux de recul et la sirène !
