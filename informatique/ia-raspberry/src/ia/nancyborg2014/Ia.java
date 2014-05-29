@@ -35,7 +35,7 @@ public class Ia {
 	public Point objectifCourant;
 	public DetectionSRF capteurArriere;
 	public Canon canon;
-	//public Fillet filet;
+	public Filet filet;
 
 	public Ia() {
 		try {
@@ -58,7 +58,7 @@ public class Ia {
 
 			//nav = new Navigation2014();
 			canon = new Canon(RaspiPin.GPIO_07, this);
-			//filet = new Fillet(this);
+			filet = new Filet(this);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -174,9 +174,9 @@ public class Ia {
 				// On place les fresques
 				System.out.println("Pose ta fresque Biatch !!!");
 				this.asserv.gotoPosition(1280, this.fuckingMult() * 150, true);
-				this.asserv.go(20, false);
+				this.asserv.go(40, false);
 				try {
-					Thread.sleep(200);
+					Thread.sleep(1000);
 				} catch (InterruptedException e2) {
 					// TODO Auto-generated catch block
 					e2.printStackTrace();
@@ -203,6 +203,8 @@ public class Ia {
 				// On tire sur le mamouth
 				System.out.println("Oh oui, tire moi grand fou !!");
 				try {
+					this.asserv.face(700, 0, true);
+					this.asserv.turn(5 * this.fuckingMult(), true);
 					this.canon();
 				} catch (IOException | InterruptedException e1) {
 					e1.printStackTrace();
@@ -211,8 +213,8 @@ public class Ia {
 			case 2:
 				// Feu extérieur
 				System.out.println("Feu extérieur : éteind moi !!!");
-				this.asserv.face(400, 2000, true);
-				this.asserv.go(300, true);
+				this.asserv.face(400, this.fuckingMult() * 2000, true);
+				this.asserv.go(300, false);
 				while (!this.asserv.lastCommandFinished()) {
 					try {
 						if (this.detection.getCapteurDroit().doitStopper() || this.detection.getCapteurGauche().doitStopper()) {
@@ -221,13 +223,13 @@ public class Ia {
 							Thread.sleep(200);
 							this.asserv.reset();
 							while (!(this.detection.getCapteurDroit().peutRepartir() && this.detection.getCapteurGauche().peutRepartir()));
-							this.asserv.go(300, true);
+							this.asserv.go(300, false);
 						}
 					} catch (IOException | InterruptedException e) {
 						e.printStackTrace();
 					}
 				}
-				this.asserv.go(-300, true);
+				this.asserv.go(-300, false);
 				while (!this.asserv.lastCommandFinished()) {
 					try {
 						if (this.capteurArriere.doitStopper()) {
@@ -236,7 +238,7 @@ public class Ia {
 							Thread.sleep(200);
 							this.asserv.reset();
 							while (!(this.capteurArriere.peutRepartir()));
-							this.asserv.go(-300, true);
+							this.asserv.go(-300, false);
 						}
 					} catch (IOException | InterruptedException e) {
 						e.printStackTrace();
@@ -256,7 +258,7 @@ public class Ia {
 							Thread.sleep(200);
 							this.asserv.reset();
 							while (!(this.detection.getCapteurDroit().peutRepartir() && this.detection.getCapteurGauche().peutRepartir()));
-							this.asserv.go(300, true);
+							this.asserv.go(300, false);
 						}
 					} catch (IOException | InterruptedException e) {
 						e.printStackTrace();
@@ -271,7 +273,7 @@ public class Ia {
 							Thread.sleep(200);
 							this.asserv.reset();
 							while (!(this.capteurArriere.peutRepartir()));
-							this.asserv.go(-300, true);
+							this.asserv.go(-300, false);
 						}
 					} catch (IOException | InterruptedException e) {
 						e.printStackTrace();
@@ -362,32 +364,14 @@ public class Ia {
 		if (newObjectif != -1) {
 			System.out.println("J'ai !!!");
 			point = todo.get(newObjectif);
+			this.objectifCourant = point; // a retirer demain si tout pète
 		} else {
 			System.out.println("Fail !!");
 			point = new Point(1100, this.fuckingMult() * 900);
+			this.objectifCourant = new Point(0, 0); // a retirer demain si tout pète
 		}
 		liste.add(point);
 		return new DeplacementTask(this.asserv, this.rouge, liste, this);
-	}
-	
-	public static void mainFuu(String[] args) {
-		//System.out.println("Atteint");
-		try {
-			Ia ia = new Ia();
-			System.out.println(ia.getPosition());
-			DetectionSRF detectionGauche = new DetectionSRF(0xE4, 30, 30);
-			DetectionSRF detectionDroite = new DetectionSRF(0xE8, 30, 30);
-			ia.asserv.gotoPosition(1000, 0, false);
-			while (true) {
-				if (detectionDroite.doitStopper() || detectionGauche.doitStopper()) {
-					ia.asserv.halt();
-					System.out.println("STOOOOOOOOOOOOOOOOOOOOOP");
-					System.exit(0);
-				}
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -396,16 +380,12 @@ public class Ia {
 		final Ia ia = new Ia();
 
 		// On initialise le chrono
-		Chrono chrono = new Chrono(89 * 1000);
+		Chrono chrono_funny = new Chrono(85 * 1000);
+		Chrono chrono_stop = new Chrono(91 * 1000);
 		
 		System.out.println("Attente enlevage tirette");
 		// On attend de virer la tirette
 		while (ia.tirette.isLow());
-		
-		for (int n = 0; n < 6; n++) {
-			ia.canon.positionnerCanon(n);
-			Thread.sleep(2000);
-		}
 		
 		ia.rouge = ia.selecteurCouleur.isHigh();
 		System.out.println("couleur isHigh = "+ia.selecteurCouleur.isHigh()+" - rouge = "+ia.rouge);
@@ -431,17 +411,45 @@ public class Ia {
 		System.out.println("Gooo");
 		
 		// On démarre le chrono et la déplacementTask
-		chrono.startChrono(new TimerTask() {
+		chrono_funny.startChrono(new TimerTask() {
 			@SuppressWarnings("deprecation")
 			@Override
 			public void run() {
-				ia.asserv.halt();
-				ia.tirette.close();
-				ia.selecteurCouleur.close();
-				ia.detection.stop();
+				System.out.println("On arrête tout et on se place pour la funny action");
 				if (ia.deplacement != null) {
 					ia.deplacement.stop();
 				}
+				ia.detection.setDetect(false);
+				ia.asserv.halt();
+				ia.asserv.resetHalt();
+				ia.asserv.gotoPosition(950, ia.fuckingMult() * 800, false);
+				while (!ia.asserv.lastCommandFinished()) {
+					try {
+						if (ia.detection.getCapteurDroit().doitStopper() || ia.detection.getCapteurGauche().doitStopper()) {
+							ia.asserv.halt();
+							Thread.sleep(200);
+							ia.asserv.reset();
+							while (!(ia.detection.getCapteurDroit().peutRepartir() && ia.detection.getCapteurGauche().peutRepartir()));
+							ia.asserv.gotoPosition(950, ia.fuckingMult() * 800, false);
+						}
+					} catch (IOException | InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+				ia.asserv.face(950, 0, true);
+			}
+		});
+		
+		chrono_stop.startChrono(new TimerTask() {
+			@Override
+			public void run() {
+				System.out.println("Fin du match mais on tire un coup quand même");
+				ia.asserv.halt();
+				ia.filet.lancer();
+				ia.tirette.close();
+				ia.selecteurCouleur.close();
+				ia.detection.stop();
+				
 				System.out.println("Fin");
 				System.exit(0);
 			}
@@ -456,14 +464,12 @@ public class Ia {
 		ia.deplacement.start();
 		System.out.println("Deplacement run ok");
 
-
-		while(true);
+		//while(true)
 
 	}
 
 	public void canon() throws IOException, InterruptedException {
-		final int angle_delta = 10;
-		this.asserv.face(750, 0, true);
+		final int angle_delta = 8;
 		
 		this.asserv.turn(-angle_delta, true);
 		this.canon.tir(ModeTir.HAUT);
@@ -485,7 +491,7 @@ public class Ia {
 	
 	public void initObjectif() {
 		this.objectifs.add(new Point(1280, this.fuckingMult() * 600)); // Fresques
-		this.objectifs.add(new Point(750, this.fuckingMult() * 500)); // Mamouth
+		this.objectifs.add(new Point(700, this.fuckingMult() * 600)); // Mamouth
 		this.objectifs.add(new Point(400, this.fuckingMult() * 800)); // Feu extérieur
 		this.objectifs.add(new Point(1100, this.fuckingMult() * 1600)); // Feu bas
 		this.objectifs.add(new Point(700, this.fuckingMult() * 1100)); // Foyer
