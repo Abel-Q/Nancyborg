@@ -42,7 +42,7 @@ public class DetectionSRFThread extends Thread {
 					// Position de l'adversaire en mm
 					int x = (int) (nous.getX() + Math.cos(angle) * min);
 					int y = (int) (nous.getY() + Math.sin(angle) * min);
-					if (x < 0  || x > 3000 || Math.abs(y) > 2000 || (ia.rouge && y > 0) || (!ia.rouge && y < 0)) {
+					if (x < 20  || x > 2980 || Math.abs(y) > 1980 || (ia.rouge && y > 20) || (!ia.rouge && y < 20)) {
 						System.out.println("Je vois des choses dont je me fou royalement : "+x+"-"+y);
 					} else {
 						System.out.println("STOOOOOOOOOOOOOOOOOOOOOOOOOOP");

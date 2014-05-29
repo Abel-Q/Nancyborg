@@ -154,7 +154,7 @@ public class Ia {
 		// On coupe la détection, le déplacement est déjà fini et on note l'objectif atteint
 		System.out.println("Stop détection");
 		this.detection.setDetect(false);
-		if (!objectif.equals(new Point(1100, 1100))) {
+		if (!objectif.equals(new Point(1100, this.fuckingMult() * 900))) {
 			System.out.println("Marquage objectif");
 			this.objectifsAtteints.add(objectif);
 		}
@@ -167,29 +167,31 @@ public class Ia {
 			case 0:
 				// On place les fresques
 				System.out.println("Pose ta fresque Biatch !!!");
-				this.asserv.gotoPosition(1280, this.fuckingMult() * 300, false);
+				this.asserv.gotoPosition(1280, this.fuckingMult() * 150, false);
 				while (!this.asserv.lastCommandFinished()) {
 					try {
 						if (this.detection.getCapteurDroit().doitStopper() || this.detection.getCapteurGauche().doitStopper()) {
+							System.out.println("Stop fresque 1");
 							this.asserv.halt();
 							Thread.sleep(200);
 							this.asserv.reset();
 							while (!(this.detection.getCapteurDroit().peutRepartir() && this.detection.getCapteurGauche().peutRepartir()));
-							this.asserv.gotoPosition(1280, this.fuckingMult() * 300, false);
+							this.asserv.gotoPosition(1280, this.fuckingMult() * 150, false);
 						}
 					} catch (IOException | InterruptedException e) {
 						e.printStackTrace();
 					}
 				}
-				this.asserv.go(-400, false);
+				this.asserv.go(-550, false);
 				while (!this.asserv.lastCommandFinished()) {
 					try {
 						if (this.capteurArriere.doitStopper()) {
+							System.out.println("Stop fresque 2");
 							this.asserv.halt();
 							Thread.sleep(200);
 							this.asserv.reset();
 							while (!(this.capteurArriere.peutRepartir()));
-							this.asserv.go(-400, false);
+							this.asserv.go(-550, false);
 						}
 					} catch (IOException | InterruptedException e) {
 						e.printStackTrace();
@@ -203,11 +205,12 @@ public class Ia {
 			case 2:
 				// Feu extérieur
 				System.out.println("Feu extérieur : éteind moi !!!");
-				this.asserv.face(400, 0, true);
+				this.asserv.face(400, 2000, true);
 				this.asserv.go(300, true);
 				while (!this.asserv.lastCommandFinished()) {
 					try {
 						if (this.detection.getCapteurDroit().doitStopper() || this.detection.getCapteurGauche().doitStopper()) {
+							System.out.println("Stop feu extérieur 1");
 							this.asserv.halt();
 							Thread.sleep(200);
 							this.asserv.reset();
@@ -222,6 +225,7 @@ public class Ia {
 				while (!this.asserv.lastCommandFinished()) {
 					try {
 						if (this.capteurArriere.doitStopper()) {
+							System.out.println("Stop feu extérieur 2");
 							this.asserv.halt();
 							Thread.sleep(200);
 							this.asserv.reset();
@@ -241,6 +245,7 @@ public class Ia {
 				while (!this.asserv.lastCommandFinished()) {
 					try {
 						if (this.detection.getCapteurDroit().doitStopper() || this.detection.getCapteurGauche().doitStopper()) {
+							System.out.println("Stop feu bas 1");
 							this.asserv.halt();
 							Thread.sleep(200);
 							this.asserv.reset();
@@ -255,6 +260,7 @@ public class Ia {
 				while (!this.asserv.lastCommandFinished()) {
 					try {
 						if (this.capteurArriere.doitStopper()) {
+							System.out.println("Stop feu bas 2");
 							this.asserv.halt();
 							Thread.sleep(200);
 							this.asserv.reset();
