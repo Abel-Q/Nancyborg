@@ -37,12 +37,10 @@ public class DeplacementTask extends Thread {
 	@Override
 	public void run() {
 		System.out.println("C'est parti !");
-		int mult = rouge ? 1 : -1;
 		for (Point p : points) {
-			this.asserv.gotoPosition(p.getX(), mult * p.getY(), false);
+			this.asserv.gotoPosition(p.getX(), p.getY(), false);
 			this.waitForFinish();
 		}
-		// TODO récupérer code de marquage
 		ia.objectifAtteint(points.get(points.size()-1));
 	}
 }

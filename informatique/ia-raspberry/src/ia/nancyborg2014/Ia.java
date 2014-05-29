@@ -159,8 +159,6 @@ public class Ia {
 			this.objectifsAtteints.add(objectif);
 		}
 		
-		int mult = this.rouge ? 1 : -1;
-
 		System.out.println(this.objectifs);
 		System.out.println(this.objectifsAtteints);
 		System.out.println(this.objectifs.indexOf(objectif));
@@ -169,7 +167,7 @@ public class Ia {
 			case 0:
 				// On place les fresques
 				System.out.println("Pose ta fresque Biatch !!!");
-				this.asserv.gotoPosition(1280, mult * 200, false);
+				this.asserv.gotoPosition(1280, this.fuckingMult() * 300, false);
 				while (!this.asserv.lastCommandFinished()) {
 					try {
 						if (this.detection.getCapteurDroit().doitStopper() || this.detection.getCapteurGauche().doitStopper()) {
@@ -177,7 +175,7 @@ public class Ia {
 							Thread.sleep(200);
 							this.asserv.reset();
 							while (!(this.detection.getCapteurDroit().peutRepartir() && this.detection.getCapteurGauche().peutRepartir()));
-							this.asserv.gotoPosition(1280, mult * 200, false);
+							this.asserv.gotoPosition(1280, this.fuckingMult() * 300, false);
 						}
 					} catch (IOException | InterruptedException e) {
 						e.printStackTrace();
@@ -238,7 +236,7 @@ public class Ia {
 			case 3:
 				// Feu bas
 				System.out.println("Feu bas : éteind moi !!!");
-				this.asserv.face(0, mult * 1600, true);
+				this.asserv.face(0, this.fuckingMult() * 1600, true);
 				this.asserv.go(300, true);
 				while (!this.asserv.lastCommandFinished()) {
 					try {
@@ -301,13 +299,12 @@ public class Ia {
 		
 		double dist = 10000;
 		int newObjectif = -1;
-		int mult = this.rouge ? 1 : -1;
 		for (int i = 0; i < todo.size(); i++) {
 			// Check colision centre et torches
 			int xmin = 1150;
 			int xmax = 1850;
-			int ymin = mult * 1300;
-			int ymax = mult * 600;
+			int ymin = this.fuckingMult() * 1300;
+			int ymax = this.fuckingMult() * 600;
 			
 			int xa = this.asserv.getCurrentPosition().getX();
 			int ya = this.asserv.getCurrentPosition().getY();
@@ -327,8 +324,8 @@ public class Ia {
 			
 			xmin = 700;
 			xmax = 1100;
-			ymin = mult * 1300;
-			ymax = mult * 900;
+			ymin = this.fuckingMult() * 1300;
+			ymax = this.fuckingMult() * 900;
 			
 			xint1 = (ymin-b)/a;
 			xint2 = (ymin-b)/a;
@@ -355,7 +352,7 @@ public class Ia {
 			point = todo.get(newObjectif);
 		} else {
 			System.out.println("Fail !!");
-			point = new Point(1100, mult * 900);
+			point = new Point(1100, this.fuckingMult() * 900);
 		}
 		liste.add(point);
 		return new DeplacementTask(this.asserv, this.rouge, liste, this);
@@ -383,10 +380,12 @@ public class Ia {
 
 	public static void main(String[] args) throws IOException {
 
+		System.out.println("############################################################## IA #################################################");
 		final Ia ia = new Ia();
 
 		// On initialise le chrono
 		Chrono chrono = new Chrono(89 * 1000);
+		
 
 		System.out.println("Attente enlevage tirette");
 		// On attend de virer la tirette
@@ -399,15 +398,6 @@ public class Ia {
 		// On lance le callage bordure
 		ia.asserv.calageBordure(!ia.rouge);
 
-		System.out.println("Attente remise tirette");
-		// On attend de remettre la tirette
-		while (ia.tirette.isHigh());
-		System.out.println("Attente enlevage tirette");
-		// On attend de virer la tirette
-		while (ia.tirette.isLow());
-
-		System.out.println(ia.getPosition());
-		
 		System.out.println("Attente remise tirette");
 		// On attend de remettre la tirette
 		while (ia.tirette.isHigh());
@@ -455,24 +445,26 @@ public class Ia {
 	}
 	
 	public void initObjectif() {
-		int mult = this.rouge ? 1 : -1;
-		this.objectifs.add(new Point(1280, mult * 600)); // Fresques
-		this.objectifs.add(new Point(750, mult * 500)); // Mamouth
-		this.objectifs.add(new Point(400, mult * 800)); // Feu extérieur
-		this.objectifs.add(new Point(1100, mult * 1600)); // Feu bas
-		this.objectifs.add(new Point(700, mult * 1100)); // Foyer
+		this.objectifs.add(new Point(1280, this.fuckingMult() * 600)); // Fresques
+		this.objectifs.add(new Point(750, this.fuckingMult() * 500)); // Mamouth
+		this.objectifs.add(new Point(400, this.fuckingMult() * 800)); // Feu extérieur
+		this.objectifs.add(new Point(1100, this.fuckingMult() * 1600)); // Feu bas
+		this.objectifs.add(new Point(700, this.fuckingMult() * 1100)); // Foyer
 	}
 	
 	public ArrayList<Point> getPath(int cas) {
-		int mult = this.rouge ? 1 : -1;
 		switch (cas) {
 			case 0: // Feu sur ligne noir et fresque
 				ArrayList<Point> path = new ArrayList<Point>();
-				path.add(new Point(200, mult * 600));
-				path.add(new Point(1280, mult * 600));
+				path.add(new Point(200, this.fuckingMult() * 600));
+				path.add(new Point(1280, this.fuckingMult() * 600));
 				return path;
 		}
 		return new ArrayList<Point>();
+	}
+	
+	public int fuckingMult() {
+		return this.rouge ? -1 : 1;
 	}
 
 }
