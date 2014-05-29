@@ -15,9 +15,10 @@
 #define HAND_TROLL_TIMEOUT 3.5
 #define TAILLE_MAX 5
 #define DISTANCE_CAPTEUR 40
-#define DISTANCE_FRESQUE 15
-#define SEUIL 8
-#define ANGLE_MAX_TIMER 8
+#define DISTANCE_FRESQUE 8
+#define SEUIL 4
+#define SEUIL_STACK 6
+#define ANGLE_MAX_TIMER 5
 /* ################################################################## */
 
 /* ##################  ENTREES SUR L'MBED  ########################## */
@@ -82,6 +83,8 @@ void match();
  * Calcule et renvoie la moyenne d'un tableau
  */
  int moyenne(int tab[]);
+ 
+ void seuilStack(int isLeft);
  
  /**
   * Rempli un tableau en décalant et supprimant le premier élément

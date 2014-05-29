@@ -72,6 +72,7 @@ int distanceDroit[TAILLE_MAX];
 int distanceMilieu[TAILLE_MAX];
 int distanceArr[TAILLE_MAX];
 int cptPosition = 0;
+int cptStack = 0;
 int angleGo = 0;
 /* ################################################################## */
 
@@ -99,7 +100,6 @@ int main()
     /* 
      * On rempli une première fois les tableaux de distance
      * avec des valeurs non fictives
-     */
     for(cpt=0;cpt<TAILLE_MAX;cpt++)
     {
         ultraG.startRanging();
@@ -118,6 +118,7 @@ int main()
         while (!ultraArr.rangingFinished()) wait(0.01);
         distanceArr[cpt] = ultraArr.getRange();
     }
+    * */
 
     qikP.setMotor1Speed(-50);
     wait(3);
@@ -200,27 +201,6 @@ void match()
         ledGauche = !capteurGauche;
         ledDroite = !capteurDroit;
 		
-		/*
-		 * Lance détection ennemi
-		 */
-        ultraG.startRanging();
-        while (!ultraG.rangingFinished()) wait(0.01);
-        remplirTab(distanceGauche,ultraG.getRange());
-
-        ultraD.startRanging();
-        while (!ultraD.rangingFinished()) wait(0.01);
-        remplirTab(distanceDroit,ultraD.getRange());
-
-        /*
-         * Gestion de la détection des ennemis
-         */
-		if(moyenne(distanceGauche) < DISTANCE_CAPTEUR || moyenne(distanceDroit) < DISTANCE_CAPTEUR)
-		{
-			printf("\r%f : Ennemi détecté :o\n", timeEnd.read());
-			qik.stopBothMotors();
-			continue;
-		}
-		
 		// Gestion de la pose de la fresque
 		if(hasTurned)
         {
@@ -232,22 +212,26 @@ void match()
             if(moyenne(distanceMilieu) < DISTANCE_FRESQUE)
             {
 				printf("\r%f : Fresque détectée, on fait l'accrochage =)\n", timeEnd.read());
+				qik.stopBothMotors();
                 /*
                  * Dépose fresque
                  */
-                qikP.setMotor1Speed(-20);
-                wait(2);
+                qikP.setMotor1Speed(-30);
+                wait(3);
                 qikP.setMotor1Speed(-1);
                 wait(1);
                 qikP.setMotor1Speed(0);
                 
 				// On recule, mettez les feux de recul et la sirène !
 				printf("\r%f : Mettez les feux de recul et la sirène !\n", timeEnd.read());
-                int count = 0;
-                while(count < 5) {					
+				Timer coucouTimer;
+				coucouTimer.start();
+                while(coucouTimer.read() <= 2.5 || moyenne(distanceMilieu) <= DISTANCE_FRESQUE*2) {					
 					ultraArr.startRanging();
 					while (!ultraArr.rangingFinished()) wait(0.01);
 					remplirTab(distanceArr,ultraArr.getRange());
+					
+					printf("dist. arrière : %d\n", moyenne(distanceArr));
                 
                     if(ultraArr.getRange() < DISTANCE_CAPTEUR)
                     {
@@ -256,9 +240,16 @@ void match()
                     }
                     else
                     {
-                        reculer(2);
+                        reculer(1);
                     }
+                    
+					// Détection mur à scratch
+					ultraM.startRanging();
+					while (!ultraM.rangingFinished()) wait(0.01);
+					remplirTab(distanceMilieu,ultraM.getRange());
                 }
+                qik.stopBothMotors();
+                coucouTimer.stop();
                 break;
             }
             else
@@ -268,12 +259,33 @@ void match()
         }
         else     
 		{
-			avancer(1);       
+			/*
+			 * Lance détection ennemi
+			 */
+			ultraG.startRanging();
+			while (!ultraG.rangingFinished()) wait(0.01);
+			remplirTab(distanceGauche,ultraG.getRange());
+
+			ultraD.startRanging();
+			while (!ultraD.rangingFinished()) wait(0.01);
+			remplirTab(distanceDroit,ultraD.getRange());
+
+			/*
+			 * Gestion de la détection des ennemis
+			 */
+			if(moyenne(distanceGauche) < DISTANCE_CAPTEUR || moyenne(distanceDroit) < DISTANCE_CAPTEUR)
+			{
+				printf("\r%f : Ennemi détecté :o\n", timeEnd.read());
+				qik.stopBothMotors();
+			}
+			else {
+				avancer(1);
+			}
 		}
 		
         printf("\r%f : Angle %d sur %d \n", timeEnd.read(), cptPosition, SEUIL);
         if(!hasTurned) {
-			hasTurned = abs(cptPosition) > SEUIL;
+			hasTurned = (abs(cptPosition) >= SEUIL) && (abs(cptStack) >= SEUIL_STACK);
 			if(hasTurned)
 				printf("\r%f : On a tourné, on peut détecter la Fresque\n", timeEnd.read());
 		}
@@ -287,7 +299,7 @@ void match()
     }
 
     qikP.setMotor1Speed(-20);
-    wait(5);
+    wait(7.5);
 
     qikP.setMotor1Speed(0);
     qik.stopBothMotors(); 
@@ -332,8 +344,10 @@ void avancer(double rate)
     if(!capteurDroit)
     {
         printf("\r%f : Gauche !\n", timeEnd.read());
-		if(angleGo)
+		if(angleGo) {
 			cptPosition ++;
+			seuilStack(1);
+		}
         qik.setMotor1Speed((int)RMOTEURG*rate);
     }
 
@@ -343,7 +357,10 @@ void avancer(double rate)
     if(!capteurGauche)
     {
         printf("\r%f : Droite !\n", timeEnd.read());
-        cptPosition --;
+        if(angleGo) {
+			cptPosition --;
+			seuilStack(0);
+		}
         qik.setMotor0Speed((int)RMOTEURD*rate);
     }
 }
@@ -357,8 +374,8 @@ void reculer(double rate)
 
     if(!capteurDroit && !capteurGauche)
     {
-        qik.setMotor0Speed((int)AMOTEURD*rate);
-        qik.setMotor1Speed((int)AMOTEURG*rate);
+        qik.setMotor0Speed((int)RMOTEURD*rate);
+        qik.setMotor1Speed((int)RMOTEURG*rate);
     }
 
     /*
@@ -367,8 +384,11 @@ void reculer(double rate)
     if(!capteurDroit)
     {
         printf("\r%f : Gauche !\n", timeEnd.read());
-        cptPosition ++;
-        qik.setMotor1Speed((int)AMOTEURG*rate);
+        if(angleGo) {
+			cptPosition ++;
+			seuilStack(1);
+		}
+        qik.setMotor1Speed((int)RMOTEURG*rate);
     }
 
     /*
@@ -377,23 +397,39 @@ void reculer(double rate)
     if(!capteurGauche)
     {
         printf("\r%f : Droite !\n", timeEnd.read());
-        if(angleGo)
+        if(angleGo) {
 			cptPosition --;
-        qik.setMotor0Speed((int)AMOTEURD*rate);
+			seuilStack(0);
+		}
+        qik.setMotor0Speed((int)RMOTEURD*rate);
     }
 }
 
 int moyenne(int tab[])
 {
     int calcule = 0, i = 0;
+    int taille = 0;
     for(i=0;i<TAILLE_MAX;i++)
     {
-        calcule += tab[i];
+        if(tab[i] != 0) {
+	        calcule += tab[i];
+	        ++taille;		
+		}
     }
 
-    return (calcule/TAILLE_MAX);
+    return (calcule/taille);
 }
 
+void seuilStack(int isLeft) {
+	if(cptStack >= 0 && isLeft)
+		++cptStack;
+	else if(cptStack <= 0 && isLeft)
+		cptStack = 1;
+	else if(cptStack >= 0 && !isLeft)
+		cptStack = -1;
+	else if(cptStack <=0 && !isLeft)
+		--cptStack;
+}
 
 
 /*
