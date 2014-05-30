@@ -8,7 +8,7 @@ public class Filet {
 	
 	public Filet(Ia ia) {
 		this.ia = ia;
-		this.ax = new AX12Linux("/dev/ttyACM0", 8, 115200);
+		this.ax = new AX12Linux("/dev/ttyAMA0", 8, 115200);
 	}
 	
 	public void lancer() {
