@@ -74,10 +74,14 @@ int distanceArr[TAILLE_MAX];
 int cptPosition = 0;
 int cptStack = 0;
 int angleGo = 0;
+int goToDance = 0;
 /* ################################################################## */
 
 int main()
 {   
+	// TODO TODO TODO REMOVE !!!
+	goToDance = 0;
+	
     int cpt = 0;
 
     printf("\r\n");
@@ -119,7 +123,7 @@ int main()
         distanceArr[cpt] = ultraArr.getRange();
     }
     * */
-
+	
     qikP.setMotor1Speed(-50);
     wait(3);
     qikP.setMotor1Speed(50);
@@ -201,62 +205,7 @@ void match()
         ledGauche = !capteurGauche;
         ledDroite = !capteurDroit;
 		
-		// Gestion de la pose de la fresque
-		if(hasTurned)
-        {
-			// Lancement détection mur à scratch
-			ultraM.startRanging();
-			while (!ultraM.rangingFinished()) wait(0.01);
-			remplirTab(distanceMilieu,ultraM.getRange());
-			
-            if(moyenne(distanceMilieu) < DISTANCE_FRESQUE)
-            {
-				printf("\r%f : Fresque détectée, on fait l'accrochage =)\n", timeEnd.read());
-				qik.stopBothMotors();
-                /*
-                 * Dépose fresque
-                 */
-                qikP.setMotor1Speed(-40);
-                wait(6);
-                qikP.setMotor1Speed(0);
-                
-				// On recule, mettez les feux de recul et la sirène !
-				printf("\r%f : Mettez les feux de recul et la sirène !\n", timeEnd.read());
-				Timer coucouTimer;
-				coucouTimer.start();
-                while(coucouTimer.read() <= 2.5 || moyenne(distanceMilieu) <= DISTANCE_FRESQUE*2) {					
-					ultraArr.startRanging();
-					while (!ultraArr.rangingFinished()) wait(0.01);
-					remplirTab(distanceArr,ultraArr.getRange());
-					
-					printf("dist. arrière : %d\n", moyenne(distanceArr));
-                
-                    if(ultraArr.getRange() < DISTANCE_CAPTEUR)
-                    {
-						printf("\r%f : Ennemi détecté :o\n", timeEnd.read());			
-                        qik.stopBothMotors();
-                    }
-                    else
-                    {
-                        reculer(1);
-                    }
-                    
-					// Détection mur à scratch
-					ultraM.startRanging();
-					while (!ultraM.rangingFinished()) wait(0.01);
-					remplirTab(distanceMilieu,ultraM.getRange());
-                }
-                qik.stopBothMotors();
-                coucouTimer.stop();
-                break;
-            }
-            else
-            {
-                avancer(0.80);
-            }
-        }
-        else     
-		{
+		if(goToDance) {
 			/*
 			 * Lance détection ennemi
 			 */
@@ -267,7 +216,7 @@ void match()
 			ultraD.startRanging();
 			while (!ultraD.rangingFinished()) wait(0.01);
 			remplirTab(distanceDroit,ultraD.getRange());
-
+			
 			/*
 			 * Gestion de la détection des ennemis
 			 */
@@ -277,21 +226,104 @@ void match()
 				qik.stopBothMotors();
 			}
 			else {
-				avancer(1);
+				iLikeToMoveItMoveIt();
 			}
 		}
-		
-        printf("\r%f : Angle %d sur %d \n", timeEnd.read(), cptPosition, SEUIL);
-        if(!hasTurned) {
-			hasTurned = (abs(cptPosition) >= SEUIL) && (abs(cptStack) >= SEUIL_STACK);
+		else {
+			// Gestion de la pose de la fresque
 			if(hasTurned)
-				printf("\r%f : On a tourné, on peut détecter la Fresque\n", timeEnd.read());
-		}
-        	
-        // Update timer angle
-        if(timeAngle.read() >= ANGLE_MAX_TIMER) {
-			timeAngle.stop();
-			angleGo = 1;
+			{
+				// Lancement détection mur à scratch
+				ultraM.startRanging();
+				while (!ultraM.rangingFinished()) wait(0.01);
+				remplirTab(distanceMilieu,ultraM.getRange());
+				
+				if(moyenne(distanceMilieu) < DISTANCE_FRESQUE)
+				{
+					printf("\r%f : Fresque détectée, on fait l'accrochage =)\n", timeEnd.read());
+					qik.stopBothMotors();
+					/*
+					 * Dépose fresque
+					 */
+					qikP.setMotor1Speed(-50);
+					wait(3);
+					qikP.setMotor1Speed(0);
+					
+					// On recule, mettez les feux de recul et la sirène !
+					printf("\r%f : Mettez les feux de recul et la sirène !\n", timeEnd.read());
+					Timer coucouTimer;
+					coucouTimer.start();
+					while(coucouTimer.read() <= 4 || moyenne(distanceMilieu) <= DISTANCE_FRESQUE*2) {					
+						ultraArr.startRanging();
+						while (!ultraArr.rangingFinished()) wait(0.01);
+						remplirTab(distanceArr,ultraArr.getRange());
+						
+						printf("dist. arrière : %d\n", moyenne(distanceArr));
+					
+						if(ultraArr.getRange() < DISTANCE_CAPTEUR)
+						{
+							printf("\r%f : Ennemi détecté :o\n", timeEnd.read());			
+							qik.stopBothMotors();
+						}
+						else
+						{
+							reculer(1);
+						}
+						
+						// Détection mur à scratch
+						ultraM.startRanging();
+						while (!ultraM.rangingFinished()) wait(0.01);
+						remplirTab(distanceMilieu,ultraM.getRange());
+					}
+					qik.stopBothMotors();
+					coucouTimer.stop();
+					
+					goToDance = 1;
+					printf("\r%f : Dance dance mode =D\n", timeEnd.read());
+				}
+				else
+				{
+					avancer(0.80);
+				}
+			}
+			else     
+			{
+				/*
+				 * Lance détection ennemi
+				 */
+				ultraG.startRanging();
+				while (!ultraG.rangingFinished()) wait(0.01);
+				remplirTab(distanceGauche,ultraG.getRange());
+
+				ultraD.startRanging();
+				while (!ultraD.rangingFinished()) wait(0.01);
+				remplirTab(distanceDroit,ultraD.getRange());
+
+				/*
+				 * Gestion de la détection des ennemis
+				 */
+				if(moyenne(distanceGauche) < DISTANCE_CAPTEUR || moyenne(distanceDroit) < DISTANCE_CAPTEUR)
+				{
+					printf("\r%f : Ennemi détecté :o\n", timeEnd.read());
+					qik.stopBothMotors();
+				}
+				else {
+					avancer(1);
+				}
+			}
+			
+			printf("\r%f : Angle %d sur %d \n", timeEnd.read(), cptPosition, SEUIL);
+			if(!hasTurned) {
+				hasTurned = (abs(cptPosition) >= SEUIL) && (abs(cptStack) >= SEUIL_STACK);
+				if(hasTurned)
+					printf("\r%f : On a tourné, on peut détecter la Fresque\n", timeEnd.read());
+			}
+				
+			// Update timer angle
+			if(timeAngle.read() >= ANGLE_MAX_TIMER) {
+				timeAngle.stop();
+				angleGo = 1;
+			}
 		}
 
     }
@@ -301,6 +333,77 @@ void match()
 
     qikP.setMotor1Speed(0);
     qik.stopBothMotors(); 
+}
+
+/**
+ * 0 : rotation
+ * 1 : opening
+ * 2 : closing
+ * 3 : moving
+ */ 
+int danceState = -1;
+Timer rotationTimer;
+Timer openTimer;
+Timer closeTimer;
+Timer moveTimer;
+
+/*
+ * name: iLikeToMoveItMoveIt fonction qui permet de danser
+ * @param
+ * @return
+ */
+void iLikeToMoveItMoveIt() {
+	if(danceState == -1) {
+		danceState = 0;
+		rotationTimer.start();
+		printf("\r%f : Mode Rotation !\n", timeEnd.read());
+	}
+	switch(danceState) {
+		case 0: // Rotation
+		qik.setMotor0Speed((int)RMOTEURD);
+		qik.setMotor1Speed((int)AMOTEURG);
+		if(rotationTimer.read() >= DANCE_ROTATION_TIME) {
+			qik.stopBothMotors();
+			danceState = 1;
+			rotationTimer.reset();
+			openTimer.start();
+			printf("\r%f : Mode Ouverture !\n", timeEnd.read());
+		}
+			break;
+		case 1: // Ouverture
+			qikP.setMotor1Speed(-50);
+			if(openTimer.read() >= DANCE_OPENING_TIME) {
+				qikP.setMotor1Speed(0);
+				danceState = 2;
+				openTimer.reset();
+				closeTimer.start();
+				printf("\r%f : Mode Fermeture !\n", timeEnd.read());
+			}
+			break;
+		case 2: // Fermeture
+			qikP.setMotor1Speed(50);
+			if(closeTimer.read() >= DANCE_CLOSING_TIME) {
+				qikP.setMotor1Speed(0);
+				danceState = 3;
+				closeTimer.reset();
+				moveTimer.start();
+				printf("\r%f : Mode Random !\n", timeEnd.read());
+			}
+			break;
+		case 3: // Random move !
+			qik.setMotor0Speed((int)AMOTEURD);
+			qik.setMotor1Speed((int)AMOTEURG);
+			if(moveTimer.read() >= DANCE_MOVING_TIME) {
+				qik.stopBothMotors();
+				danceState = 0;
+				moveTimer.reset();
+				rotationTimer.start();
+				printf("\r%f : Mode Rotation !\n", timeEnd.read());
+			}
+			break;
+		default:
+			break;
+	}
 }
 
 /*
@@ -318,6 +421,11 @@ void actionClavier(int vitesse, int tempsAttente)
     }
 }
 
+/*
+ * name: abs
+ * @param: un entier n
+ * @return: retourne la valeur absolue de l'entier en paramètre
+ */
 int abs(int n)
 {
     return n < 0 ? -n : n;

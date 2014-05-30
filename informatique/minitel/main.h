@@ -19,6 +19,13 @@
 #define SEUIL 4
 #define SEUIL_STACK 6
 #define ANGLE_MAX_TIMER 5
+
+// Dance !
+#define DANCE_ROTATION_TIME 3
+#define DANCE_OPENING_TIME 2
+#define DANCE_CLOSING_TIME 2
+#define DANCE_MOVING_TIME 3
+
 /* ################################################################## */
 
 /* ##################  ENTREES SUR L'MBED  ########################## */
@@ -85,6 +92,9 @@ void match();
  int moyenne(int tab[]);
  
  void seuilStack(int isLeft);
+ 
+ // Yeah ! =)
+ void iLikeToMoveItMoveIt();
  
  /**
   * Rempli un tableau en décalant et supprimant le premier élément
