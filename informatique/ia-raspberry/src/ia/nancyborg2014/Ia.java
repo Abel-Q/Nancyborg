@@ -216,12 +216,12 @@ public class Ia {
 				this.asserv.go(300, false);
 				while (!this.asserv.lastCommandFinished()) {
 					try {
-						if (this.detection.getCapteurDroit().doitStopper() || this.detection.getCapteurGauche().doitStopper()) {
+						if (!this.rouge && this.detection.getCapteurDroit().doitStopper() || (this.rouge && this.detection.getCapteurGauche().doitStopper())) {
 							System.out.println("Stop feu extérieur 1");
 							this.asserv.halt();
 							Thread.sleep(200);
 							this.asserv.reset();
-							while (!(this.detection.getCapteurDroit().peutRepartir() && this.detection.getCapteurGauche().peutRepartir()));
+							while (!(!this.rouge && this.detection.getCapteurDroit().peutRepartir()) || !(this.rouge && this.detection.getCapteurGauche().peutRepartir()));
 							this.asserv.go(300, false);
 						}
 					} catch (IOException | InterruptedException e) {
@@ -251,12 +251,12 @@ public class Ia {
 				this.asserv.go(300, true);
 				while (!this.asserv.lastCommandFinished()) {
 					try {
-						if (this.detection.getCapteurDroit().doitStopper() || this.detection.getCapteurGauche().doitStopper()) {
+						if ((this.rouge && this.detection.getCapteurDroit().doitStopper()) || (!this.rouge && this.detection.getCapteurGauche().doitStopper())) {
 							System.out.println("Stop feu bas 1");
 							this.asserv.halt();
 							Thread.sleep(200);
 							this.asserv.reset();
-							while (!(this.detection.getCapteurDroit().peutRepartir() && this.detection.getCapteurGauche().peutRepartir()));
+							while (!(this.rouge && this.detection.getCapteurDroit().peutRepartir()) || !(!this.rouge && this.detection.getCapteurGauche().peutRepartir()));
 							this.asserv.go(300, false);
 						}
 					} catch (IOException | InterruptedException e) {
@@ -422,9 +422,11 @@ public class Ia {
 				ia.detection.setDetect(false);
 				ia.asserv.halt();
 				ia.asserv.resetHalt();
-				if (ia.rouge) {
+				if (!ia.rouge) {
+					ia.asserv.face(950, ia.fuckingMult() * 800, true);
 					ia.asserv.gotoPosition(950, ia.fuckingMult() * 800, false);
 				} else {
+					ia.asserv.face(630, ia.fuckingMult() * 800, true);
 					ia.asserv.gotoPosition(630, ia.fuckingMult() * 800, false);
 				}
 				while (!ia.asserv.lastCommandFinished()) {
@@ -435,16 +437,16 @@ public class Ia {
 							ia.asserv.reset();
 							while (!(ia.detection.getCapteurDroit().peutRepartir() && ia.detection.getCapteurGauche().peutRepartir()));
 							if (ia.rouge) {
-								ia.asserv.gotoPosition(950, ia.fuckingMult() * 800, false);
+								ia.asserv.gotoPosition(950, ia.fuckingMult() * 600, false);
 							} else {
-								ia.asserv.gotoPosition(630, ia.fuckingMult() * 800, false);
+								ia.asserv.gotoPosition(630, ia.fuckingMult() * 600, false);
 							}
 						}
 					} catch (IOException | InterruptedException e) {
 						e.printStackTrace();
 					}
 				}
-				if (ia.rouge) {
+				if (!ia.rouge) {
 					ia.asserv.face(950, 0, true);
 				} else {
 					ia.asserv.face(630, 0, true);
