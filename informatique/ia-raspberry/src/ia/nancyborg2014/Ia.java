@@ -336,21 +336,7 @@ public class Ia {
 			boolean colisionCentre = ((xint1 > xmin  && xint1 < xmax) || (xint2 > xmin  && xint2 < xmax) ||
 					(yint1 > ymin  && yint1 < ymax) || (yint2 > ymin  && yint2 < ymax));
 			
-			xmin = 700;
-			xmax = 1100;
-			ymin = this.fuckingMult() * 1300;
-			ymax = this.fuckingMult() * 900;
-			
-			xint1 = (ymin-b)/a;
-			xint2 = (ymin-b)/a;
-			
-			yint1 = a*xmax+b;
-			yint2 = a*xmax+b;
-			
-			boolean colisionTorche = ((xint1 > xmin  && xint1 < xmax) || (xint2 > xmin  && xint2 < xmax) ||
-					(yint1 > ymin  && yint1 < ymax) || (yint2 > ymin  && yint2 < ymax));
-			
-			if (!colisionCentre && !colisionTorche) {
+			if (!colisionCentre) {
 				double newdist = Math.hypot(xb-xa, yb-ya);
 				if (newdist < dist) {
 					dist = newdist;
