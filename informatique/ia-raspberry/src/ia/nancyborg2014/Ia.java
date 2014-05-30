@@ -178,7 +178,6 @@ public class Ia {
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e2) {
-					// TODO Auto-generated catch block
 					e2.printStackTrace();
 				}
 				this.asserv.halt();
@@ -309,6 +308,7 @@ public class Ia {
 		
 		if (this.objectifs.size() == this.objectifsAtteints.size()) {
 			System.out.println("J'ai fini mon taff, je vous emmerde et je rentre à ma maison !!");
+			return null; // On insiste pas
 		}
 		
 		double dist = 10000;
@@ -422,7 +422,11 @@ public class Ia {
 				ia.detection.setDetect(false);
 				ia.asserv.halt();
 				ia.asserv.resetHalt();
-				ia.asserv.gotoPosition(950, ia.fuckingMult() * 800, false);
+				if (ia.rouge) {
+					ia.asserv.gotoPosition(950, ia.fuckingMult() * 800, false);
+				} else {
+					ia.asserv.gotoPosition(630, ia.fuckingMult() * 800, false);
+				}
 				while (!ia.asserv.lastCommandFinished()) {
 					try {
 						if (ia.detection.getCapteurDroit().doitStopper() || ia.detection.getCapteurGauche().doitStopper()) {
@@ -430,13 +434,22 @@ public class Ia {
 							Thread.sleep(200);
 							ia.asserv.reset();
 							while (!(ia.detection.getCapteurDroit().peutRepartir() && ia.detection.getCapteurGauche().peutRepartir()));
-							ia.asserv.gotoPosition(950, ia.fuckingMult() * 800, false);
+							if (ia.rouge) {
+								ia.asserv.gotoPosition(950, ia.fuckingMult() * 800, false);
+							} else {
+								ia.asserv.gotoPosition(630, ia.fuckingMult() * 800, false);
+							}
 						}
 					} catch (IOException | InterruptedException e) {
 						e.printStackTrace();
 					}
 				}
-				ia.asserv.face(950, 0, true);
+				if (ia.rouge) {
+					ia.asserv.face(950, 0, true);
+				} else {
+					ia.asserv.face(630, 0, true);
+				}
+				
 			}
 		});
 		
