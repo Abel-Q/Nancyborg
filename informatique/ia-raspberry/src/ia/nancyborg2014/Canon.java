@@ -15,9 +15,10 @@ public class Canon {
 	}
 	private static final float alphaMin = 210; //en degrés
 	private static final float alphaMax = 237; //en degrés
-	private static final float angleHaut = 216;
-	private static final float angleBas = 225;
-	private static final int   tempsCanon = 100; // en ms
+	
+	private static final float angleHaut = 222;
+	private static final float angleBas = 226;
+	private static final int   tempsCanon = 27; // en ms
 
 	private Ia ia;
 	private AX12Linux axElevation;

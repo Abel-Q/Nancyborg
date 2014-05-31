@@ -393,6 +393,8 @@ public class Ia {
 		System.out.println("Callage bordure");
 		// On lance le callage bordure
 		ia.asserv.calageBordure(!ia.rouge);
+		ia.asserv.go(100, true);
+		ia.asserv.turn(-90 * ia.fuckingMult(), true);
 
 		System.out.println("Attente remise tirette");
 		// On attend de remettre la tirette
