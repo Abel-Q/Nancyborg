@@ -9,8 +9,8 @@ QT += core multimedia network gui widgets
 LIBS += $$PWD/android/libs/armeabi-v7a/*
 #LIBS += /home/loic/OpenCV-2.4.9-android-sdk/sdk/native/libs/armeabi-v7a/*
 
-#INCLUDEPATH += /home/loic/OpenCV-2.4.9-android-sdk/sdk/native/jni/include/
-INCLUDEPATH += /home/naruto/Téléchargements/OpenCV-2.4.9-android-sdk/sdk/native/jni/include
+INCLUDEPATH += /home/loic/OpenCV-2.4.9-android-sdk/sdk/native/jni/include/
+#INCLUDEPATH += /home/naruto/Téléchargements/OpenCV-2.4.9-android-sdk/sdk/native/jni/include
 
 SOURCES += \
     main.cpp
