@@ -51,7 +51,6 @@ public class DetectionSRF {
 		while (echantillons.size() > NB_ECH) {
 			echantillons.remove(0);
 		}
-
 		return mesure;
 	}
 

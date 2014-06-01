@@ -9,7 +9,7 @@ public class Point {
 
 	private int x;
 	private int y;
-	private float cap;
+	private double cap;
 	
 	/**
 	 * Représente une direction dans laquelle il faut aller pour aller d'un point à un autre
@@ -50,11 +50,11 @@ public class Point {
 		return y;
 	}
 	
-	public float getCap() {
+	public double getCap() {
 		return cap;
 	}
 
-	public void setCap(float cap) {
+	public void setCap(double cap) {
 		this.cap = cap;
 	}
 	
@@ -100,5 +100,30 @@ public class Point {
 	
 	public String toString(){
 		return "("+x+";"+y+")";
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + x;
+		result = prime * result + y;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Point other = (Point) obj;
+		if (x != other.x)
+			return false;
+		if (y != other.y)
+			return false;
+		return true;
 	}
 }
