@@ -16,9 +16,11 @@ public:
     // Paramétrage des vitesses
     virtual void vitesseG(int vitMoteurG);
     virtual void vitesseD(int vitMoteurD);
+    virtual int getVitesseG() { return vitMoteurG; }
+    virtual int getVitesseD() { return vitMoteurD; }
 
 private:
-
+    int vitMoteurG, vitMoteurD;
     // Communication I2C entre la Mbed et la MD22
     I2C i2cLink;
 };

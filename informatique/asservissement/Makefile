@@ -36,6 +36,6 @@ deploy-%:
 
 all:: configs
 term:
-	picocom /dev/ttyACM0 -b 115200 --imap lfcrlf
+	picocom /dev/ttyACM0 -b 230400 --imap lfcrlf
 
 .PHONY: all term configs

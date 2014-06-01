@@ -20,6 +20,7 @@ CommandManager::CommandManager(int capacity , ConsignController *ctrlr, Odometri
     nextCMD.type = CMD_NULL;
     emergencyStop = false;
     currentConsignFinished = true;
+    lastStatus = 2;
 }
 
 CommandManager::~CommandManager()
@@ -33,26 +34,31 @@ CommandManager::~CommandManager()
  */
 bool CommandManager::addStraightLine(int64_t valueInmm)
 {
+    lastStatus = 0;
     return liste->enqueue(CMD_GO , Utils::mmToUO(odometrie, valueInmm), 0);
 }
 
 bool CommandManager::addTurn(int64_t angleInDeg)
 {
+    lastStatus = 0;
     return liste->enqueue(CMD_TURN , Utils::degToUO(odometrie, angleInDeg) , 0);
 }
 
 bool CommandManager::addGoTo(int64_t posXInmm, int64_t posYInmm)
 {
+    lastStatus = 0;
     return liste->enqueue(CMD_GOTO , Utils::mmToUO(odometrie, posXInmm) , Utils::mmToUO(odometrie, posYInmm));
 }
 
 bool CommandManager::addGoToEnchainement(int64_t posXInmm, int64_t posYInmm)
 {
+    lastStatus = 0;
     return liste->enqueue(CMD_GOTOENCHAIN , Utils::mmToUO(odometrie, posXInmm) , Utils::mmToUO(odometrie, posYInmm));
 }
 
 bool CommandManager::addGoToAngle(int64_t posXInmm, int64_t posYInmm)
 {
+    lastStatus = 0;
     return liste->enqueue(CMD_GOTOANGLE , Utils::mmToUO(odometrie, posXInmm) , Utils::mmToUO(odometrie, posYInmm));
 }
 
@@ -66,9 +72,9 @@ void CommandManager::perform()
     * On demande un arrêt d'urgence, donc on fixe la consigne à atteindre sur la position courante
     */
     if (emergencyStop) {
-        cnsgCtrl->set_dist_consigne(cnsgCtrl->getAccuDist());
+/*        cnsgCtrl->set_dist_consigne(cnsgCtrl->getAccuDist());
         cnsgCtrl->set_angle_consigne(cnsgCtrl->getAccuAngle());
-
+*/
         while (currCMD.type != CMD_NULL) { //On s'assure que la liste des commandes est vide
             currCMD = liste->dequeue();
         }
@@ -114,9 +120,10 @@ void CommandManager::perform()
         // On vient de terminer la consigne courante, on le signale en haut lieu
         if (currentConsignFinished == false) {
             //iaCom.printf("d\n"); //ou iaCom.putc('d');
-            putchar('d');
-            putchar('\n');
+//            putchar('d');
+//            putchar('\n');
             //printf("D sent \n");
+            lastStatus = 1;
         }
 
         currentConsignFinished = false;
@@ -292,6 +299,7 @@ void CommandManager::setEmergencyStop()   //Gestion d'un éventuel arrêt d'urge
     }
 
     currentConsignFinished = true;
+    lastStatus = 2;
 }
 
 void CommandManager::resetEmergencyStop()
@@ -307,8 +315,8 @@ void CommandManager::calageBordureGros(int sens)
     cnsgCtrl->setLowSpeed(true);
 
     // On recule 2sec
-    cnsgCtrl->add_dist_consigne(Utils::mmToUO(odometrie, -300));
-    wait(3);
+    cnsgCtrl->add_dist_consigne(Utils::mmToUO(odometrie, -150));
+    wait(2);
     cnsgCtrl->angle_Regu_On(false); //on coupe le régu d'angle pour s'aligner avec la bordure
     wait(2); //et on attend encore
 
@@ -322,17 +330,17 @@ void CommandManager::calageBordureGros(int sens)
     cnsgCtrl->angle_Regu_On(true);
 
     // On avance un peu pour sortir de la zone
-    cnsgCtrl->add_dist_consigne(Utils::mmToUO(odometrie, 600));
-    wait(4);
+    cnsgCtrl->add_dist_consigne(Utils::mmToUO(odometrie, 140));
+    wait(2);
 
     // En fonction de la couleur, on tourne dans un sens ou l'autre
     int mult = sens == 0 ? 1 : -1;
-    cnsgCtrl->add_angle_consigne(mult * Utils::degToUO(odometrie, 90));
+    cnsgCtrl->add_angle_consigne(mult * Utils::degToUO(odometrie, -90));
     wait(2);
 
     // On recule dans la bordure
-    cnsgCtrl->add_dist_consigne(Utils::mmToUO(odometrie, -800));
-    wait(4);
+    cnsgCtrl->add_dist_consigne(Utils::mmToUO(odometrie, -150));
+    wait(2);
     cnsgCtrl->angle_Regu_On(false); //on coupe le régu d'angle pour s'aligner avec la bordure
     wait(2); //et on attend encore
 
@@ -340,22 +348,11 @@ void CommandManager::calageBordureGros(int sens)
     odometrie->resetY();
     cnsgCtrl->reset_regu_dist();
     cnsgCtrl->angle_Regu_On(true);
-    cnsgCtrl->add_dist_consigne(Utils::mmToUO(odometrie, 500));
-    wait(3);
-
-
-    // On tourne pour entrer à nouveau dans la zone de depart
-    mult = sens == 0 ? -1 : 1;
-    cnsgCtrl->add_angle_consigne(mult * Utils::degToUO(odometrie, 90));
+    cnsgCtrl->add_dist_consigne(Utils::mmToUO(odometrie, 150));
     wait(2);
-
-    // On se met en postion de départ
-    cnsgCtrl->add_dist_consigne(Utils::mmToUO(odometrie, -380));
-    wait(4);
 
     // On remet la marche arrière à vitesse normale
     cnsgCtrl->setLowSpeed(false);
-
 }
 
 void CommandManager::calageBordurePetit(int sens)
@@ -397,16 +394,6 @@ void CommandManager::calageBordurePetit(int sens)
     cnsgCtrl->angle_Regu_On(true);
     cnsgCtrl->add_dist_consigne(Utils::mmToUO(odometrie, 140));
     wait(3);
-
-
-    // On tourne pour entrer à nouveau dans la zone de départ
-    mult = sens == 0 ? -1 : 1;
-    cnsgCtrl->add_angle_consigne(mult * Utils::degToUO(odometrie, 90));
-    wait(3);
-
-    // On se met en postion de départ
-    cnsgCtrl->add_dist_consigne(Utils::mmToUO(odometrie, -500));
-    wait(5);
 
     // On remet la marche arrière à vitesse normale
     cnsgCtrl->setLowSpeed(false);

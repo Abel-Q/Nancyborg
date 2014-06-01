@@ -81,6 +81,7 @@ void Md22::vitesseG(int vitMoteurG)
         i2cLink.write(moteurDReg);
     }
 
+    this->vitMoteurG = vitMoteurG;
     i2cLink.write((int8_t)vitMoteurG);
     i2cLink.stop();
 }
@@ -117,6 +118,7 @@ void Md22::vitesseD(int vitMoteurD)
         i2cLink.write(moteurGReg);
     }
 
+    this->vitMoteurD = vitMoteurD;
     i2cLink.write((int8_t)vitMoteurD);
     i2cLink.stop();
 }

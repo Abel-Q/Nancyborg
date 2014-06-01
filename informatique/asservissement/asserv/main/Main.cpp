@@ -13,11 +13,14 @@ void loadConfig() {
     printf("Version configuration : %lld\n", Config::configVersion);
 }
 
+Serial pc(USBTX, USBRX);
+
 int main()
 {
+    pc.baud(230400);
     // Initialisation du port série par défaut (utilisé par printf & co)
-    serial_init(&stdio_uart, STDIO_UART_TX, STDIO_UART_RX);
-    serial_baud(&stdio_uart, 115200); // GaG va être content
+/*    serial_init(&stdio_uart, STDIO_UART_TX, STDIO_UART_RX);
+    serial_baud(&stdio_uart, 230400); // GaG va être content*/
 
     printf("--- Asservissement Nancyborg ---\n");
     printf("Version " GIT_VERSION " - Compilée le " DATE_COMPIL " par " AUTEUR_COMPIL "\n\n");
@@ -44,7 +47,6 @@ int main()
 
     while (1) {
         ecouteSerie();
-        //wait(0.01);
     }
 }
 
@@ -245,6 +247,7 @@ void resetAsserv()
 // On rafraichit l'asservissement régulièrement
 void Live_isr()
 {
+    static int mod = 0;
     odometrie->refresh();
 
     if (!Config::disableAsserv) {
@@ -253,6 +256,19 @@ void Live_isr()
     }
 
     liveLed = 1 - liveLed;
+
+
+    if ((mod++) % 20 == 0) {
+        printf("#x%lfy%lfa%lfd%dvg%dvd%d\n", (double)Utils::UOTomm(odometrie, odometrie->getX()),
+                                   (double)Utils::UOTomm(odometrie, odometrie->getY()),
+                                   odometrie->getTheta(),
+                                   commandManager->getLastCommandStatus(),
+                                   motorController->getVitesseG(),
+                                   motorController->getVitesseD());
+
+        if (commandManager->getLastCommandStatus() == 1)
+            commandManager->setLastCommandStatus(2);
+    }
 #ifdef DEBUG
     temps++;
     static int refreshPeriod = 0;
@@ -271,7 +287,6 @@ void Live_isr()
         dataLed = 0;
         debugUdp->dropCurrentData();
     }
-
 #endif
 }
 
