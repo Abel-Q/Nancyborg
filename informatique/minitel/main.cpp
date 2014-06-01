@@ -75,13 +75,11 @@ int cptPosition = 0;
 int cptStack = 0;
 int angleGo = 0;
 int goToDance = 0;
+int goToPomPom = 0;
 /* ################################################################## */
 
 int main()
 {   
-	// TODO TODO TODO REMOVE !!!
-	goToDance = 0;
-	
     int cpt = 0;
 
     printf("\r\n");
@@ -132,24 +130,115 @@ int main()
 
     printf("\rAttente de tirette\n");
     while(Tirette){} // Boucle d'attente qu'on est tiré sur la tirette
-    timeEnd.start();
+    if(goToPomPom) {
+		pomPomGirl();
+	}
+	else {
+		timeEnd.start();
 
-    /*
-     * On part du coin et on avance tant que le robot ne trouvre pas
-     * de ligne noir et on éteint les moteurs après.
-     */
+		/*
+		 * On part du coin et on avance tant que le robot ne trouvre pas
+		 * de ligne noir et on éteint les moteurs après.
+		 */
 
-    qik.setMotor0Speed(AMOTEURD);
-    qik.setMotor1Speed(AMOTEURG);
-    printf("\rAttente de %f secondes pour rejoindre la ligne\n", HAND_TROLL_TIMEOUT);
-    wait(HAND_TROLL_TIMEOUT);
+		qik.setMotor0Speed(AMOTEURD);
+		qik.setMotor1Speed(AMOTEURG);
+		printf("\rAttente de %f secondes pour rejoindre la ligne\n", HAND_TROLL_TIMEOUT);
+		wait(HAND_TROLL_TIMEOUT);
 
-    qik.stopBothMotors();
+		qik.stopBothMotors();
 
-    match();
+		match();
+	}
 
-    printf("\rFin du match et du code\n");
-    return EXIT_SUCCESS;
+		printf("\rFin du match et du code\n");
+		return EXIT_SUCCESS;
+}
+
+void pomPomGirl() {
+	while(1) {
+		/*
+		 * Lance détection ennemi
+		 */
+		ultraG.startRanging();
+		while (!ultraG.rangingFinished()) wait(0.01);
+		remplirTab(distanceGauche,ultraG.getRange());
+
+		ultraD.startRanging();
+		while (!ultraD.rangingFinished()) wait(0.01);
+		remplirTab(distanceDroit,ultraD.getRange());
+		
+			/*
+			// Tourne à droite doucement
+			double slow = 0.8;
+			qik.setMotor0Speed((int)AMOTEURD*slow);
+			qik.setMotor1Speed((int)RMOTEURG*slow);
+			wait(2);
+			qik.stopBothMotors();
+			
+			// Tourne à gauche doucement
+			qik.setMotor0Speed((int)RMOTEURD*slow);
+			qik.setMotor1Speed((int)AMOTEURG*slow);
+			wait(4);
+			qik.stopBothMotors();
+			*/
+			
+			double fast = 1.3;
+			// Tourne gauche-droite-gauche rapidement
+			qik.setMotor0Speed((int)AMOTEURD*fast);
+			qik.setMotor1Speed((int)RMOTEURG*fast);
+			wait(2);
+			
+			qik.setMotor0Speed((int)RMOTEURD*fast);
+			qik.setMotor1Speed((int)AMOTEURG*fast);
+			wait(2);
+			
+			qikP.setMotor1Speed(0);
+			
+			qik.setMotor0Speed((int)AMOTEURD*fast);
+			qik.setMotor1Speed((int)RMOTEURG*fast);
+			wait(1);
+			
+			qik.setMotor0Speed((int)RMOTEURD*fast);
+			qik.setMotor1Speed((int)AMOTEURG*fast);
+			wait(1);
+			
+			qik.setMotor0Speed((int)AMOTEURD*fast);
+			qik.setMotor1Speed((int)RMOTEURG*fast);
+			wait(1);
+			
+			qik.stopBothMotors();
+			
+			/*
+			// Ouverture/Fermeture lente
+			qikP.setMotor1Speed(-40);
+			wait(4);
+			qikP.setMotor1Speed(40);
+			wait(4);
+			qikP.setMotor1Speed(0);
+			* */
+			
+			// Ouverture/Fermeture rapide
+			qikP.setMotor1Speed(-80);
+			wait(1);
+			qikP.setMotor1Speed(80);
+			wait(1);
+			qikP.setMotor1Speed(-80);
+			wait(1);
+			qikP.setMotor1Speed(80);
+			wait(1);
+			qikP.setMotor1Speed(-80);
+			wait(1);
+			qikP.setMotor1Speed(0);
+			
+			// Tour 360 gauche + remise
+			qikP.setMotor1Speed(40);
+			qik.setMotor0Speed((int)RMOTEURD*fast);
+			qik.setMotor1Speed((int)AMOTEURG*fast);
+			wait(2.5);
+			qik.stopBothMotors();
+		
+	}
 }
 
 void init()

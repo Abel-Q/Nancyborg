@@ -21,10 +21,16 @@
 #define ANGLE_MAX_TIMER 5
 
 // Dance !
-#define DANCE_ROTATION_TIME 3
-#define DANCE_OPENING_TIME 2
-#define DANCE_CLOSING_TIME 2
-#define DANCE_MOVING_TIME 3
+#define DANCE_ROTATION_TIME 5
+#define DANCE_OPENING_TIME 3
+#define DANCE_CLOSING_TIME 3
+#define DANCE_MOVING_TIME 5
+
+// POM POM !
+#define POM_POM_ROTATION_TIME 5
+#define POM_POM_OPENING_TIME 2
+#define POM_POM_CLOSING_TIME 2
+#define POM_POM_MOVING_TIME 3
 
 /* ################################################################## */
 
@@ -95,6 +101,7 @@ void match();
  
  // Yeah ! =)
  void iLikeToMoveItMoveIt();
+ void pomPomGirl();
  
  /**
   * Rempli un tableau en décalant et supprimant le premier élément
