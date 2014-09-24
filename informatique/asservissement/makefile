@@ -17,6 +17,7 @@ LIBS_PREFIX=
 LIBS_SUFFIX=
 GPFLAGS=-DDATE_COMPIL='"$(shell date)"' -DAUTEUR_COMPIL='"$(USER)"' -DGIT_VERSION='"$(shell git describe --dirty --always)"'
 PYTHON?=/usr/bin/python
+NEWLIB_NANO=0
 
 include $(GCC4MBED_DIR)/build/gcc4mbed.mk
 
@@ -34,7 +35,7 @@ deploy-%:
 	$(Q) $(subst PROJECT.bin,$(DIR)/config.txt,$(LPC_DEPLOY))
 	$(Q) rm -rf $(DIR)
 
-all:: configs
+all: $(DEVICES) configs
 term:
 	picocom /dev/ttyACM0 -b 230400 --imap lfcrlf
 

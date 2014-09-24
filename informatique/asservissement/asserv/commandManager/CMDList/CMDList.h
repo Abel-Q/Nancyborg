@@ -1,7 +1,7 @@
 #ifndef CMD_LIST
 #define CMD_LIST
 
-#include "../mbed.h"
+#include "mbed.h"
 
 // Internal Structures
 enum typeCMD {
