@@ -1,0 +1,3 @@
+[submodule "imprimante-3d/Marlin"]
+	path = imprimante-3d/Marlin
+	url = https://github.com/Nancyborg/Marlin.git
