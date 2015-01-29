@@ -4,3 +4,6 @@
 [submodule "CubeALed"]
 	path = CubeALed
 	url = git@github.com:Nancyborg/CubeALed.git
+[submodule "CoupeDeFrance"]
+	path = CoupeDeFrance
+	url = git@github.com:Nancyborg/CoupeDeFrance.git
