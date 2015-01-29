@@ -1,3 +1,6 @@
 [submodule "imprimante-3d/Marlin"]
 	path = imprimante-3d/Marlin
 	url = https://github.com/Nancyborg/Marlin.git
+[submodule "CubeALed"]
+	path = CubeALed
+	url = git@github.com:Nancyborg/CubeALed.git
