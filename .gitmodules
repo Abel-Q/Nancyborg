@@ -13,3 +13,6 @@
 [submodule "Electronique"]
 	path = Electronique
 	url = git@github.com:Nancyborg/Electronique.git
+[submodule "Tests"]
+	path = Tests
+	url = git@github.com:Nancyborg/Tests.git
