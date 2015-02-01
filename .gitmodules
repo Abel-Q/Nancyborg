@@ -10,3 +10,6 @@
 [submodule "Imprimante3D"]
 	path = Imprimante3D
 	url = git@github.com:Nancyborg/Imprimante3D.git
+[submodule "Electronique"]
+	path = Electronique
+	url = git@github.com:Nancyborg/Electronique.git
