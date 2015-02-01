@@ -7,3 +7,6 @@
 [submodule "CoupeDeFrance"]
 	path = CoupeDeFrance
 	url = git@github.com:Nancyborg/CoupeDeFrance.git
+[submodule "Imprimante3D"]
+	path = Imprimante3D
+	url = git@github.com:Nancyborg/Imprimante3D.git
