@@ -83,6 +83,8 @@ else
         mount -o ro "$ROOT" "$MNTDIR"
         mount -o ro "$BOOT" "$MNTDIR/boot"
     else
+        dosfsck -a "$BOOT"
+        fsck -a "$ROOT"
         mount "$ROOT" "$MNTDIR"
         mount "$BOOT" "$MNTDIR/boot"
     fi

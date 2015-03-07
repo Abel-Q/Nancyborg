@@ -75,6 +75,5 @@ if ! mkdir -p "$MNTDIR" || ! chmod 777 "$MNTDIR"; then
     exit 4
 fi
 
-
 mount "$IMG" "$MNTDIR" -o "loop,offset=${offsets[1]}${MOUNTOPTS}" || exit 5
 mount "$IMG" "$MNTDIR/boot" -o "loop,offset=${offsets[0]}${MOUNTOPTS}" || { clean; exit 5; }
