@@ -17,5 +17,5 @@
 	path = Tests
 	url = git@github.com:Nancyborg/Tests.git
 [submodule "Librairies"]
-	path = Librairies
+	path = informatique/Librairies
 	url = git@github.com:Nancyborg/Librairies.git
