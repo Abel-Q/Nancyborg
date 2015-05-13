@@ -16,6 +16,7 @@ static const int TICKS_PER_TURN = 1920;
 static float motorOutput = 0;
 static float processValue = 0;
 static float setPoint = 0;
+static float speed = 0;
 
 static PID pid(5, 0.4, 0, PID_PERIOD);
 static PololuQik2 qik(TX_PIN, RX_PIN, RST_PIN, ERR_PIN, NULL, false);
@@ -29,10 +30,19 @@ extern "C" void HardFault_Handler()
 }
 
 void run_pid() {
+    static float previous_position = 0;
     processValue = qei.getPulses() / (float)TICKS_PER_TURN;
+    speed = (processValue - prev_position) / PID_PERIOD;
+    prev_position = processValue;
     pid.setProcessValue(processValue);
     pid.setSetPoint(setPoint);
-    motorOutput = pid.compute();
+
+    if (fabs(position - setPoint) < 0.1) {
+        motorOutput = 0;
+    } else {
+        motorOutput = pid.compute();
+    }
+
     qik.setMotor0Speed(motorOutput * 127);
 }
 
@@ -50,6 +60,7 @@ int main() {
 
     RPCVariable<float> rpcSetPoint(&setPoint, "SetPoint");
     RPCVariable<float> rpcPosition(&processValue, "Position");
+    RPCVariable<float> rpcPosition(&speed, "Speed");
 
     RPC::add_rpc_class<RpcDigitalIn>();
     RPC::add_rpc_class<RpcDigitalOut>();
