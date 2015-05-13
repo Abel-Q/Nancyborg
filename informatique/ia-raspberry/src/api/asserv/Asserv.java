@@ -1,14 +1,14 @@
 package api.asserv;
 
+import api.communication.Serial;
+import gnu.io.NoSuchPortException;
+import gnu.io.PortInUseException;
+import gnu.io.UnsupportedCommOperationException;
+import navigation.Point;
+
 import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import navigation.Point;
-import purejavacomm.NoSuchPortException;
-import purejavacomm.PortInUseException;
-import purejavacomm.UnsupportedCommOperationException;
-import api.communication.Serial;
 
 /**
  * Classe permettant de communiquer avec l'asservissement sur MBED et de lui
@@ -45,7 +45,13 @@ public class Asserv {
 		@Override
 		public void run() {
 			while (true) {
-				String check = mbed.readLine();
+				String check = null;
+				try {
+					check = mbed.readLine();
+				} catch (IOException e) {
+					e.printStackTrace();
+					return;
+				}
 				if (check.isEmpty() || check.charAt(0) != '#') {
 					continue;
 				}
@@ -80,10 +86,16 @@ public class Asserv {
 	 * @throws PortInUseException 
 	 * @throws IOException 
 	 */
-	public Asserv(String serie) throws IOException {
+	public Asserv(String serie) throws IOException, NoSuchPortException, PortInUseException, UnsupportedCommOperationException {
 		System.out.println("Connexion à l'asserv...");
 		commande = "";
 		mbed = new Serial(serie, /*115200*/230400);
+		mbed.sendBreak();
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		System.out.println("Serie ok");
 		reset();
 		checker.start();
@@ -94,6 +106,7 @@ public class Asserv {
 		lastCommandFinished = true;
 		while(true) {
 			String blabla = mbed.readLine();
+			System.out.println("blabla: " + blabla);
 			if (blabla.endsWith("ok")) {
 				System.out.println("Asserv ready (la salope)");
 				return;
@@ -234,11 +247,19 @@ public class Asserv {
 	}
 	
 	public void setEnabled(boolean enabled) {
-		mbed.write("D" + (enabled ? "0" : "1"));
+		try {
+			mbed.write("D" + (enabled ? "0" : "1"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public void setMotorSpeed(char moteur, int val) {
-		mbed.write("M" + moteur + val + "\n");
+		try {
+			mbed.write("M" + moteur + val + "\n");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public synchronized Point parseCurrentPosition(String str) {

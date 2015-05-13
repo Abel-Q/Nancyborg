@@ -1,9 +1,12 @@
 package api.controllers.gc;
 
+import api.communication.Serial;
+import gnu.io.NoSuchPortException;
+import gnu.io.PortInUseException;
+import gnu.io.UnsupportedCommOperationException;
+
 import java.io.IOException;
 import java.util.ArrayList;
-
-import api.communication.Serial;
 
 /**
  * Implémente la communication avec une manette de GameCube par l'intermédiaire
@@ -63,7 +66,7 @@ public class GameCubeRemote {
 		}
 	}
 
-	public GameCubeRemote() throws IOException {
+	public GameCubeRemote() throws IOException, NoSuchPortException, PortInUseException, UnsupportedCommOperationException {
 		serial = new Serial("/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A700fioY-if00-port0", 115200);
 		serial.write(0);
 		try {

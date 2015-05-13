@@ -1,37 +1,30 @@
-package ia.nancyborg2014;
+package ia.common;
+
+import api.asserv.Asserv;
+import ia.nancyborg2015.Ia;
+import navigation.Point;
 
 import java.util.ArrayList;
-
-import navigation.Point;
-import api.asserv.Asserv;
 
 public class DeplacementTask extends Thread {
 
 	private Asserv asserv;
-	private boolean rouge;
 	private ArrayList<Point> points;
 	private Ia ia;
-	
-	public DeplacementTask(Asserv asserv, boolean rouge, ArrayList<Point> points, Ia ia) {
-		this.asserv = asserv;
-		this.rouge = rouge;
+
+	public DeplacementTask(Ia ia, ArrayList<Point> points) {
+		this.asserv = ia.asserv;
 		this.points = points;
 		this.ia = ia;
 	}
 	
 	private void waitForFinish() {
-		boolean finished = false;
-		while(!finished) {
-			try {
-				Thread.sleep(20);
-				if(asserv.lastCommandFinished()) {
-					finished = true;
-				}
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+		while(true) {
+			ia.sleep(20);
+			if(asserv.lastCommandFinished()) {
+				return;
 			}
 		}
-		
 	}
 	
 	@Override
