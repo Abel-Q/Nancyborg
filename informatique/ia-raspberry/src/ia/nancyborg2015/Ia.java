@@ -6,6 +6,7 @@ import api.communication.Serial;
 import api.controllers.PololuMaestro;
 import ia.common.DeplacementTask;
 import ia.common.DetectionRPLidar;
+import ia.common.Pince;
 import navigation.Navigation2014;
 import navigation.Point;
 import org.mbed.RPC.*;
@@ -29,6 +30,7 @@ public class Ia {
     Point objectifCourant;
     DeplacementTask deplacement;
 	DetectionRPLidar rplidar;
+	Pince bras, tube, mainGauche, mainDroite, pinceGauche, pinceDroite;
 
 	public TeamColor teamColor;
 	private int ymult;
@@ -51,6 +53,13 @@ public class Ia {
 
 	            System.out.println("****** Init maestro");
 	            maestro = new PololuMaestro(new Serial("/dev/serial/by-id/usb-Pololu_Corporation_Pololu_Micro_Maestro_6-Servo_Controller_00046907-if00", 115200)); // if02
+	            bras = new Pince(maestro, 0, 0, 0); // TODO
+	            tube = new Pince(maestro, 0, 0, 0); // TODO
+	            pinceGauche = new Pince(maestro, 0, 0, 0); // TODO
+	            pinceDroite = new Pince(maestro, 0, 0, 0); // TODO
+	            mainGauche = new Pince(maestro, 0, 0, 0); // TODO
+	            mainDroite = new Pince(maestro, 0, 0, 0); // TODO
+
 
 	            System.out.println("****** Init GPIO");
 	            tirette = new Tirette(new DigitalIn(rpc, MbedRPC.p27), new DigitalOut(rpc, MbedRPC.p28));
@@ -419,6 +428,14 @@ public class Ia {
 		/*this.deplacement = new DeplacementTask(this, path);
 		this.deplacement.start();*/
 		System.out.println("Deplacement run ok");
+
+		iaHomologation();
+	}
+
+	private void iaHomologation() {
+		asserv.go(600, true); // on sort de la zone
+		asserv.gotoPosition(750, 300 * ymult, true);
+	 	asserv.gotoPosition(1100, 300*ymult, true);
 	}
 
 	public void sleep(int msec) {

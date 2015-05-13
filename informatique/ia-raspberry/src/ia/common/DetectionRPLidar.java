@@ -1,6 +1,7 @@
 package ia.common;
 
 import ia.nancyborg2015.Ia;
+import navigation.Point;
 import roboticinception.rplidar.RpLidarHighLevelDriver;
 import roboticinception.rplidar.RpLidarScan;
 
@@ -17,7 +18,7 @@ public class DetectionRPLidar implements Runnable {
 
 	public DetectionRPLidar(Ia ia, String device, int baudrate) {
 		this.ia = ia;
-		rplidar = new RpLidarHighLevelDriver();
+		rplidar = new RpLidarHighLevelDriver(ia);
 		rplidar.initialize(device, baudrate);
 		//rplidar.driver.setVerbose(true);
 
@@ -47,14 +48,23 @@ public class DetectionRPLidar implements Runnable {
 				int index = scan.used.get(i);
 				float angle = index / 64f;
 				float distance = scan.distance[index];
+				Point pos_asserv = scan.pos_asserv[index];
+
 
 				if (distance > 1000 || distance <= 120) {
 					continue;
 				}
 
-				if (distance < 800) {
-					det++;
+				if (distance > 800) {
+					continue;
 				}
+
+				if (pos_asserv.getX() < 100 || pos_asserv.getY() < 100 || pos_asserv.getX() > (3000-100) || Math.abs(pos_asserv.getY()) > (2000-100)) {
+					System.out.println("Detection hors table (" + pos_asserv + ")");
+					continue;
+				}
+
+				det++;
 
 				if (distance < min) {
 					min = distance;

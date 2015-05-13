@@ -1,5 +1,7 @@
 package roboticinception.rplidar;
 
+import ia.nancyborg2015.Ia;
+
 import java.util.Arrays;
 
 /**
@@ -12,12 +14,17 @@ public class RpLidarHighLevelDriver implements RpLidarListener {
 
 	final RpLidarScan work = new RpLidarScan();
 	final RpLidarScan complete = new RpLidarScan();
+	private final Ia ia;
 	volatile boolean ready = false;
 
 	public RpLidarLowLevelDriver driver;
 
 	int expectedCount;
 	volatile boolean initialized;
+
+	public RpLidarHighLevelDriver(Ia ia) {
+		this.ia = ia;
+	}
 
 	/**
 	 * Connects to the LIDAR
@@ -177,6 +184,7 @@ public class RpLidarHighLevelDriver implements RpLidarListener {
 		}
 
 		work.used.add(which);
+		work.pos_asserv[which] = ia.getPosition();
 		work.time[which] = measurement.timeMilli;
 		work.distance[which] = measurement.distance / 4.0f;
 		work.quality[which] = measurement.quality;

@@ -1,5 +1,7 @@
 package roboticinception.rplidar;
 
+import navigation.Point;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -18,6 +20,7 @@ public class RpLidarScan {
 	public long time[] = new long[N];
 	/** index of elements which were written to */
 	public ArrayList<Integer> used = new ArrayList<>();
+	public Point[] pos_asserv = new Point[N];
 
 
 	/**
@@ -29,6 +32,7 @@ public class RpLidarScan {
 		System.arraycopy(scan.quality,0,quality,0,N);
 		System.arraycopy(scan.distance,0,distance,0,N);
 		System.arraycopy(scan.time,0,time,0,N);
+		System.arraycopy(scan.pos_asserv,0,pos_asserv,0,N);
 		used.clear();
 		used.addAll(scan.used);
 	}
