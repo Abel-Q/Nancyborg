@@ -57,7 +57,11 @@ public class Point {
 	public void setCap(double cap) {
 		this.cap = cap;
 	}
-	
+
+	public double getCapDegree() {
+		return Math.toDegrees(cap);
+	}
+
 	/**
 	 * Indique si un point est voisin directe d'un autre
 	 * Si les points sont supperpos�s ils ne sont pas consid�r�s comme voisins
@@ -99,7 +103,7 @@ public class Point {
 	}
 	
 	public String toString(){
-		return "("+x+";"+y+")";
+		return "("+x+";"+y+"; " + getCapDegree() + "°)";
 	}
 
 	@Override

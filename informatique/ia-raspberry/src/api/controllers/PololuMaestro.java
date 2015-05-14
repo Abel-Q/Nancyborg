@@ -30,6 +30,19 @@ public class PololuMaestro {
 		setTarget(channel, 1500 + 500 * angle / 90);
 	}
 
+
+	public void setTargetMs(int channel, int ms) throws IOException {
+		byte[] buffer = new byte[6];
+		buffer[0] = (byte) 0xAA;
+		buffer[1] = 12;
+		buffer[2] = (byte) 0x04;
+		buffer[3] = (byte) channel;
+		buffer[4] = (byte) ((4 * ms) % 128);
+		buffer[5] = (byte) ((4 * ms) / 128);
+
+		serial.write(buffer);
+	}
+
 	public static void main(String[] args) throws Exception {
 		Serial serial = new Serial("/dev/ttyACM0", 115200);
 

@@ -4,13 +4,14 @@ import api.asserv.Asserv;
 import api.chrono.Chrono;
 import api.communication.Serial;
 import api.controllers.PololuMaestro;
-import ia.common.DeplacementTask;
+import ia.common.AsservQueue;
 import ia.common.DetectionRPLidar;
 import ia.common.Pince;
 import navigation.Navigation2014;
 import navigation.Point;
 import org.mbed.RPC.*;
 
+import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.util.ArrayList;
 import java.util.TimerTask;
@@ -28,12 +29,13 @@ public class Ia {
     ArrayList<Point> objectifs;
     ArrayList<Point> objectifsAtteints;
     Point objectifCourant;
-    DeplacementTask deplacement;
-	DetectionRPLidar rplidar;
+    //DeplacementTask deplacement;
+	public DetectionRPLidar rplidar;
 	Pince bras, tube, mainGauche, mainDroite, pinceGauche, pinceDroite;
 
 	public TeamColor teamColor;
-	private int ymult;
+	public int ymult;
+	public AsservQueue queue;
 
 	public enum TeamColor {
 		GREEN,
@@ -41,49 +43,56 @@ public class Ia {
 	}
 
 	public Ia() {
-        while (true) {
-            try {
-                // On initialise l'asservissement
-	            System.out.println("****** Init asserv");
-	            asserv = new Asserv("/dev/serial/by-id/usb-MBED_MBED_CMSIS-DAP_101068a5cbdd92814f89f87e9a3fcdbac7ba-if01");
+        try {
+            // On initialise l'asservissement
+            System.out.println("****** Init asserv");
+            asserv = new Asserv("/dev/serial/by-id/usb-MBED_MBED_CMSIS-DAP_101068a5cbdd92814f89f87e9a3fcdbac7ba-if01");
 
-	            System.out.println("****** Init MBED IO");
-	            // On initialise la MBED pour les IO et l'étage
-                rpc = new SerialMbedRPC(FileSystems.getDefault().getPath("/dev/serial/by-id/usb-MBED_MBED_CMSIS-DAP_1010b17ca0c1d1b67081b01c87816f0123b1-if01").toRealPath().toString(), 115200);
+            System.out.println("****** Init MBED IO");
+            // On initialise la MBED pour les IO et l'étage
+            rpc = new SerialMbedRPC(FileSystems.getDefault().getPath("/dev/serial/by-id/usb-MBED_MBED_CMSIS-DAP_1010b17ca0c1d1b67081b01c87816f0123b1-if01").toRealPath().toString(), 115200);
 
-	            System.out.println("****** Init maestro");
-	            maestro = new PololuMaestro(new Serial("/dev/serial/by-id/usb-Pololu_Corporation_Pololu_Micro_Maestro_6-Servo_Controller_00046907-if00", 115200)); // if02
-	            bras = new Pince(maestro, 0, 0, 0); // TODO
-	            tube = new Pince(maestro, 0, 0, 0); // TODO
-	            pinceGauche = new Pince(maestro, 0, 0, 0); // TODO
-	            pinceDroite = new Pince(maestro, 0, 0, 0); // TODO
-	            mainGauche = new Pince(maestro, 0, 0, 0); // TODO
-	            mainDroite = new Pince(maestro, 0, 0, 0); // TODO
+            System.out.println("****** Init maestro");
+            maestro = new PololuMaestro(new Serial("/dev/serial/by-id/usb-Pololu_Corporation_Pololu_Micro_Maestro_6-Servo_Controller_00046907-if00", 9600)); // if02
+            bras = new Pince(maestro, 1, 1488, 2304);
+            tube = new Pince(maestro, 0, 1856, 992);
+            pinceGauche = new Pince(maestro, 4, 2400, 1443);
+            pinceDroite = new Pince(maestro, 3, 704, 1645);
+            mainGauche = new Pince(maestro, 2, 1408, 608);
+            mainDroite = new Pince(maestro, 5, 1616, 2400);
 
+            pinceGauche.setPosition(0);
+            pinceDroite.setPosition(0);
 
-	            System.out.println("****** Init GPIO");
-	            tirette = new Tirette(new DigitalIn(rpc, MbedRPC.p27), new DigitalOut(rpc, MbedRPC.p28));
-                selecteurCouleur  = new SelecteurCouleur(new DigitalIn(rpc, MbedRPC.p29), new DigitalOut(rpc, MbedRPC.p30));
+            mainGauche.setPosition(0);
+            mainDroite.setPosition(0);
 
-	            System.out.println("****** Init moteur etage");
-	            consigneEtage = new RPCVariable<>(rpc, "SetPoint");
-	            positionEtage = new RPCVariable<>(rpc, "Position");
+            System.out.println("COUCOUCOUCOU");
 
-	            System.out.println("****** Init RPLidar");
+            System.out.println("****** Init GPIO");
+            tirette = new Tirette(new DigitalIn(rpc, MbedRPC.p27), new DigitalOut(rpc, MbedRPC.p28));
+            selecteurCouleur  = new SelecteurCouleur(new DigitalIn(rpc, MbedRPC.p29), new DigitalOut(rpc, MbedRPC.p30));
 
-	            rplidar = new DetectionRPLidar(this,
-			            FileSystems.getDefault().getPath("/dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0").toRealPath().toString(), 115200);
+            System.out.println("****** Init moteur etage");
+            consigneEtage = new RPCVariable<>(rpc, "SetPoint");
+            positionEtage = new RPCVariable<>(rpc, "Position");
 
-	            System.out.println("******* ALL INIT DONE");
-	            objectifsAtteints = new ArrayList<Point>();
-                objectifs = new ArrayList<Point>();
-                return;
-                //nav = new Navigation2014();
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                System.err.println("Nouvelle tentative d'init dans 3 secondes...");
-	            sleep(3000);
-            }
+            System.out.println("****** Init RPLidar");
+
+            rplidar = new DetectionRPLidar(this,
+		            FileSystems.getDefault().getPath("/dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0").toRealPath().toString(), 115200);
+
+            System.out.println("******* ALL INIT DONE");
+            objectifsAtteints = new ArrayList<Point>();
+            objectifs = new ArrayList<Point>();
+
+            queue = new AsservQueue(asserv);
+            queue.start();
+            return;
+            //nav = new Navigation2014();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+	        System.exit(1);
         }
 	}
 
@@ -372,12 +381,18 @@ public class Ia {
 
 		System.out.println("############################################################## IA #################################################");
 		final Ia ia = new Ia();
+		/*ia.sleep(1000);
+		ia.pinceGauche.setPosition(1);
+		ia.pinceDroite.setPosition(1);*/
 		ia.start();
 	}
 
 	public void start() throws Exception {
 		// On initialise le chrono
-		Chrono chrono_stop = new Chrono(91 * 1000);
+		Chrono chrono_stop = new Chrono(90 * 1000);
+
+		System.out.println("Attente tirette présente");
+		tirette.wait(false);
 
 		System.out.println("Attente enlevage tirette");
 		// On attend de virer la tirette
@@ -387,12 +402,18 @@ public class Ia {
 
 		System.out.println("IA initialisée. Couleur : " + (this.teamColor == TeamColor.GREEN ? "vert" : "jaune"));
 
+
+		//iaTest();
+
 		// On lance le callage bordure
 		System.out.println("Calage bordure");
 
 		this.asserv.calageBordure(this.teamColor != TeamColor.GREEN);
-		this.asserv.go(100, true);
-		this.asserv.turn(-90 * this.ymult, true);
+
+		asserv.gotoPosition(800, 500 * ymult, true);
+		asserv.gotoPosition(800, 1000 * ymult, true);
+		asserv.face(2000, 1000 * ymult, true);
+		asserv.go(-390, true);
 
 		System.out.println("Attente remise tirette");
 		// On attend de remettre la tirette
@@ -425,17 +446,56 @@ public class Ia {
 		//this.detection.start();
 
 		System.out.println("Lancement déplacement");
-		/*this.deplacement = new DeplacementTask(this, path);
-		this.deplacement.start();*/
+		//this.deplacement = new DeplacementTask(this, path);
+		//this.deplacement.start();
 		System.out.println("Deplacement run ok");
 
 		iaHomologation();
+
 	}
 
-	private void iaHomologation() {
-		asserv.go(600, true); // on sort de la zone
-		asserv.gotoPosition(750, 300 * ymult, true);
-	 	asserv.gotoPosition(1100, 300*ymult, true);
+	private void iaTest() {
+		rplidar.start();
+
+		asserv.gotoPosition(1000, 0, true);
+		System.exit(0);
+	}
+
+	private void iaHomologation() throws IOException {
+		rplidar.start();
+
+		asserv.gotoPosition(650, 1000 * ymult, true);
+		asserv.gotoPosition(650, (2000 - 830) * ymult, true);
+
+		// Avance vers verre 1
+		asserv.gotoPosition(910 - 200, (2000 - 830) * ymult, true);
+		asserv.gotoPosition(910 - 110, (2000 - 830) * ymult, true);
+
+		// On serre la pince
+		pinceGauche.setPosition(1);
+		pinceDroite.setPosition(1);
+
+		sleep(300);
+
+		// Avance vers verre 2 avec pince fermée
+		asserv.gotoPosition(2000, (2000 - 830) * ymult, true);
+		// Pause en 2200 pour pas le perdre
+
+		// On se prépare à tourner
+		asserv.gotoPosition(2200, (2000 - 830) * ymult, true);
+
+		asserv.gotoPosition(2500, (2000 - 830) * ymult, true);
+
+		// On va le déposer
+		asserv.gotoPosition(2500, (2000 - 600) * ymult, true);
+		asserv.gotoPosition(2800, (2000 - 600) * ymult, true);
+
+		pinceGauche.setPosition(0);
+		pinceDroite.setPosition(0);
+
+		sleep(300);
+
+		asserv.go(-100, true);
 	}
 
 	public void sleep(int msec) {

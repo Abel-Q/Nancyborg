@@ -1,9 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="jar" build-on-make="true" name="test-detection">
-    <output-path>$PROJECT_DIR$/dist</output-path>
-    <root id="archive" name="test-detection.jar">
-      <element id="module-output" name="ia-raspberry" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/libs/RXTXcomm.jar" path-in-jar="/" />
-    </root>
-  </artifact>
-</component>

@@ -26,7 +26,7 @@ public class Pince {
 	 * @param pos position entre 0 et 1 (0 = fermée, 1 = ouverte)
 	 */
 	public void setPosition(float pos) throws IOException {
-
-		maestro.setTarget(this.channel, closedPos + (openPos - closedPos) * pos);
+		System.out.println("Channel " + channel + " val " + ((int) (closedPos + (openPos - closedPos) * pos)));
+		maestro.setTarget(this.channel, (int) (closedPos + (openPos - closedPos) * pos));
 	}
 }

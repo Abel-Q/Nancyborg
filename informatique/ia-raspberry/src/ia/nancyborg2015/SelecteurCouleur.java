@@ -17,6 +17,6 @@ public class SelecteurCouleur {
 	}
 
 	public Ia.TeamColor getTeamColor() {
-		return in.read() == 1 ? Ia.TeamColor.GREEN : Ia.TeamColor.YELLOW;
+		return in.read() == 0 ? Ia.TeamColor.GREEN : Ia.TeamColor.YELLOW;
 	}
 }
