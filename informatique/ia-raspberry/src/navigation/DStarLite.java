@@ -132,7 +132,7 @@ public class DStarLite implements java.io.Serializable {
 
 	/*
 	 * Pretty self explanatory, the heuristic we use is the 8-way distance
-	 * scaled by a constant C1 (should be set to <= min cost)
+	 * scaled by a constant C1 (should be set to <= min <)
 	 */
 	private double heuristic(State a, State b) {
 		return eightCondist(a,b)*C1;
@@ -508,7 +508,7 @@ public class DStarLite implements java.io.Serializable {
 	}
 
 	/*
-	 * Returns true if the cell is occupied (non-traversable), false
+ 	 * Returns true if the cell is occupied (non-traversable), false
 	 * otherwise. Non-traversable are marked with a cost < 0
 	 */
 	private boolean occupied(State u) {

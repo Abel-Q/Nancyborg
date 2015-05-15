@@ -9,7 +9,10 @@ import ia.common.DetectionRPLidar;
 import ia.common.Pince;
 import navigation.Navigation2014;
 import navigation.Point;
-import org.mbed.RPC.*;
+import org.mbed.RPC.DigitalIn;
+import org.mbed.RPC.DigitalOut;
+import org.mbed.RPC.MbedRPC;
+import org.mbed.RPC.SerialMbedRPC;
 
 import java.io.IOException;
 import java.nio.file.FileSystems;
@@ -24,14 +27,14 @@ public class Ia {
 	Tirette tirette;
     SelecteurCouleur selecteurCouleur;
 	PololuMaestro maestro;
-	RPCVariable<Float> consigneEtage;
-	RPCVariable<Float> positionEtage;
+	Etage etage;
+
     ArrayList<Point> objectifs;
     ArrayList<Point> objectifsAtteints;
     Point objectifCourant;
     //DeplacementTask deplacement;
 	public DetectionRPLidar rplidar;
-	Pince bras, tube, mainGauche, mainDroite, pinceGauche, pinceDroite;
+	Pince bras, tube, mainGauche, mainDroite, pinceGaucheGobelet, pinceGauchePied, pinceDroiteGobelet, pinceDroitePied;
 
 	public TeamColor teamColor;
 	public int ymult;
@@ -56,16 +59,23 @@ public class Ia {
             maestro = new PololuMaestro(new Serial("/dev/serial/by-id/usb-Pololu_Corporation_Pololu_Micro_Maestro_6-Servo_Controller_00046907-if00", 9600)); // if02
             bras = new Pince(maestro, 1, 1488, 2304);
             tube = new Pince(maestro, 0, 1856, 992);
-            pinceGauche = new Pince(maestro, 4, 2400, 1443);
-            pinceDroite = new Pince(maestro, 3, 704, 1645);
+
+            pinceGaucheGobelet = new Pince(maestro, 4, 2400, 1443);
+	        pinceGauchePied = new Pince(maestro, 4, 2400, 1359);
+
+            pinceDroiteGobelet = new Pince(maestro, 3, 704, 1645);
+	        pinceDroitePied = new Pince(maestro, 3, 704, 1807);
+
             mainGauche = new Pince(maestro, 2, 1408, 608);
             mainDroite = new Pince(maestro, 5, 1616, 2400);
 
-            pinceGauche.setPosition(0);
-            pinceDroite.setPosition(0);
+	        pinceGaucheGobelet.setPosition(0);
+	        pinceDroiteGobelet.setPosition(0);
 
             mainGauche.setPosition(0);
             mainDroite.setPosition(0);
+
+
 
             System.out.println("COUCOUCOUCOU");
 
@@ -74,8 +84,8 @@ public class Ia {
             selecteurCouleur  = new SelecteurCouleur(new DigitalIn(rpc, MbedRPC.p29), new DigitalOut(rpc, MbedRPC.p30));
 
             System.out.println("****** Init moteur etage");
-            consigneEtage = new RPCVariable<>(rpc, "SetPoint");
-            positionEtage = new RPCVariable<>(rpc, "Position");
+	        etage = new Etage(rpc);
+	        etage.takeOrigin();
 
             System.out.println("****** Init RPLidar");
 
@@ -381,11 +391,94 @@ public class Ia {
 
 		System.out.println("############################################################## IA #################################################");
 		final Ia ia = new Ia();
-		/*ia.sleep(1000);
-		ia.pinceGauche.setPosition(1);
-		ia.pinceDroite.setPosition(1);*/
+
+/*		ia.pied1();
+		ia.sleep(2000);
+		ia.pied2();
+		ia.sleep(2000);
+		ia.pied3();
+		ia.sleep(2000);*/
 		ia.start();
 	}
+
+	private void pied1() throws IOException {
+		System.out.println("Atrappage pied 1");
+		this.etage.setPosition(0.3f, true);
+
+		this.pinceGauchePied.setPosition(0);
+		this.pinceDroitePied.setPosition(0);
+		this.sleep(500);
+
+		asserv.go(-10, true);
+		this.etage.setPosition(0, true);
+
+		this.pinceGauchePied.setPosition(1);
+		this.pinceDroitePied.setPosition(1);
+		this.sleep(500);
+
+		System.out.println("Lève pied 1");
+		this.etage.setPosition(0.9f, true);
+	}
+
+	private void pied2() throws IOException {
+		System.out.println("Attrape pied 2");
+		this.etage.setPosition(0.7f, true);
+
+		this.pinceGauchePied.setPosition(0);
+		this.pinceDroitePied.setPosition(0);
+		this.sleep(500);
+		asserv.go(-10, true);
+
+		System.out.println("Calage pied 2");
+		this.etage.setPosition(0.2f, true);
+		this.pinceGauchePied.setPosition(1);
+		this.pinceDroitePied.setPosition(1);
+		this.sleep(500);
+		this.pinceGauchePied.setPosition(0);
+		this.pinceDroitePied.setPosition(0);
+		this.sleep(500);
+
+		System.out.println("On prend le pied 2");
+		this.etage.setPosition(0f, true);
+		this.pinceGauchePied.setPosition(1);
+		this.pinceDroitePied.setPosition(1);
+		this.sleep(500);
+
+		System.out.println("Lève pied 2");
+		this.etage.setPosition(1.3f, false);
+		this.sleep(500);
+	}
+
+
+	private void pied3() throws IOException {
+		System.out.println("Attrape pied 3");
+		this.etage.setPosition(0.7f, true);
+
+		this.pinceGauchePied.setPosition(0);
+		this.pinceDroitePied.setPosition(0);
+		this.sleep(500);
+		asserv.go(-10, true);
+
+		System.out.println("Calage pied 3");
+		this.etage.setPosition(0.2f, true);
+		this.pinceGauchePied.setPosition(1);
+		this.pinceDroitePied.setPosition(1);
+		this.sleep(500);
+		this.pinceGauchePied.setPosition(0);
+		this.pinceDroitePied.setPosition(0);
+		this.sleep(500);
+
+		System.out.println("On prend pied 3");
+		this.etage.setPosition(0f, true);
+		this.pinceGauchePied.setPosition(1);
+		this.pinceDroitePied.setPosition(1);
+		this.sleep(500);
+
+		System.out.println("Blocage");
+		this.etage.setPosition(0.75f, false);
+		this.sleep(500);
+	}
+
 
 	public void start() throws Exception {
 		// On initialise le chrono
@@ -414,6 +507,12 @@ public class Ia {
 		asserv.gotoPosition(800, 1000 * ymult, true);
 		asserv.face(2000, 1000 * ymult, true);
 		asserv.go(-390, true);
+
+
+		System.out.println("Depart prechargement balle");
+		this.pinceGaucheGobelet.setPosition(1);
+		this.pinceDroiteGobelet.setPosition(1);
+		this.etage.setPosition(0.8f, true);
 
 		System.out.println("Attente remise tirette");
 		// On attend de remettre la tirette
@@ -450,7 +549,8 @@ public class Ia {
 		//this.deplacement.start();
 		System.out.println("Deplacement run ok");
 
-		iaHomologation();
+		//iaHomologation();
+		iaEmpilage();
 
 	}
 
@@ -472,30 +572,154 @@ public class Ia {
 		asserv.gotoPosition(910 - 110, (2000 - 830) * ymult, true);
 
 		// On serre la pince
-		pinceGauche.setPosition(1);
-		pinceDroite.setPosition(1);
+		pinceGaucheGobelet.setPosition(1);
+		pinceDroiteGobelet.setPosition(1);
 
 		sleep(300);
 
-		// Avance vers verre 2 avec pince fermée
+		System.out.println("Avance vers verre 2 avec pince fermée");
 		asserv.gotoPosition(2000, (2000 - 830) * ymult, true);
-		// Pause en 2200 pour pas le perdre
+		System.out.println("Pause en 2200 pour pas le perdre");
 
-		// On se prépare à tourner
-		asserv.gotoPosition(2200, (2000 - 830) * ymult, true);
+		System.out.println("On se prépare à tourner");
+		asserv.gotoPosition(2300, (2000 - 830) * ymult, true);
 
-		asserv.gotoPosition(2500, (2000 - 830) * ymult, true);
-
-		// On va le déposer
-		asserv.gotoPosition(2500, (2000 - 600) * ymult, true);
+		System.out.println("On va le déposer");
+		asserv.gotoPosition(2300, (2000 - 600) * ymult, true);
 		asserv.gotoPosition(2800, (2000 - 600) * ymult, true);
 
-		pinceGauche.setPosition(0);
-		pinceDroite.setPosition(0);
+		System.out.println("Ouverture pinces");
+		pinceGaucheGobelet.setPosition(0);
+		pinceDroiteGobelet.setPosition(0);
 
 		sleep(300);
 
 		asserv.go(-100, true);
+	}
+
+	private void iaEmpilage() throws IOException {
+		System.out.println("Alignement avec pied premier pied");
+		asserv.gotoPosition(870, 1000 * ymult, true);
+
+		System.out.println("Avance vers pied");
+		asserv.gotoPosition(870, (2000 - 1250) * ymult, true);
+		asserv.gotoPosition(870, (2000 - 1355) * ymult, true);
+
+		pied1();
+
+		asserv.gotoPosition(1200, (2000 - 1400) * ymult, true);
+		asserv.gotoPosition(1300, (2000 - 1400) * ymult, true);
+
+		pied2();
+
+		asserv.gotoPosition(850, (2000 - 1400) * ymult, true);
+		asserv.gotoPosition(850, (2000 - 1770) * ymult, true);
+		asserv.gotoPosition(1010, (2000 - 1770) * ymult, true);
+
+		pied3();
+
+		/*asserv.face(2000, (2000 - 1800) * ymult, true);*/
+		asserv.turn(-20 * ymult, true);
+		asserv.go(100, true);
+
+		System.out.println("On lache tout");
+		this.etage.setPosition(0, true);
+		this.pinceGauchePied.setPosition(0);
+		this.pinceDroitePied.setPosition(0);
+		sleep(500);
+
+		asserv.go(-200, true);
+
+		if (teamColor == TeamColor.GREEN) {
+			System.out.println("On est vert; on se retourne");
+			asserv.gotoPosition(860, (2000 - 1800), true);
+			asserv.face(0, (2000 - 1800), true);
+
+			System.out.println("Clap 1");
+			bras.setPosition(1);
+			sleep(500);
+			asserv.go(-200, true);
+			bras.setPosition(0);
+			sleep(500);
+
+			System.out.println("Gobelet");
+			pinceGaucheGobelet.setPosition(0);
+			pinceDroiteGobelet.setPosition(0);
+			sleep(500);
+
+			asserv.gotoPosition(260, (2000 - 1800), true);
+			asserv.gotoPosition(240, (2000 - 1800), true);
+
+			pinceGaucheGobelet.setPosition(1);
+			pinceDroiteGobelet.setPosition(1);
+			sleep(500);
+
+			asserv.face(0, (2000 - 1800), true);
+			bras.setPosition(1);
+			sleep(500);
+
+			System.out.println("Clap 2");
+			asserv.go(-200, true);
+			bras.setPosition(0);
+			sleep(500);
+
+
+			asserv.gotoPosition(800, 500 * ymult, true);
+			asserv.gotoPosition(800, 1000 * ymult, true);
+			asserv.face(0, 1000 * ymult, true);
+			asserv.go(500, true);
+
+			System.out.println("On range le gobelet");
+			pinceGaucheGobelet.setPosition(0);
+			pinceDroiteGobelet.setPosition(0);
+			sleep(500);
+
+			asserv.go(-200, true);
+
+			System.out.println("Fin du match vert");
+		} else {
+			System.out.println("On est jaune; c'est moins chiant");
+			asserv.gotoPosition(860, (2000 - 1800), true);
+
+			System.out.println("Clap 1");
+			bras.setPosition(1);
+			sleep(500);
+			asserv.go(-200, true);
+			bras.setPosition(0);
+			sleep(500);
+
+			System.out.println("Gobelet");
+			pinceGaucheGobelet.setPosition(0);
+			pinceDroiteGobelet.setPosition(0);
+			sleep(500);
+
+			asserv.gotoPosition(260, (2000 - 1800), true);
+			asserv.gotoPosition(240, (2000 - 1800), true);
+			pinceGaucheGobelet.setPosition(1);
+			pinceDroiteGobelet.setPosition(1);
+			bras.setPosition(1);
+			sleep(500);
+
+			System.out.println("Clap 2");
+			asserv.go(-200, true);
+			bras.setPosition(0);
+			sleep(500);
+
+
+			asserv.gotoPosition(800, 500 * ymult, true);
+			asserv.gotoPosition(800, 1000 * ymult, true);
+			asserv.face(0, 1000 * ymult, true);
+			asserv.go(500, true);
+
+			System.out.println("On range le gobelet");
+			pinceGaucheGobelet.setPosition(0);
+			pinceDroiteGobelet.setPosition(0);
+			sleep(500);
+
+			asserv.go(-200, true);
+
+			System.out.println("Fin du match vert");
+		}
 	}
 
 	public void sleep(int msec) {

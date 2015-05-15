@@ -79,11 +79,11 @@ public class DetectionRPLidar implements Runnable {
 
 
 				//if (xobs < 100 || Math.abs(yobs) < 100 || xobs > (3000-100) || Math.abs(yobs) > (2000-100)) {
-				/*if (xobs < 0 || xobs > (3000-100) || Math.abs(yobs) > (2000-100)) {
+				if (xobs < 0 || xobs > (3000-100) || Math.abs(yobs) > (2000-100)) {
 					//System.out.println("Detection hors table (" + xobs + ',' + yobs + ")");
 					System.out.println("Hors table");
 					continue;
-				}*/
+				}
 
     			det++;
 
