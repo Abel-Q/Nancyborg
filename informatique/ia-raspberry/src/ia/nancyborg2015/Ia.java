@@ -69,12 +69,12 @@ public class Ia {
             mainGauche = new Pince(maestro, 2, 1408, 608);
             mainDroite = new Pince(maestro, 5, 1616, 2400);
 
+	        bras.setPosition(0);
 	        pinceGaucheGobelet.setPosition(0);
 	        pinceDroiteGobelet.setPosition(0);
 
             mainGauche.setPosition(0);
             mainDroite.setPosition(0);
-
 
 
             System.out.println("COUCOUCOUCOU");
@@ -392,16 +392,18 @@ public class Ia {
 		System.out.println("############################################################## IA #################################################");
 		final Ia ia = new Ia();
 
-/*		ia.pied1();
+
+/*		ia.pied1(false);
 		ia.sleep(2000);
-		ia.pied2();
+		ia.pied2(false);
 		ia.sleep(2000);
-		ia.pied3();
-		ia.sleep(2000);*/
+		//ia.pied3(false);
+		//ia.sleep(2000);
+		*/
 		ia.start();
 	}
 
-	private void pied1() throws IOException {
+	private void pied1(boolean move) throws IOException {
 		System.out.println("Atrappage pied 1");
 		this.etage.setPosition(0.3f, true);
 
@@ -409,7 +411,8 @@ public class Ia {
 		this.pinceDroitePied.setPosition(0);
 		this.sleep(500);
 
-		asserv.go(-10, true);
+		if (move)
+			asserv.go(-10, true);
 		this.etage.setPosition(0, true);
 
 		this.pinceGauchePied.setPosition(1);
@@ -420,14 +423,15 @@ public class Ia {
 		this.etage.setPosition(0.9f, true);
 	}
 
-	private void pied2() throws IOException {
+	private void pied2(boolean move) throws IOException {
 		System.out.println("Attrape pied 2");
 		this.etage.setPosition(0.7f, true);
 
 		this.pinceGauchePied.setPosition(0);
 		this.pinceDroitePied.setPosition(0);
 		this.sleep(500);
-		asserv.go(-10, true);
+		if (move)
+			asserv.go(-10, true);
 
 		System.out.println("Calage pied 2");
 		this.etage.setPosition(0.2f, true);
@@ -445,19 +449,21 @@ public class Ia {
 		this.sleep(500);
 
 		System.out.println("Lève pied 2");
-		this.etage.setPosition(1.3f, false);
-		this.sleep(500);
+		this.etage.setPosition(1.4f, false);
+		this.sleep(1500);
 	}
 
 
-	private void pied3() throws IOException {
+	private void pied3(boolean move) throws IOException {
 		System.out.println("Attrape pied 3");
 		this.etage.setPosition(0.7f, true);
 
 		this.pinceGauchePied.setPosition(0);
 		this.pinceDroitePied.setPosition(0);
 		this.sleep(500);
-		asserv.go(-10, true);
+		if (move) {
+			asserv.go(-10, true);
+		}
 
 		System.out.println("Calage pied 3");
 		this.etage.setPosition(0.2f, true);
@@ -475,14 +481,14 @@ public class Ia {
 		this.sleep(500);
 
 		System.out.println("Blocage");
-		this.etage.setPosition(0.75f, false);
-		this.sleep(500);
+		this.etage.setPosition(0.85f, false);
+		this.sleep(1500);
 	}
 
 
 	public void start() throws Exception {
 		// On initialise le chrono
-		Chrono chrono_stop = new Chrono(90 * 1000);
+		Chrono chrono_stop = new Chrono(89 * 1000);
 
 		System.out.println("Attente tirette présente");
 		tirette.wait(false);
@@ -495,13 +501,13 @@ public class Ia {
 
 		System.out.println("IA initialisée. Couleur : " + (this.teamColor == TeamColor.GREEN ? "vert" : "jaune"));
 
-
-		//iaTest();
-
 		// On lance le callage bordure
 		System.out.println("Calage bordure");
 
 		this.asserv.calageBordure(this.teamColor != TeamColor.GREEN);
+
+		/*iaTest();
+		System.exit(0);*/
 
 		asserv.gotoPosition(800, 500 * ymult, true);
 		asserv.gotoPosition(800, 1000 * ymult, true);
@@ -515,6 +521,7 @@ public class Ia {
 		this.etage.setPosition(0.8f, true);
 
 		System.out.println("Attente remise tirette");
+
 		// On attend de remettre la tirette
 		tirette.wait(false);
 
@@ -536,6 +543,12 @@ public class Ia {
 				System.out.println("Fin du match mais on tire un coup quand même");
 				asserv.halt();
 				System.out.println("Fin");
+				try {
+					pinceGauchePied.setPosition(0);
+					pinceDroitePied.setPosition(0);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 				System.exit(0);
 			}
 		});
@@ -549,16 +562,18 @@ public class Ia {
 		//this.deplacement.start();
 		System.out.println("Deplacement run ok");
 
+
+		//iaTest();
 		//iaHomologation();
 		iaEmpilage();
 
 	}
 
 	private void iaTest() {
-		rplidar.start();
-
-		asserv.gotoPosition(1000, 0, true);
-		System.exit(0);
+		//rplidar.start();
+		asserv.gotoPosition(850, (2000 - 1770) * ymult, true);
+		asserv.gotoPosition(1010, (2000 - 1770) * ymult, true);
+		asserv.halt();
 	}
 
 	private void iaHomologation() throws IOException {
@@ -599,28 +614,32 @@ public class Ia {
 
 	private void iaEmpilage() throws IOException {
 		System.out.println("Alignement avec pied premier pied");
-		asserv.gotoPosition(870, 1000 * ymult, true);
+		asserv.gotoPosition(870, 900 * ymult, true);
 
 		System.out.println("Avance vers pied");
 		asserv.gotoPosition(870, (2000 - 1250) * ymult, true);
 		asserv.gotoPosition(870, (2000 - 1355) * ymult, true);
 
-		pied1();
+		pied1(true);
 
 		asserv.gotoPosition(1200, (2000 - 1400) * ymult, true);
 		asserv.gotoPosition(1300, (2000 - 1400) * ymult, true);
 
-		pied2();
+		pied2(true);
 
 		asserv.gotoPosition(850, (2000 - 1400) * ymult, true);
 		asserv.gotoPosition(850, (2000 - 1770) * ymult, true);
-		asserv.gotoPosition(1010, (2000 - 1770) * ymult, true);
+		asserv.gotoPosition(1040, (2000 - 1770) * ymult, true);
 
-		pied3();
+		pied3(true);
 
 		/*asserv.face(2000, (2000 - 1800) * ymult, true);*/
-		asserv.turn(-20 * ymult, true);
-		asserv.go(100, true);
+		/*asserv.turn(-20 * ymult, true);
+		asserv.go(100, true);*/
+		asserv.go(-30, true);
+		asserv.turn(-10 * ymult, true);
+		asserv.go(70, true);
+		asserv.turn(-10 * ymult, true);
 
 		System.out.println("On lache tout");
 		this.etage.setPosition(0, true);
@@ -632,13 +651,13 @@ public class Ia {
 
 		if (teamColor == TeamColor.GREEN) {
 			System.out.println("On est vert; on se retourne");
-			asserv.gotoPosition(860, (2000 - 1800), true);
-			asserv.face(0, (2000 - 1800), true);
+			asserv.gotoPosition(860, (2000 - 1780) * ymult, true);
+			asserv.face(0, (2000 - 1780) * ymult, true);
 
 			System.out.println("Clap 1");
 			bras.setPosition(1);
 			sleep(500);
-			asserv.go(-200, true);
+			asserv.go(-170, true);
 			bras.setPosition(0);
 			sleep(500);
 
@@ -647,14 +666,16 @@ public class Ia {
 			pinceDroiteGobelet.setPosition(0);
 			sleep(500);
 
-			asserv.gotoPosition(260, (2000 - 1800), true);
-			asserv.gotoPosition(240, (2000 - 1800), true);
+			asserv.gotoPosition(400, (2000 - 1780) * ymult, true);
+			asserv.gotoPosition(370, (2000 - 1780) * ymult, true);
 
 			pinceGaucheGobelet.setPosition(1);
 			pinceDroiteGobelet.setPosition(1);
 			sleep(500);
 
-			asserv.face(0, (2000 - 1800), true);
+			asserv.gotoPosition(200, (2000 - 1780) * ymult, true);
+
+			asserv.face(0, (2000 - 1780) * ymult, true);
 			bras.setPosition(1);
 			sleep(500);
 
@@ -662,7 +683,6 @@ public class Ia {
 			asserv.go(-200, true);
 			bras.setPosition(0);
 			sleep(500);
-
 
 			asserv.gotoPosition(800, 500 * ymult, true);
 			asserv.gotoPosition(800, 1000 * ymult, true);
@@ -679,12 +699,12 @@ public class Ia {
 			System.out.println("Fin du match vert");
 		} else {
 			System.out.println("On est jaune; c'est moins chiant");
-			asserv.gotoPosition(860, (2000 - 1800), true);
+			asserv.gotoPosition(860, (2000 - 1780) * ymult, true);
 
 			System.out.println("Clap 1");
 			bras.setPosition(1);
 			sleep(500);
-			asserv.go(-200, true);
+			asserv.go(-170, true);
 			bras.setPosition(0);
 			sleep(500);
 
@@ -693,12 +713,14 @@ public class Ia {
 			pinceDroiteGobelet.setPosition(0);
 			sleep(500);
 
-			asserv.gotoPosition(260, (2000 - 1800), true);
-			asserv.gotoPosition(240, (2000 - 1800), true);
+			asserv.gotoPosition(400, (2000 - 1780) * ymult, true);
+			asserv.gotoPosition(370, (2000 - 1780) * ymult, true);
 			pinceGaucheGobelet.setPosition(1);
 			pinceDroiteGobelet.setPosition(1);
 			bras.setPosition(1);
 			sleep(500);
+
+			asserv.gotoPosition(200, (2000 - 1780) * ymult, true);
 
 			System.out.println("Clap 2");
 			asserv.go(-200, true);

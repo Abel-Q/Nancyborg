@@ -29,4 +29,8 @@ public class Pince {
 		System.out.println("Channel " + channel + " val " + ((int) (closedPos + (openPos - closedPos) * pos)));
 		maestro.setTarget(this.channel, (int) (closedPos + (openPos - closedPos) * pos));
 	}
+
+	public void shutdown() throws IOException {
+		maestro.setTarget(this.channel, 0);
+	}
 }
