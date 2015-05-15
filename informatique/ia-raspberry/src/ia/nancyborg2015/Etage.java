@@ -13,13 +13,15 @@ public class Etage {
 	private RPCVariable<Integer> endstop;
 	private RPCVariable<Float> speed;
 	private RPCVariable<Float> output;
+	private long timeout;
 
-	public Etage(MbedRPC rpc) {
+	public Etage(MbedRPC rpc, long timeout) {
 		this.setPoint = new RPCVariable<>(rpc, "SetPoint");
 		this.position = new RPCVariable<>(rpc, "Position");
 		this.enable = new RPCVariable<>(rpc, "Enable");
 		this.endstop = new RPCVariable<>(rpc, "Endstop");
 		this.output = new RPCVariable<>(rpc, "Output");
+		this.timeout = timeout;
 
 		this.setEnabled(false);
 	}
@@ -44,12 +46,21 @@ public class Etage {
 		this.setPoint.write(pos);
 
 		if (blocking) {
-			while (this.output.read_float() != 0f)
-				;
+			long time = System.currentTimeMillis();
+
+			while (this.output.read_float() != 0f) {
+				if (timeout > 0 && (System.currentTimeMillis() - time) > timeout) {
+					return;
+				}
+			}
 		}
 	}
 
 	public void setEnabled(boolean val) {
 		this.enable.write(val ? 1 : 0);
+	}
+
+	public void setOutput(float out) {
+		this.output.write(out);
 	}
 }

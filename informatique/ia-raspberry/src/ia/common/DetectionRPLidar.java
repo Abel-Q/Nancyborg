@@ -91,9 +91,10 @@ public class DetectionRPLidar implements Runnable {
 					min = distance;
 					min_angle = angle;
 				}
-
-
 			}
+
+
+
 
 
 			detection.add(det > 1);

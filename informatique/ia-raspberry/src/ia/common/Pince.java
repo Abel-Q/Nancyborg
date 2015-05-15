@@ -31,6 +31,8 @@ public class Pince {
 	}
 
 	public void shutdown() throws IOException {
+		System.out.println("Shutdown channel " + channel);
 		maestro.setTarget(this.channel, 0);
+		maestro.setTargetMs(this.channel, 0);
 	}
 }

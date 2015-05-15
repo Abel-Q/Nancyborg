@@ -34,6 +34,6 @@ public class DeplacementTask extends Thread {
 			this.asserv.gotoPosition(p.getX(), p.getY(), false);
 			this.waitForFinish();
 		}
-		ia.objectifAtteint(points.get(points.size()-1));
+		//ia.objectifAtteint(points.get(points.size()-1));
 	}
 }
