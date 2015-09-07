@@ -1,7 +1,11 @@
 package api.communication;
 
+import gnu.io.*;
+
+import java.io.BufferedInputStream;
 import java.io.IOException;
-import com.pi4j.io.serial.SerialFactory;
+import java.io.OutputStream;
+import java.nio.file.FileSystems;
 
 /**
  * Représente un port série.
@@ -10,21 +14,24 @@ import com.pi4j.io.serial.SerialFactory;
  * 
  */
 public class Serial {
-	private com.pi4j.io.serial.Serial serial;
+	private final SerialPort port;
+	private final OutputStream out;
+	private final BufferedInputStream in;
 
 	/**
 	 * Ouvre un port série
 	 * 
 	 * @param path chemin du port série (/dev/ttyAMA0 par exemple)
 	 * @param speed vitesse en bauds
-	 * @throws IOException
-	 * @throws PortInUseException
-	 * @throws NoSuchPortException
-	 * @throws UnsupportedCommOperationException
 	 */
-	public Serial(String path, int speed) {
-		serial = SerialFactory.createInstance();
-		serial.open(path, speed);
+	public Serial(String path, int speed) throws NoSuchPortException, PortInUseException, UnsupportedCommOperationException, IOException {
+		path = FileSystems.getDefault().getPath(path).toRealPath().toString();
+		System.out.println("Open Serial: " + path);
+
+		this.port = (SerialPort) CommPortIdentifier.getPortIdentifier(path).open("IA", 1000);
+		this.port.setSerialPortParams(speed, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
+		this.out = this.port.getOutputStream();
+		this.in = new BufferedInputStream(this.port.getInputStream());
 	}
 
 	/**
@@ -32,8 +39,9 @@ public class Serial {
 	 * 
 	 * @param bytes
 	 */
-	public synchronized void write(byte... bytes) {
-		serial.write(bytes);
+	public synchronized void write(byte... bytes) throws IOException {
+		this.out.write(bytes);
+		this.out.flush();
 	}
 
 	/**
@@ -41,10 +49,11 @@ public class Serial {
 	 * 
 	 * @param bytes
 	 */
-	public synchronized void write(int... bytes) {
-		for (int b : bytes) {
-			serial.write((byte) (b & 0xFF));
-		}
+	public synchronized void write(int... bytes) throws IOException {
+		byte[] data = new byte[bytes.length];
+		for (int i = 0; i < bytes.length; i++)
+			data[i] =  (byte)(bytes[i] & 0xFF);
+		this.write(data);
 	}
 
 	/**
@@ -52,23 +61,23 @@ public class Serial {
 	 * 
 	 * @param str
 	 */
-	public synchronized void write(String str) {
-		System.out.println("asserv : "+str);
-		serial.write(str);
+	public synchronized void write(String str) throws IOException {
+		this.out.write(str.getBytes());
+		this.out.flush();
 	}
 
 	/**
 	 * Lit un octet depuis le port série.
 	 */
-	public synchronized byte readByte() {
-		return (byte) serial.read();
+	public synchronized byte readByte() throws IOException {
+		return (byte) in.read();
 	}
 
 	/**
 	 * Lit un octet depuis le port série (résultat dans un entier).
 	 */
-	public synchronized int read() {
-		return (int) serial.read();
+	public synchronized int read() throws IOException {
+		return in.read();
 	}
 
 	/**
@@ -76,11 +85,18 @@ public class Serial {
 	 * 
 	 * @throws IOException
 	 */
-	public byte[] read(int bytes) throws IOException {
-		byte[] arr = new byte[bytes];
+	public byte[] read(int numbytes) throws IOException {
+		byte[] arr = new byte[numbytes];
+		int offset = 0;
 
-		for (int i = 0; i < bytes; i++) {
-			arr[i] = readByte();
+		while (offset < numbytes) {
+			int nb = in.read(arr, offset, numbytes - offset);
+
+			if (nb <= 0) {
+				throw new IOException("EOF");
+			}
+
+			offset += nb;
 		}
 
 		return arr;
@@ -89,14 +105,14 @@ public class Serial {
 	/**
 	 * Lit un caractère depuis le port série.
 	 */
-	public synchronized char readChar() {
-		return serial.read();
+	public synchronized char readChar() throws IOException {
+		return (char) read();
 	}
 
 	/**
 	 * Lit une ligne depuis le port série.
 	 */
-	public synchronized String readLine() {
+	public synchronized String readLine() throws IOException {
 		String ret = "";
 
 		while (true) {
@@ -115,15 +131,11 @@ public class Serial {
 	/**
 	 * Indique si il y a au moins un octet en attente d'être lu
 	 */
-	public synchronized boolean ready() {
-		return serial.availableBytes() > 0;
+	public synchronized boolean ready() throws IOException {
+		return in.available() > 0;
 	}
 
-	public com.pi4j.io.serial.Serial getSerial() {
-		return serial;
-	}
-
-	public void setSerial(com.pi4j.io.serial.Serial serial) {
-		this.serial = serial;
+	public void sendBreak() {
+		port.sendBreak(100);
 	}
 }

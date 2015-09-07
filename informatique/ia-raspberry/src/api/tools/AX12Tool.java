@@ -1,6 +1,6 @@
 package api.tools;
 
-import api.controllers.AX12;
+import fr.nancyborg.ax12.AX12;
 
 public class AX12Tool {
 	public static void main(String[] args) {

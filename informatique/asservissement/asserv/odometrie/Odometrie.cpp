@@ -63,12 +63,12 @@ Odometrie::~Odometrie()
     delete codeurs;
 }
 
-void Odometrie::resetX() {
-    x = Utils::mmToUO(this, Config::placementOrigine);
+void Odometrie::resetX(float xval) {
+    x = Utils::mmToUO(this, xval);
 }
 
-void Odometrie::resetY() {
-    y = Utils::mmToUO(this, Config::placementOrigine);
+void Odometrie::resetY(float yval) {
+    y = Utils::mmToUO(this, yval);
 }
 
 void Odometrie::resetTheta() {

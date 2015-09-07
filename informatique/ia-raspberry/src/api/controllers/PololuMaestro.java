@@ -1,8 +1,8 @@
 package api.controllers;
 
-import java.io.IOException;
-
 import api.communication.Serial;
+
+import java.io.IOException;
 
 public class PololuMaestro {
 	private static final int CMD_SET_TARGET = 0x84;
@@ -29,6 +29,7 @@ public class PololuMaestro {
 	public void setTargetAngle(int channel, int angle) throws IOException {
 		setTarget(channel, 1500 + 500 * angle / 90);
 	}
+
 
 	public void setTargetMs(int channel, int ms) throws IOException {
 		byte[] buffer = new byte[6];

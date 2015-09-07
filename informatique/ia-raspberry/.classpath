@@ -2,13 +2,9 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="libs/pi4j-core.jar" sourcepath="libs/pi4j-core-sources.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/raspberry/libs/pi4j-core-javadoc.jar!/"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="libs/ax12.jar"/>
+	<classpathentry kind="lib" path="libs/ax12.jar" sourcepath="libs/ax12.jar"/>
+	<classpathentry kind="lib" path="libs/RXTXcomm.jar"/>
 	<classpathentry kind="lib" path="libs/jna.jar"/>
-	<classpathentry kind="lib" path="libs/purejavacomm.jar"/>
+	<classpathentry kind="lib" path="libs/pi4j-core.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

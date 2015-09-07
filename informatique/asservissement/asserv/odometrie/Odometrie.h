@@ -17,8 +17,8 @@ public:
     ~Odometrie();
 
     // Reset de la position du robot
-    void resetX();
-    void resetY();
+    void resetX(float xval);
+    void resetY(float yval);
     void resetTheta();
 
     // Mise à jour de la position du robot
