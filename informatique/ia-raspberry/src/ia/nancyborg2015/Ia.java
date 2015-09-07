@@ -94,6 +94,22 @@ public class Ia {
 	public Point getPosition() {
 		return asserv.getCurrentPosition();
 	}
+	public static void main(String[] args) throws Exception {
+
+		System.out.println("############################################################## IA #################################################");
+		final Ia ia = new Ia();
+
+
+/*		ia.pied1(false);
+		ia.sleep(2000);
+		ia.pied2(false);
+		ia.sleep(2000);
+		//ia.pied3(false);
+		//ia.sleep(2000);
+		*/
+		ia.start();
+	}
+
 
 	private void pied1(boolean move) throws IOException {
 		System.out.println("Atrappage pied 1");
