@@ -1,5 +1,4 @@
 #include "Md22.h"
-
 // Définition des adresses
 #define md22Address 0xB0    //Adresse de la MD22 ( pour tous les switchs de mode à ON)
 #define modeReg  0x00       //Registre de mode
@@ -122,5 +121,3 @@ void Md22::vitesseD(int vitMoteurD)
     i2cLink.write((int8_t)vitMoteurD);
     i2cLink.stop();
 }
-
-

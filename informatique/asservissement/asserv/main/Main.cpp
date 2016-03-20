@@ -204,7 +204,11 @@ void initAsserv() {
     fflush(stdout);
 
     odometrie = new Odometrie();
-    motorController = new Md22(p9, p10);
+    motorController = new DualVNH5019AccelMotorShield(
+        p22,p23,p20,p19,p21,
+        p25,p26,p18,p17,p24
+    );
+    //motorController = new Md22(p9, p10);
     //motorController = new Qik(p9, p10);
     //motorController = new PololuSMCs(p13, p14, p28, p27);
 
@@ -289,4 +293,3 @@ void Live_isr()
     }
 #endif
 }
-

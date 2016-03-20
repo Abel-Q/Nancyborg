@@ -25,6 +25,4 @@ private:
     I2C i2cLink;
 };
 
-
-
 #endif
